@@ -1,10 +1,10 @@
 /**
  * @file {@link http://xotic750.github.io/customError/ customError}
  * Create custom Javascript Error objects.
- * @version 0.1.3
+ * @version 0.1.4
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
- * @license {@link <http://www.gnu.org/licenses/gpl-3.0.html> GPL-3.0+}
+ * @license {@link <https://opensource.org/licenses/MIT> MIT}
  * @module customError
  */
 
@@ -25,6 +25,7 @@
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
     isCallable = require('is-callable'),
+    isPlainObject = require('lodash.isplainobject'),
     ERROR = Error,
     TYPEERROR = TypeError,
     SYNTAXERROR = SyntaxError,
@@ -77,7 +78,7 @@
             frame.toString()
           );
         });
-        if (temp === undefined) {
+        if (typeof temp === 'undefined') {
           delete ERROR.prepareStackTrace;
         } else {
           ERROR.prepareStackTrace = temp;
@@ -226,19 +227,20 @@
         return new Custom$$Error(message);
       }
       if (asAssertionError(name, ErrorCtr)) {
-        if (!message || typeof message !== 'object') {
+        if (!isPlainObject(message)) {
           message = {};
         }
         defProps(this, {
           actual: message.actual,
           expected: message.expected
         });
-        if (message.operator !== undefined) {
+        if (typeof message.operator !== 'undefined') {
           defProps(this, {
             operator: String(message.operator)
           });
         }
-        if (message.message === undefined) {
+        if (typeof message.message === 'undefined') {
+          // todo
           defProps(this, {
             message: String(message.message),
             generatedMessage: true
@@ -252,7 +254,7 @@
       } else {
         // Standard Errors. Only set `this.message` if the argument `message`
         // was not `undefined`.
-        if (message !== undefined) {
+        if (typeof message !== 'undefined') {
           defProps(this, {
             message: String(message)
           });
@@ -280,7 +282,7 @@
        * @default 'Custom$$Error'
        * @type {string}
        */
-      name: name === undefined ? 'Error' : String(name),
+      name: typeof name === 'undefined' ? 'Error' : String(name),
       /**
        * IE<9 has no built-in implementation of `Object.getPrototypeOf` neither
        * `__proto__`, but this manually setting `__proto__` will guarantee that
@@ -309,7 +311,7 @@
           expected: this.expected,
           operator: this.operator
         };
-        if (typeof JSON.decycle === 'function') {
+        if (isCallable(JSON.decycle)) {
           obj = JSON.decycle(obj);
         }
         return JSON.stringify(obj);
