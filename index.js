@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/customError/ customError}
  * Create custom Javascript Error objects.
- * @version 0.1.1
+ * @version 0.1.2
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <http://www.gnu.org/licenses/gpl-3.0.html> GPL-3.0+}
@@ -16,7 +16,7 @@
   es3:true, esnext:false, plusplus:true, maxparams:2, maxdepth:3,
   maxstatements:16, maxcomplexity:9 */
 
-/*global require */
+/*global require, module */
 
 ;(function () {
   'use strict';
@@ -24,6 +24,7 @@
   var StackFrame = require('stackframe'),
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
+    isCallable = require('is-callable'),
     ERROR = Error,
     TYPEERROR = TypeError,
     SYNTAXERROR = SyntaxError,
@@ -31,6 +32,7 @@
     EVALERROR = EvalError,
     REFERENCEERROR = ReferenceError,
     URIERROR = URIError,
+    ASSERTIONERROR,
     captureV8 = ERROR.captureStackTrace && (function () {
       // Capture the function (if any).
       var captureStackTrace = ERROR.captureStackTrace;
@@ -83,7 +85,7 @@
         return frames;
       };
     }(ERROR)),
-    allCtrs = false;
+    allCtrs = true;
 
   /**
    * Defines frames and stack on the Custom$$Error this object.
@@ -178,45 +180,31 @@
     }
   }
 
-  /**
-   * Tests to see if the argument is one of the seven standard Error type
-   * constructors.
-   *
-   * @private
-   * @param {*} value The object to be tested.
-   * @return {boolean} True if object is an Error constructor.
-   */
-  function isValidCtr(value) {
-    switch (value) {
-    case ERROR:
-      /* falls through */
-    case TYPEERROR:
-      /* falls through */
-    case SYNTAXERROR:
-      /* falls through */
-    case RANGEERROR:
-      /* falls through */
-    case EVALERROR:
-      /* falls through */
-    case REFERENCEERROR:
-      /* falls through */
-    case URIERROR:
-      return true;
+  function isErrorCtr(ErrorCtr) {
+    if (isCallable(ErrorCtr)) {
+      try {
+        return new ErrorCtr() instanceof ERROR;
+      } catch (ignore) {}
     }
     return false;
+  }
+
+  function asAssertionError(name, ErrorCtr) {
+    return name === 'AssertionError' ||
+      isErrorCtr(ASSERTIONERROR) && new ErrorCtr() instanceof ASSERTIONERROR;
   }
 
   /**
    * Creates a custom Error constructor. Will use `Error` if argument is not
    * a valid constructor.
    *
-   * @param {string} [name='Custom$$Error'] The name for the custom Error.
-   * @param {Function} [ErrorConstructor=Error] Error constructor to be used.
+   * @param {string} [name='Error'] The name for the custom Error.
+   * @param {Function} [ErrorCtr=Error] Error constructor to be used.
    * @return {Function} The custom Error constructor.
    */
-  function create(name, ErrorConstructor) {
-    if (!allCtrs || !isValidCtr(ErrorConstructor)) {
-      ErrorConstructor = ERROR;
+  function create(name, ErrorCtr) {
+    if (!allCtrs || !isErrorCtr(ErrorCtr)) {
+      ErrorCtr = ERROR;
     }
     /**
      * Create a new object, that prototypally inherits from the `Error`
@@ -237,7 +225,7 @@
       if (!(this instanceof Custom$$Error)) {
         return new Custom$$Error(message);
       }
-      if (name === 'AssertionError') {
+      if (asAssertionError(name, ErrorCtr)) {
         if (!message || typeof message !== 'object') {
           message = {};
         }
@@ -273,8 +261,8 @@
       // Parse and set the 'this' properties.
       parse(this);
     }
-    // Inherit the prototype methods from `ErrorConstructor`.
-    Custom$$Error.prototype = ErrorConstructor.prototype;
+    // Inherit the prototype methods from `ErrorCtr`.
+    Custom$$Error.prototype = ErrorCtr.prototype;
     Custom$$Error.prototype = new Custom$$Error(defProps);
     defProps(Custom$$Error.prototype, {
       /**
@@ -292,7 +280,7 @@
        * @default 'Custom$$Error'
        * @type {string}
        */
-      name: name === undefined ? 'Custom$$Error' : String(name),
+      name: name === undefined ? 'Error' : String(name),
       /**
        * IE<9 has no built-in implementation of `Object.getPrototypeOf` neither
        * `__proto__`, but this manually setting `__proto__` will guarantee that
@@ -302,7 +290,7 @@
        * @name Custom$$Error.prototype.__proto__
        * @type {Object}
        */
-      '__proto__': ErrorConstructor.prototype,
+      '__proto__': ErrorCtr.prototype,
       /**
        * The toJSON method returns a string representation of the Error object.
        *
@@ -332,8 +320,21 @@
 
   // Test if we can use more than just the Error constructor.
   try {
-    allCtrs = create('Test', SYNTAXERROR)('test') instanceof SYNTAXERROR;
-  } catch (ignore) {}
+    allCtrs = create('X', SYNTAXERROR)('x') instanceof SYNTAXERROR;
+  } catch (ignore) {
+    allCtrs = false;
+  }
+
+  /**
+   * Error constructor for test and validation frameworks that implement the
+   * standardized AssertionError specification.
+   *
+   * @private
+   * @constructor
+   * @augments Error
+   * @param {Object} [message] Need to document the properties.
+   */
+  ASSERTIONERROR = create('AssertionError', ERROR);
 
   module.exports = {
     supportsAllConstructors: allCtrs,
@@ -346,7 +347,7 @@
      * @augments Error
      * @param {string} [message] Human-readable description of the error.
      */
-    Error: create('Error'),
+    Error: create('Error', ERROR),
     /**
      * Creates an instance representing a syntax error that occurs while parsing
      * code in eval().
@@ -409,7 +410,7 @@
      * @augments Error
      * @param {string} [message] Human-readable description of the error.
      */
-    InternalError: create('InternalError'),
+    InternalError: create('InternalError', ERROR),
     /**
      * Error constructor for test and validation frameworks that implement the
      * standardized AssertionError specification.
@@ -418,6 +419,6 @@
      * @augments Error
      * @param {Object} [message] Need to document the properties.
      */
-    AssertionError: create('AssertionError')
+    AssertionError: ASSERTIONERROR
   };
 }());
