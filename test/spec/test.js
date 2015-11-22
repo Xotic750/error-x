@@ -47,7 +47,8 @@
             expect(exports.create('MyError')('test').message).toBe('test');
         });
         it('should have correct `toString`', function () {
-            expect(/^MyError: test/.test(exports.create('MyError')('test').toString())).toBe(true);
+            var s = exports.create('MyError')('test').toString().slice(0, 13);
+            expect(s).toBe('MyError: test');
         });
     });
 }());
