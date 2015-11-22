@@ -28,6 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "es5-shim": "^4.3.1",
+    "array.prototype.findindex": "^1.0.0",
     "json3": "^3.3.2",
     "cycle-x": "^1.0.3",
     "is-callable": "^1.1.0",

@@ -22,6 +22,7 @@
   'use strict';
 
   require('es5-shim');
+  require('array.prototype.findindex');
   if (typeof JSON === 'undefined') {
     JSON = {};
   }
