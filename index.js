@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.9
+ * @version 0.1.10
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -14,7 +14,7 @@
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
   es3:true, esnext:true, plusplus:true, maxparams:2, maxdepth:3,
-  maxstatements:16, maxcomplexity:9 */
+  maxstatements:16, maxcomplexity:8 */
 
 /*global require, module */
 
@@ -23,12 +23,12 @@
 
   var hasToStringTag = typeof Symbol === 'function' &&
       typeof Symbol.toStringTag === 'symbol',
-    errTag = '[object Error]',
     StackFrame = require('stackframe'),
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
     isCallable = require('is-callable'),
     isPlainObject = require('lodash.isplainobject'),
+    truePredicate = require('lodash.constant')(true),
     ERROR = Error,
     TYPEERROR = TypeError,
     SYNTAXERROR = SyntaxError,
@@ -90,16 +90,6 @@
       };
     }(ERROR)),
     allCtrs = true;
-
-  /**
-   * Predicate that return `true`.
-   *
-   * @private
-   * @return {boolean} True.
-   */
-  function truePredicate() {
-    return true;
-  }
 
   /**
    * Defines frames and stack on the Custom$$Error this object.
@@ -379,7 +369,7 @@
         enumerable: false,
         writable: true,
         configurable: true,
-        value: errTag
+        value: '[object Error]'
       });
     }
     return Custom$$Error;

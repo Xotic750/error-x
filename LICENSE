@@ -7,6 +7,7 @@ is-callable
 Copyright (c) 2015 Jordan Harband
 
 lodash.isplainobject
+lodash.constant
 Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
 Based on Underscore.js, copyright 2009-2015 Jeremy Ashkenas,
 DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
