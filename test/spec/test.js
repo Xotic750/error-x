@@ -4,7 +4,7 @@
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
   es3:true, esnext:false, plusplus:true, maxparams:1, maxdepth:1,
-  maxstatements:5, maxcomplexity:2 */
+  maxstatements:6, maxcomplexity:2 */
 
 /*global module, require, describe, it, expect, returnExports */
 
@@ -40,12 +40,14 @@
           expect(error instanceof Error).toBe(true);
           expect(error instanceof MyError).toBe(true);
         });
-        it('should have correct properies', function () {
-            var MyError = exports.create('MyError'),
-              error = new MyError('test');
-            expect(error.name).toBe('MyError');
-            expect(error.message).toBe('test');
-            expect(/^MyError: test/.test(error.toString())).toBe(true);
+        it('should have correct `name`', function () {
+            expect(exports.create('MyError')('test').name).toBe('MyError');
+        });
+        it('should have correct `message`', function () {
+            expect(exports.create('MyError')('test').message).toBe('test');
+        });
+        it('should have correct `toString`', function () {
+            expect(/^MyError: test/.test(exports.create('MyError')('test').toString())).toBe(true);
         });
     });
 }());
