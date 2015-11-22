@@ -18,11 +18,11 @@
 
 /*global require, module */
 
-;(function () {
+;(function (root) {
   'use strict';
 
   require('es5-shim');
-  require('json3').runInContext();
+  require('json3').runInContext(root);
   require('cycle-x');
   var hasToStringTag = typeof Symbol === 'function' &&
       typeof Symbol.toStringTag === 'symbol',
@@ -497,4 +497,4 @@
     InternalError: truePredicate,
     AssertionError: truePredicate
   });
-}());
+}(Function('return this')));
