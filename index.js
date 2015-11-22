@@ -1,11 +1,11 @@
 /**
- * @file {@link http://xotic750.github.io/customError/ customError}
+ * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.5
+ * @version 0.1.6
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
- * @module customError
+ * @module error-x
  */
 
 /*jslint maxlen:80, es6:false, this:true, white:true */
@@ -13,7 +13,7 @@
 /*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:false, plusplus:true, maxparams:2, maxdepth:3,
+  es3:true, esnext:true, plusplus:true, maxparams:2, maxdepth:3,
   maxstatements:16, maxcomplexity:9 */
 
 /*global require, module */
@@ -21,7 +21,10 @@
 ;(function () {
   'use strict';
 
-  var StackFrame = require('stackframe'),
+  var hasToStringTag = typeof Symbol === 'function' &&
+      typeof Symbol.toStringTag === 'symbol',
+    errTag = '[object Error]',
+    StackFrame = require('stackframe'),
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
     isCallable = require('is-callable'),
@@ -181,6 +184,13 @@
     }
   }
 
+  /**
+   * Test whether we have a valid Error constructor.
+   *
+   * @private
+   * @param {Function} ErrorCtr Constructor to test it creates an Error.
+   * @return {boolean} True if ErrorCtr creates an Error, otherwise false.
+   */
   function isErrorCtr(ErrorCtr) {
     if (isCallable(ErrorCtr)) {
       try {
@@ -190,6 +200,14 @@
     return false;
   }
 
+  /**
+   * Detect whether we are creating an 'AssertionError' constructor.
+   *
+   * @private
+   * @param {string} name Name to test if it is 'AssertionError'.
+   * @param {Function} ErrorCtr Constructor to test it creates ASSERTIONERROR.
+   * @return {boolean} True if either arguments asserts, otherwise false.
+   */
   function asAssertionError(name, ErrorCtr) {
     return name === 'AssertionError' ||
       isErrorCtr(ASSERTIONERROR) && new ErrorCtr() instanceof ASSERTIONERROR;
@@ -317,6 +335,18 @@
         return JSON.stringify(obj);
       }
     });
+    if (hasToStringTag) {
+      Object.defineProperty(Custom$$Error.prototype, Symbol.toStringTag, {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: errTag
+      });
+    } else {
+      defProps(Custom$$Error.prototype, {
+        '@@toStringTag': errTag
+      });
+    }
     return Custom$$Error;
   }
 
@@ -337,6 +367,31 @@
    * @param {Object} [message] Need to document the properties.
    */
   ASSERTIONERROR = create('AssertionError', ERROR);
+
+  /**
+   * Detect (best effort) whether a value is an error.
+   *
+   * @private
+   * @param {*} value Argument to be tested.
+   * @return {boolean} True if value is an Error, otherwise false.
+   */
+  function isError(value) {
+    var tag;
+    if (!value || typeof value !== 'object') {
+      return false;
+    }
+    tag = Object.prototype.toString.call(value);
+    if (!hasToStringTag && tag === errTag) {
+      return true;
+    }
+    if (value instanceof ERROR) {
+      return true;
+    }
+    if (tag === errTag || value['@@toStringTag'] === errTag) {
+      return true;
+    }
+    return false;
+  }
 
   defProps(module.exports, {
     supportsAllConstructors: allCtrs,
@@ -421,6 +476,15 @@
      * @augments Error
      * @param {Object} [message] Need to document the properties.
      */
-    AssertionError: ASSERTIONERROR
+    AssertionError: ASSERTIONERROR,
+
+    /**
+     * Detect whether a value is an error.
+     *
+     * @function
+     * @param {*} value Argument to be tested.
+     * @return {boolean} True if value is an Error, otherwise false.
+     */
+    isError: isError
   });
 }());
