@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.10
+ * @version 0.1.11
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -365,12 +365,16 @@
       toJSON: truePredicate
     });
     if (hasToStringTag) {
-      Object.defineProperty(Custom$$Error.prototype, Symbol.toStringTag, {
-        enumerable: false,
-        writable: true,
-        configurable: true,
-        value: '[object Error]'
-      });
+      if (defProps.supportsDescriptors) {
+        Object.defineProperty(Custom$$Error.prototype, Symbol.toStringTag, {
+          enumerable: false,
+          writable: true,
+          configurable: true,
+          value: '[object Error]'
+        });
+      } else {
+        Custom$$Error.prototype[Symbol.toStringTag] = '[object Error]';
+      }
     }
     return Custom$$Error;
   }
