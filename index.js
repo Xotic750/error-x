@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.8
+ * @version 0.1.9
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -92,6 +92,16 @@
     allCtrs = true;
 
   /**
+   * Predicate that return `true`.
+   *
+   * @private
+   * @return {boolean} True.
+   */
+  function truePredicate() {
+    return true;
+  }
+
+  /**
    * Defines frames and stack on the Custom$$Error this object.
    *
    * @private
@@ -104,7 +114,10 @@
       stack: frames.map(function (frame) {
         return frame.toString();
       }).join('\n')
-    }, true);
+    }, {
+      frames: truePredicate,
+      stack: truePredicate
+    });
   }
 
   /**
@@ -165,21 +178,29 @@
         if (typeof err['opera#sourceloc'] === 'string') {
           defProps(context, {
             'opera#sourceloc': err['opera#sourceloc']
-          }, true);
+          }, {
+            'opera#sourceloc': truePredicate
+          });
         }
         if (typeof err.stacktrace === 'string') {
           defProps(context, {
             stacktrace: err.stacktrace
-          }, true);
+          }, {
+            stacktrace: truePredicate
+          });
         }
         if (typeof err.stack === 'string') {
           defProps(context, {
             stack: err.stack
-          }, true);
+          }, {
+            stack: truePredicate
+          });
         }
         defProps(context, {
           frames: []
-        }, true);
+        }, {
+          frames: truePredicate
+        });
       }
     }
   }
@@ -235,9 +256,9 @@
      * @param {string} [message] Human-readable description of the error.
      */
     function Custom$$Error(message) {
-      // If `message` is our internal `defProps` function then we are
+      // If `message` is our internal `truePredicate` function then we are
       // inheriting and we do not need to process any further.
-      if (message === defProps) {
+      if (message === truePredicate) {
         return;
       }
       // If `Custom$$Error` was not called with `new`
@@ -251,35 +272,52 @@
         defProps(this, {
           actual: message.actual,
           expected: message.expected
-        }, true);
-        defProps(this, {
-          operator: String(message.operator)
-        }, typeof message.operator !== 'undefined');
+        }, {
+          actual: truePredicate,
+          expected: truePredicate
+        });
+        if (typeof message.operator !== 'undefined') {
+          defProps(this, {
+            operator: String(message.operator)
+          }, {
+            operator: truePredicate
+          });
+        }
         if (typeof message.message === 'undefined') {
           // todo
           defProps(this, {
             message: String(message.message),
             generatedMessage: true
-          }, true);
+          }, {
+            message: truePredicate,
+            generatedMessage: truePredicate
+          });
         } else {
           defProps(this, {
             message: String(message.message),
             generatedMessage: false
-          }, true);
+          }, {
+            message: truePredicate,
+            generatedMessage: truePredicate
+          });
         }
       } else {
         // Standard Errors. Only set `this.message` if the argument `message`
         // was not `undefined`.
-        defProps(this, {
-          message: String(message)
-        }, typeof message !== 'undefined');
+        if (typeof message !== 'undefined') {
+          defProps(this, {
+            message: String(message)
+          }, {
+            message: truePredicate
+          });
+        }
       }
       // Parse and set the 'this' properties.
       parse(this);
     }
     // Inherit the prototype methods from `ErrorCtr`.
     Custom$$Error.prototype = ErrorCtr.prototype;
-    Custom$$Error.prototype = new Custom$$Error(defProps);
+    Custom$$Error.prototype = new Custom$$Error(truePredicate);
     defProps(Custom$$Error.prototype, {
       /**
        * Specifies the function that created an instance's prototype.
@@ -330,7 +368,12 @@
         }
         return JSON.stringify(obj);
       }
-    }, true);
+    }, {
+      constructor: truePredicate,
+      name: truePredicate,
+      '__proto__': truePredicate,
+      toJSON: truePredicate
+    });
     if (hasToStringTag) {
       Object.defineProperty(Custom$$Error.prototype, Symbol.toStringTag, {
         enumerable: false,
@@ -444,5 +487,17 @@
      * @param {Object} [message] Need to document the properties.
      */
     AssertionError: ASSERTIONERROR
-  }, true);
+  }, {
+    supportsAllConstructors: truePredicate,
+    create: truePredicate,
+    Error: truePredicate,
+    SyntaxError: truePredicate,
+    TypeError: truePredicate,
+    RangeError: truePredicate,
+    EvalError: truePredicate,
+    ReferenceError: truePredicate,
+    URIError: truePredicate,
+    InternalError: truePredicate,
+    AssertionError: truePredicate
+  });
 }());

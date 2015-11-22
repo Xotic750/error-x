@@ -2,7 +2,7 @@
   "name": "error-x",
   "homepage": "http://xotic750.github.io/error-x/",
   "description": "Create custom Javascript Error objects.",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "keywords": [
     "javascript",
     "library",
