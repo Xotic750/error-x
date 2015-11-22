@@ -21,6 +21,9 @@
 ;(function () {
   'use strict';
 
+  require('es5-shim');
+  require('json3');
+  require('cycle-x');
   var hasToStringTag = typeof Symbol === 'function' &&
       typeof Symbol.toStringTag === 'symbol',
     StackFrame = require('stackframe'),
