@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.12
+ * @version 0.1.13
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -27,6 +27,7 @@
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
     isCallable = require('is-callable'),
+    isRegExp = require('is-regex'),
     isPlainObject = require('lodash.isplainobject'),
     truePredicate = require('lodash.constant')(true),
     ERROR = Error,
@@ -224,6 +225,30 @@
       isErrorCtr(ASSERTIONERROR) && new ErrorCtr() instanceof ASSERTIONERROR;
   }
 
+  function replacer(key, value) {
+    if (typeof value === 'undefined') {
+      return String(value);
+    }
+    if (typeof value === 'number' && !isFinite(value)) {
+      return String(value);
+    }
+    if (isCallable(value) || isRegExp(value)) {
+      return String(value);
+    }
+    return value;
+  }
+
+  function getMessage(message) {
+    var actual = message.actual,
+      expected = message.expeted;
+    if (isCallable(JSON.decycle)) {
+      actual = JSON.decycle(actual);
+      expected = JSON.decycle(expected);
+    }
+    return JSON.stringify(actual, replacer) + ' ' + message.operator + ' ' +
+      JSON.stringify(expected, replacer);
+  }
+
   /**
    * Creates a custom Error constructor. Will use `Error` if argument is not
    * a valid constructor.
@@ -274,9 +299,8 @@
           });
         }
         if (typeof message.message === 'undefined') {
-          // todo
           defProps(this, {
-            message: String(message.message),
+            message: getMessage(message),
             generatedMessage: true
           }, {
             message: truePredicate,
