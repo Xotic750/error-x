@@ -16,13 +16,16 @@
   es3:true, esnext:true, plusplus:true, maxparams:2, maxdepth:3,
   maxstatements:16, maxcomplexity:8 */
 
-/*global require, module */
+/*global require, module, JSON:true */
 
-;(function (root) {
+;(function () {
   'use strict';
 
   require('es5-shim');
-  require('json3').runInContext(root);
+  if (typeof JSON === 'undefined') {
+    JSON = {};
+  }
+  require('json3').runInContext(null, JSON);
   require('cycle-x');
   var hasToStringTag = typeof Symbol === 'function' &&
       typeof Symbol.toStringTag === 'symbol',
@@ -497,4 +500,4 @@
     InternalError: truePredicate,
     AssertionError: truePredicate
   });
-}(Function('return this')));
+}());

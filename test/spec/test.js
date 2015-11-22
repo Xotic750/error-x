@@ -11,43 +11,43 @@
 (function () {
     'use strict';
 
-    var exports;
+    var lib;
     if (typeof module === 'object' && module.exports) {
-      exports = require('../../index.js');
+      lib = require('../../index.js');
     } else {
-      exports = returnExports;
+      lib = returnExports;
     }
 
     describe('error-x', function () {
         it('should not throw an error with bad arguments', function () {
-            exports.create();
-            exports.create(null);
-            exports.create('');
-            exports.create('NullError', null);
-            exports.create('FnError', function () {});
+            lib.create();
+            lib.create(null);
+            lib.create('');
+            lib.create('NullError', null);
+            lib.create('FnError', function () {});
         });
         it('should work with `Error`', function () {
-            var MyError = exports.create('MyError', Error),
+            var MyError = lib.create('MyError', Error),
               error = new MyError('test');
             expect(MyError.prototype.constructor).toBe(MyError);
             expect(error instanceof Error).toBe(true);
             expect(error instanceof MyError).toBe(true);
         });
         it('environment supports all `Error` types', function () {
-          var MyError = exports.create('MyError', SyntaxError),
+          var MyError = lib.create('MyError', SyntaxError),
             error = new MyError('test');
           expect(MyError.prototype.constructor).toBe(MyError);
           expect(error instanceof Error).toBe(true);
           expect(error instanceof MyError).toBe(true);
         });
         it('should have correct `name`', function () {
-            expect(exports.create('MyError')('test').name).toBe('MyError');
+            expect(lib.create('MyError')('test').name).toBe('MyError');
         });
         it('should have correct `message`', function () {
-            expect(exports.create('MyError')('test').message).toBe('test');
+            expect(lib.create('MyError')('test').message).toBe('test');
         });
         it('should have correct `toString`', function () {
-            var s = exports.create('MyError')('test').toString().slice(0, 13);
+            var s = lib.create('MyError')('test').toString().slice(0, 13);
             expect(s).toBe('MyError: test');
         });
     });
