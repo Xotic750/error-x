@@ -6,11 +6,18 @@
   es3:true, esnext:false, plusplus:true, maxparams:1, maxdepth:1,
   maxstatements:6, maxcomplexity:2 */
 
-/*global module, require, describe, it, expect, returnExports */
+/*global module, require, describe, it, expect, JSON:true, returnExports */
 
 (function () {
     'use strict';
 
+    require('es5-shim');
+    require('array.prototype.findindex');
+    if (typeof JSON === 'undefined') {
+      JSON = {};
+    }
+    require('json3').runInContext(null, JSON);
+    require('cycle-x');
     var lib;
     if (typeof module === 'object' && module.exports) {
       lib = require('../../index.js');

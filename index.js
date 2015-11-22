@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.11
+ * @version 0.1.12
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -16,18 +16,11 @@
   es3:true, esnext:true, plusplus:true, maxparams:2, maxdepth:3,
   maxstatements:16, maxcomplexity:8 */
 
-/*global require, module, JSON:true */
+/*global require, module */
 
 ;(function () {
   'use strict';
 
-  require('es5-shim');
-  require('array.prototype.findindex');
-  if (typeof JSON === 'undefined') {
-    JSON = {};
-  }
-  require('json3').runInContext(null, JSON);
-  require('cycle-x');
   var hasToStringTag = typeof Symbol === 'function' &&
       typeof Symbol.toStringTag === 'symbol',
     StackFrame = require('stackframe'),
