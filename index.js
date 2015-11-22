@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.7
+ * @version 0.1.8
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -104,7 +104,7 @@
       stack: frames.map(function (frame) {
         return frame.toString();
       }).join('\n')
-    });
+    }, true);
   }
 
   /**
@@ -165,21 +165,21 @@
         if (typeof err['opera#sourceloc'] === 'string') {
           defProps(context, {
             'opera#sourceloc': err['opera#sourceloc']
-          });
+          }, true);
         }
         if (typeof err.stacktrace === 'string') {
           defProps(context, {
             stacktrace: err.stacktrace
-          });
+          }, true);
         }
         if (typeof err.stack === 'string') {
           defProps(context, {
             stack: err.stack
-          });
+          }, true);
         }
         defProps(context, {
           frames: []
-        });
+        }, true);
       }
     }
   }
@@ -251,32 +251,28 @@
         defProps(this, {
           actual: message.actual,
           expected: message.expected
-        });
-        if (typeof message.operator !== 'undefined') {
-          defProps(this, {
-            operator: String(message.operator)
-          });
-        }
+        }, true);
+        defProps(this, {
+          operator: String(message.operator)
+        }, typeof message.operator !== 'undefined');
         if (typeof message.message === 'undefined') {
           // todo
           defProps(this, {
             message: String(message.message),
             generatedMessage: true
-          });
+          }, true);
         } else {
           defProps(this, {
             message: String(message.message),
             generatedMessage: false
-          });
+          }, true);
         }
       } else {
         // Standard Errors. Only set `this.message` if the argument `message`
         // was not `undefined`.
-        if (typeof message !== 'undefined') {
-          defProps(this, {
-            message: String(message)
-          });
-        }
+        defProps(this, {
+          message: String(message)
+        }, typeof message !== 'undefined');
       }
       // Parse and set the 'this' properties.
       parse(this);
@@ -334,7 +330,7 @@
         }
         return JSON.stringify(obj);
       }
-    });
+    }, true);
     if (hasToStringTag) {
       Object.defineProperty(Custom$$Error.prototype, Symbol.toStringTag, {
         enumerable: false,
@@ -448,5 +444,5 @@
      * @param {Object} [message] Need to document the properties.
      */
     AssertionError: ASSERTIONERROR
-  });
+  }, true);
 }());
