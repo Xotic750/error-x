@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 0.1.13
+ * @version 0.1.14
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -238,14 +238,14 @@
     return value;
   }
 
-  function getMessage(message) {
-    var actual = message.actual,
-      expected = message.expeted;
+  function getMessage(self) {
+    var actual = self.actual,
+      expected = self.expected;
     if (isCallable(JSON.decycle)) {
       actual = JSON.decycle(actual);
       expected = JSON.decycle(expected);
     }
-    return JSON.stringify(actual, replacer) + ' ' + message.operator + ' ' +
+    return JSON.stringify(actual, replacer) + ' ' + self.operator + ' ' +
       JSON.stringify(expected, replacer);
   }
 
@@ -300,7 +300,7 @@
         }
         if (typeof message.message === 'undefined') {
           defProps(this, {
-            message: getMessage(message),
+            message: getMessage(this),
             generatedMessage: true
           }, {
             message: truePredicate,
