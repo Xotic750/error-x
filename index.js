@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 1.0.0
+ * @version 1.0.1
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -27,10 +27,8 @@
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
     isCallable = require('is-callable'),
-    isRegExp = require('is-regex'),
     isPlainObject = require('lodash.isplainobject'),
-    constant = require('lodash.constant'),
-    truePredicate = constant(true),
+    truePredicate = require('lodash.constant')(true),
     ERROR = Error,
     TYPEERROR = TypeError,
     SYNTAXERROR = SyntaxError,
@@ -167,21 +165,21 @@
         // `opera#sourceloc` property that offers a trace of which functions
         // were called, in what order, from which line and  file, and with what
         // argument, then we will set it.
-        if (typeof err['opera#sourceloc'] === 'string') {
+        if (typeof err['opera#sourceloc'] !== 'undefined') {
           defProps(context, {
             'opera#sourceloc': err['opera#sourceloc']
           }, {
             'opera#sourceloc': truePredicate
           });
         }
-        if (typeof err.stacktrace === 'string') {
+        if (typeof err.stacktrace !== 'undefined') {
           defProps(context, {
             stacktrace: err.stacktrace
           }, {
             stacktrace: truePredicate
           });
         }
-        if (typeof err.stack === 'string') {
+        if (typeof err.stack !== 'undefined') {
           defProps(context, {
             stack: err.stack
           }, {
@@ -226,30 +224,6 @@
       isErrorCtr(ASSERTIONERROR) && new ErrorCtr() instanceof ASSERTIONERROR;
   }
 
-  function replacer(key, value) {
-    if (typeof value === 'undefined') {
-      return String(value);
-    }
-    if (typeof value === 'number' && !isFinite(value)) {
-      return String(value);
-    }
-    if (isCallable(value) || isRegExp(value)) {
-      return String(value);
-    }
-    return value;
-  }
-
-  function getMessage(self) {
-    var actual = self.actual,
-      expected = self.expected;
-    if (isCallable(JSON.decycle)) {
-      actual = JSON.decycle(actual);
-      expected = JSON.decycle(expected);
-    }
-    return JSON.stringify(actual, replacer) + ' ' + self.operator + ' ' +
-      JSON.stringify(expected, replacer);
-  }
-
   /**
    * Creates a custom Error constructor. Will use `Error` if argument is not
    * a valid constructor.
@@ -281,6 +255,15 @@
       if (!(this instanceof Custom$$Error)) {
         return new Custom$$Error(message);
       }
+      // Standard Errors. Only set `this.message` if the argument `message`
+      // was not `undefined`.
+      if (typeof message !== 'undefined') {
+        defProps(this, {
+          message: String(message)
+        }, {
+          message: truePredicate
+        });
+      }
       if (asAssertionError(name, ErrorCtr)) {
         if (!isPlainObject(message)) {
           message = {};
@@ -297,33 +280,6 @@
             operator: String(message.operator)
           }, {
             operator: truePredicate
-          });
-        }
-        if (typeof message.message === 'undefined') {
-          defProps(this, {
-            message: getMessage(this),
-            generatedMessage: true
-          }, {
-            message: truePredicate,
-            generatedMessage: truePredicate
-          });
-        } else {
-          defProps(this, {
-            message: String(message.message),
-            generatedMessage: false
-          }, {
-            message: truePredicate,
-            generatedMessage: truePredicate
-          });
-        }
-      } else {
-        // Standard Errors. Only set `this.message` if the argument `message`
-        // was not `undefined`.
-        if (typeof message !== 'undefined') {
-          defProps(this, {
-            message: String(message)
-          }, {
-            message: truePredicate
           });
         }
       }
@@ -423,8 +379,6 @@
   ASSERTIONERROR = create('AssertionError', ERROR);
 
   defProps(module.exports, {
-    extras: {},
-
     supportsAllConstructors: allCtrs,
     // Creates a custom Error constructor.
     create: create,
@@ -509,14 +463,4 @@
      */
     AssertionError: ASSERTIONERROR
   });
- defProps(module.exports.extras, {
-    StackFrame: StackFrame,
-    ErrorStackParser: errorStackParser,
-    defProps: defProps,
-    isCallable: isCallable,
-    isRegExp: isRegExp,
-    isPlainObject: isPlainObject,
-    constant: constant,
-    truePredicate: truePredicate
- });
 }());
