@@ -32,7 +32,7 @@ messages and stacks are parsed and then re-formatted.
 - They have a `frames` property which is an array of the parsed `stack`
 message, so you have easy access to the information.
 
-**Version**: 1.0.4  
+**Version**: 1.0.5  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
