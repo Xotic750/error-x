@@ -22,10 +22,52 @@ alt="npm version" height="18">
 
 Create custom Javascript Error objects.
 
+Want to create your own Error objects, this module will allow you to do
+just that. It ships with all the standard Error objects already created
+for you. Why? Well, these offer some improvements of the native versions.
+They have a `toJSON` method and so they can be serialised.
+They have a standardised `stack` property, using
+[`error-stack-parser`](https://github.com/stacktracejs/error-stack-parser)
+messsages and stacks are parsed and then re-formatted.
+They have a `frames` property which is an array of the parsed `stack`
+message, so you have easy access to the information.
+
 **Version**: 1.0.4  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
+**Example**  
+```js
+var errorX = require('error-x');
+var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
+                                        // specified.
+var err = new MyError('somethingHappened');
+
+JSON.stringify(err); // => see below.
+// A searialised error, showing the custom error object's structure and
+// format
+{
+  "name": "MyError",
+  "message": "somethingHappened",
+  "frames": [
+    {
+      "functionName": "Y.x",
+      "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
+      "lineNumber": 65,
+      "columnNumber": 13,
+      "source": "Y.x (http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13)"
+    },
+    {
+      "functionName": "window.onload",
+      "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
+      "lineNumber": 73,
+      "columnNumber": 3,
+      "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
+    }
+  ],
+  "stack": "Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\nwindow.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
+}
+```
 
 * [error-x](#module_error-x)
   * [~Error](#module_error-x..Error) ⇐ <code>Error</code>
@@ -176,6 +218,10 @@ standardized AssertionError specification.
 
 <a name="module_error-x..supportsAllConstructors"></a>
 ### `error-x~supportsAllConstructors` : <code>boolean</code>
+Indicates if the Javascript engine supports subclassing of all Error
+types. If `true` then all are supported, if `false` (only very old
+browsers IE6) then only `Error` is supported.
+
 **Kind**: inner property of <code>[error-x](#module_error-x)</code>  
 <a name="module_error-x..create"></a>
 ### `error-x~create([name], [ErrorCtr])` ⇒ <code>function</code>
