@@ -28,7 +28,7 @@ for you. Why? Well, these offer some improvements over the native versions.
 - They have a `toJSON` method and so they can be serialised.
 - They have a standardised `stack` property, using
 [`error-stack-parser`](https://github.com/stacktracejs/error-stack-parser)
-messsages and stacks are parsed and then re-formatted.
+messages and stacks are parsed and then re-formatted.
 - They have a `frames` property which is an array of the parsed `stack`
 message, so you have easy access to the information.
 
