@@ -1,7 +1,7 @@
 /**
  * @file {@link http://xotic750.github.io/error-x/ error-x}
  * Create custom Javascript Error objects.
- * @version 1.0.2
+ * @version 1.0.3
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -228,6 +228,7 @@
    * Creates a custom Error constructor. Will use `Error` if argument is not
    * a valid constructor.
    *
+   * @private
    * @param {string} [name='Error'] The name for the custom Error.
    * @param {Function} [ErrorCtr=Error] Error constructor to be used.
    * @return {Function} The custom Error constructor.
@@ -386,9 +387,19 @@
    */
   ASSERTIONERROR = create('AssertionError', ERROR);
 
+  /** namespace module.exports */
   defProps(module.exports, {
+    /** @type boolean */
     supportsAllConstructors: allCtrs,
-    // Creates a custom Error constructor.
+  /**
+   * Creates a custom Error constructor. Will use `Error` if argument is not
+   * a valid constructor.
+   *
+   * @function
+   * @param {string} [name='Error'] The name for the custom Error.
+   * @param {Function} [ErrorCtr=Error] Error constructor to be used.
+   * @return {Function} The custom Error constructor.
+   */
     create: create,
     /**
      * The Error constructor creates an error object.

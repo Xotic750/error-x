@@ -18,7 +18,6 @@
       JSON = {};
     }
     require('json3').runInContext(null, JSON);
-    require('es6-shim');
     require('cycle-x');
     lib = require('../../index.js');
   } else {
