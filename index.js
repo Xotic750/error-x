@@ -63,7 +63,7 @@
  *   "stack": "Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\nwindow.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.0.6
+ * @version 1.0.7
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
