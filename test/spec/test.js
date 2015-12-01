@@ -18,7 +18,6 @@
       JSON = {};
     }
     require('json3').runInContext(null, JSON);
-    require('cycle-x');
     lib = require('../../index.js');
   } else {
     lib = returnExports;

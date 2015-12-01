@@ -63,7 +63,7 @@
  *   "stack": "Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\nwindow.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.0.5
+ * @version 1.0.6
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -85,10 +85,19 @@
 
   var hasToStringTag = typeof Symbol === 'function' &&
       typeof Symbol.toStringTag === 'symbol',
+    pMap = Array.prototype.map,
+    pJoin = Array.prototype.join,
+    pSlice = Array.prototype.slice,
+    pIndexOf = String.prototype.indexOf,
+    safeToString = require('safe-to-string-x'),
+    noop = require('noop-x'),
     StackFrame = require('stackframe'),
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
-    isCallable = require('is-callable'),
+    defProp = require('define-property-x'),
+    CircularJSON = require('circular-json'),
+    findIndex = require('find-index-x'),
+    ES = require('es-abstract'),
     isPlainObject = require('lodash.isplainobject'),
     truePredicate = require('lodash.constant')(true),
     ERROR = Error,
@@ -99,7 +108,7 @@
     REFERENCEERROR = ReferenceError,
     URIERROR = URIError,
     ASSERTIONERROR,
-    captureV8 = ERROR.captureStackTrace && (function () {
+    cV8 = ERROR.captureStackTrace && (function () {
       // Capture the function (if any).
       var captureStackTrace = ERROR.captureStackTrace;
       // Test to see if the function works.
@@ -127,22 +136,22 @@
        * @param {!Object} context The Custom$$Error this object.
        * @return {!Array.<!Object>} Array of StackFrames.
        */
-      return function (context) {
+      return function captureV8(context) {
         var temp = ERROR.prepareStackTrace,
           error, frames;
         ERROR.prepareStackTrace = prepareStackTrace;
         error = new ERROR();
         captureStackTrace(error, context.constructor);
-        frames = error.stack.map(function (frame) {
+        frames = ES.Call(pMap, error.stack, [function (frame) {
           return new StackFrame(
             frame.getFunctionName(),
-            undefined,
+            noop(),
             frame.getFileName(),
             frame.getLineNumber(),
             frame.getColumnNumber(),
             frame.toString()
           );
-        });
+        }]);
         if (typeof temp === 'undefined') {
           delete ERROR.prepareStackTrace;
         } else {
@@ -163,9 +172,9 @@
   function defContext(context, frames) {
     defProps(context, {
       frames: frames,
-      stack: frames.map(function (frame) {
+      stack: ES.Call(pJoin, ES.Call(pMap, frames, [function (frame) {
         return frame.toString();
-      }).join('\n')
+      }]), ['\n'])
     }, {
       frames: truePredicate,
       stack: truePredicate
@@ -187,17 +196,17 @@
     } catch (ignore) {
       return false;
     }
-    start = frames.findIndex(function (frame) {
-      return frame.functionName.indexOf('Custom$$Error') > -1;
+    start = findIndex(frames, function (frame) {
+      return ES.Call(pIndexOf, frame.functionName, ['Custom$$Error']) > -1;
     });
     if (start > -1) {
       item = frames[start];
-      frames = frames.slice(start + 1);
-      end = frames.findIndex(function (frame) {
+      frames = ES.Call(pSlice, frames, [start + 1]);
+      end = findIndex(frames, function (frame) {
         return item.source === frame.source;
       });
       if (end > -1) {
-        frames = frames.slice(0, end);
+        frames = ES.Call(pSlice, frames, [0, end]);
       }
     }
     defContext(context, frames);
@@ -213,8 +222,8 @@
    */
   function parse(context) {
     var err;
-    if (captureV8) {
-      defContext(context, captureV8(context));
+    if (cV8) {
+      defContext(context, cV8(context));
     } else {
       try {
         // Error must be thrown to get stack in IE
@@ -265,7 +274,7 @@
    * @return {boolean} True if ErrorCtr creates an Error, otherwise false.
    */
   function isErrorCtr(ErrorCtr) {
-    if (isCallable(ErrorCtr)) {
+    if (ES.IsCallable(ErrorCtr)) {
       try {
         return new ErrorCtr() instanceof ERROR;
       } catch (ignore) {}
@@ -287,6 +296,28 @@
   }
 
   /**
+   * The toJSON method returns a string representation of the Error object.
+   *
+   * @private
+   * @this {!Object} A custom error instance.
+   * @return {string} A JSON stringified representation.
+   */
+  function toJSON() {
+    /*jshint validthis:true */
+    return CircularJSON.stringify({
+      name: this.name,
+      message: this.message,
+      frames: this.frames,
+      stack: this.stack,
+      stackframe: this.stackframe,
+      'opera#sourceloc': this['opera#sourceloc'],
+      actual: this.actual,
+      expected: this.expected,
+      operator: this.operator
+    });
+  }
+
+  /**
    * Creates a custom Error constructor. Will use `Error` if argument is not
    * a valid constructor.
    *
@@ -296,6 +327,7 @@
    * @return {Function} The custom Error constructor.
    */
   function create(name, ErrorCtr) {
+    var CustomCtr;
     if (!allCtrs || !isErrorCtr(ErrorCtr)) {
       ErrorCtr = ERROR;
     }
@@ -304,19 +336,19 @@
      * constructor.
      *
      * @private
-     * @constructor
+     * @constructor Custom$$Error
      * @augments Error
      * @param {string} [message] Human-readable description of the error.
      */
-    function Custom$$Error(message) {
+    CustomCtr = function Custom$$Error(message) {
       // If `message` is our internal `truePredicate` function then we are
       // inheriting and we do not need to process any further.
       if (message === truePredicate) {
         return;
       }
       // If `Custom$$Error` was not called with `new`
-      if (!(this instanceof Custom$$Error)) {
-        return new Custom$$Error(message);
+      if (!(this instanceof CustomCtr)) {
+        return new CustomCtr(message);
       }
       if (asAssertionError(name, ErrorCtr)) {
         if (!isPlainObject(message)) {
@@ -324,7 +356,7 @@
         }
         if (typeof message.message !== 'undefined') {
           defProps(this, {
-            message: String(message.message)
+            message: safeToString(message.message)
           }, {
             message: truePredicate
           });
@@ -338,7 +370,7 @@
         });
         if (typeof message.operator !== 'undefined') {
           defProps(this, {
-            operator: String(message.operator)
+            operator: safeToString(message.operator)
           }, {
             operator: truePredicate
           });
@@ -348,7 +380,7 @@
         // was not `undefined`.
         if (typeof message !== 'undefined') {
           defProps(this, {
-            message: String(message)
+            message: safeToString(message)
           }, {
             message: truePredicate
           });
@@ -356,60 +388,38 @@
       }
       // Parse and set the 'this' properties.
       parse(this);
-    }
+    };
     // Inherit the prototype methods from `ErrorCtr`.
-    Custom$$Error.prototype = ErrorCtr.prototype;
-    Custom$$Error.prototype = new Custom$$Error(truePredicate);
-    defProps(Custom$$Error.prototype, {
+    CustomCtr.prototype = ErrorCtr.prototype;
+    CustomCtr.prototype = new CustomCtr(truePredicate);
+    defProps(CustomCtr.prototype, /** @lends module:error-x.Custom$$Error.prototype */ {
       /**
        * Specifies the function that created an instance's prototype.
        *
-       * @private
-       * @constructor Custom$$Error.prototype.constructor
+       * @constructor
        */
-      constructor: Custom$$Error,
+      constructor: CustomCtr,
       /**
        * The name property represents a name for the type of error.
        *
-       * @private
-       * @name Custom$$Error.prototype.name
-       * @default 'Custom$$Error'
+       * @default 'Error'
        * @type {string}
        */
-      name: typeof name === 'undefined' ? 'Error' : String(name),
+      name: typeof name === 'undefined' ? 'Error' : safeToString(name),
       /**
        * IE<9 has no built-in implementation of `Object.getPrototypeOf` neither
        * `__proto__`, but this manually setting `__proto__` will guarantee that
        * `Object.getPrototypeOf` will work as expected.
        *
-       * @private
-       * @name Custom$$Error.prototype.__proto__
        * @type {Object}
        */
       '__proto__': ErrorCtr.prototype,
       /**
        * The toJSON method returns a string representation of the Error object.
        *
-       * @private
-       * @function Custom$$Error.prototype.toJSON
+       * @return {string} A JSON stringified representation.
        */
-      toJSON: function () {
-        var obj = {
-          name: this.name,
-          message: this.message,
-          frames: this.frames,
-          stack: this.stack,
-          stackframe: this.stackframe,
-          'opera#sourceloc': this['opera#sourceloc'],
-          actual: this.actual,
-          expected: this.expected,
-          operator: this.operator
-        };
-        if (isCallable(JSON.decycle)) {
-          obj = JSON.decycle(obj);
-        }
-        return JSON.stringify(obj);
-      }
+      toJSON: toJSON
     }, {
       constructor: truePredicate,
       name: truePredicate,
@@ -417,18 +427,19 @@
       toJSON: truePredicate
     });
     if (hasToStringTag) {
-      if (defProps.supportsDescriptors) {
-        Object.defineProperty(Custom$$Error.prototype, Symbol.toStringTag, {
-          enumerable: false,
-          writable: true,
-          configurable: true,
-          value: '[object Error]'
-        });
-      } else {
-        Custom$$Error.prototype[Symbol.toStringTag] = '[object Error]';
-      }
+      /**
+       * name Symbol.toStringTag
+       * @memberof module:error-x.Custom$$Error.prototype
+       * @type {string}
+       */
+      defProp(
+        CustomCtr.prototype,
+        Symbol.toStringTag,
+        '[object Error]',
+        true
+      );
     }
-    return Custom$$Error;
+    return CustomCtr;
   }
 
   // Test if we can use more than just the Error constructor.

@@ -2,7 +2,7 @@
   "name": "error-x",
   "homepage": "http://xotic750.github.io/error-x/",
   "description": "Create custom Javascript Error objects.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "keywords": [
     "javascript",
     "library",
@@ -27,17 +27,21 @@
   },
   "license": "MIT",
   "dependencies": {
-    "is-callable": "^1.1.0",
+    "es-abstract": "^1.4.3",
     "define-properties": "^1.1.2",
+    "define-property-x": "^1.0.3",
     "lodash.isplainobject": "^3.2.0",
     "lodash.constant": "^3.0.0",
     "stackframe": "^0.3.1",
-    "error-stack-parser": "^1.3.0"
+    "error-stack-parser": "^1.3.1",
+    "noop-x": "^1.0.0",
+    "circular-json": "^0.3.0",
+    "find-index-x": "^1.0.5",
+    "safe-to-string-x": "^1.0.0"
   },
   "devDependencies": {
     "es5-shim": "^4.3.1",
     "json3": "^3.3.2",
-    "cycle-x": "^1.0.4",
     "jscs": "^2.6.0",
     "uglify-js": "^2.6.1",
     "browserify": "12.0.1",
