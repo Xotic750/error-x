@@ -26,6 +26,7 @@
   describe('error-x', function () {
     it('should not throw an error with bad arguments', function () {
       lib.create();
+      lib.create(undefined);
       lib.create(null);
       lib.create('');
       lib.create('NullError', null);
