@@ -191,7 +191,7 @@
    * @param {!Object} err The Error object to be parsed.
    * @return {boolean} True if the Error object was parsed, otherwise false.
    */
-  function errParse(context, err) {
+  function errParse(context, err, name) {
     var frames, start, end, item;
     try {
       frames = errorStackParser.parse(err);
@@ -199,7 +199,7 @@
       return false;
     }
     start = findIndex(frames, function (frame) {
-      return ES.Call(pIndexOf, frame.functionName, ['Custom$$Error']) > -1;
+      return ES.Call(pIndexOf, frame.functionName, [name]) > -1;
     });
     if (start > -1) {
       item = frames[start];
@@ -222,7 +222,7 @@
    * @private
    * @param {!Object} context The Custom Error this object.
    */
-  function parse(context) {
+  function parse(context, name) {
     var err;
     if (cV8) {
       defContext(context, cV8(context));
@@ -233,7 +233,7 @@
       } catch (e) {
         err = e;
       }
-      if (!errParse(context, err)) {
+      if (!errParse(context, err, name)) {
         // If `Error` has a non-standard `stack`, `stacktrace` or
         // `opera#sourceloc` property that offers a trace of which functions
         // were called, in what order, from which line and  file, and with what
@@ -324,7 +324,7 @@
       }
     }
     // Parse and set the 'this' properties.
-    parse(context);
+    parse(context, name);
   }
 
   init({}, 'message', 'name', ERROR);
