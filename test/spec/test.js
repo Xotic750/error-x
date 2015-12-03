@@ -40,12 +40,12 @@
       expect(error instanceof MyError).toBe(true);
     });
     it('environment supports all `Error` types', function () {
-          var MyError = lib.create('MyError', SyntaxError),
-            error = new MyError('test');
-          expect(MyError.prototype.constructor).toBe(MyError);
-          expect(error instanceof Error).toBe(true);
-          expect(error instanceof MyError).toBe(true);
-        });
+      var MyError = lib.create('MyError', SyntaxError),
+        error = new MyError('test');
+      expect(MyError.prototype.constructor).toBe(MyError);
+      expect(error instanceof Error).toBe(true);
+      expect(error instanceof MyError).toBe(true);
+    });
     it('should have correct `name`', function () {
       expect(lib.create('MyError')('test').name).toBe('MyError');
     });

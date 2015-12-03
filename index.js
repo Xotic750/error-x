@@ -63,7 +63,7 @@
  *   "stack": "Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\nwindow.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -76,7 +76,7 @@
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
   es3:true, esnext:true, plusplus:true, maxparams:4, maxdepth:3,
-  maxstatements:15, maxcomplexity:8 */
+  maxstatements:17, maxcomplexity:8 */
 
 /*global require, module */
 
@@ -99,9 +99,8 @@
     CircularJSON = require('circular-json'),
     findIndex = require('find-index-x'),
     ES = require('es-abstract'),
-    truePredicate = function constantTrue() {
-      return true;
-    },
+    inspect = require('util').inspect,
+    truncate = require('lodash.trunc'),
     ERROR = Error,
     TYPEERROR = TypeError,
     SYNTAXERROR = SyntaxError,
@@ -165,6 +164,16 @@
     allCtrs = true;
 
   /**
+   * For use with defProps, a predicate that returns `true`.
+   *
+   * @private
+   * @return {boolean} `true`.
+   */
+  function truePredicate() {
+    return true;
+  }
+
+  /**
    * Defines frames and stack on the Custom Error this object.
    *
    * @private
@@ -189,6 +198,7 @@
    * @private
    * @param {!Object} context The Custom Error this object.
    * @param {!Object} err The Error object to be parsed.
+   * @param {string} name The name of the constructor.
    * @return {boolean} True if the Error object was parsed, otherwise false.
    */
   function errParse(context, err, name) {
@@ -221,6 +231,7 @@
    *
    * @private
    * @param {!Object} context The Custom Error this object.
+   * @param {string} name The name of the constructor.
    */
   function parse(context, name) {
     var err;
@@ -282,6 +293,23 @@
   }
 
   /**
+   * Message generator for AssertionError.
+   *
+   * @private
+   * @param {!Object} message The message object.
+   * @return {string} The generated message.
+   */
+  function getMessage(message) {
+    var opts = {
+      length: message.length ? ES.ToLength(message.length) : 128,
+      separator: message.separator ? ES.ToString(message.separator) : '',
+      omission: message.omission ? ES.ToString(message.omission) : ''
+    };
+    return truncate(inspect(message.actual), opts) + ' ' +
+      message.operator + ' ' +  truncate(inspect(message.expected), opts);
+  }
+
+  /**
    * The toJSON method returns a string representation of the Error object.
    *
    * @private
@@ -303,18 +331,29 @@
     });
   }
 
+  /**
+   * Initialise a new instance of a custom error.
+   *
+   * @private
+   * @param {!Object} context The Custom Error this object.
+   * @param {string} message Human-readable description of the error.
+   * @param {string} name The name for the custom Error.
+   * @param {Function} [ErrorCtr=Error] Error constructor to be used.
+   */
   function init(context, message, name, ErrorCtr) {
     if (asAssertionError(name, ErrorCtr)) {
       defProps(context, {
         actual: message.actual,
         expected: message.expected,
-        message: message.message,
-        operator: message.operator
+        message: message.message ? message.message : getMessage(message),
+        operator: message.operator,
+        generatedMessage: !message.message
       }, {
         actual: truePredicate,
         expected: truePredicate,
         message: truePredicate,
-        operator: truePredicate
+        operator: truePredicate,
+        generatedMessage: truePredicate
       });
     } else {
       // Standard Errors. Only set `this.message` if the argument `message`

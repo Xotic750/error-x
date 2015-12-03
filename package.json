@@ -2,7 +2,7 @@
   "name": "error-x",
   "homepage": "http://xotic750.github.io/error-x/",
   "description": "Create custom Javascript Error objects.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": [
     "javascript",
     "library",
@@ -35,7 +35,9 @@
     "noop-x": "^1.0.5",
     "circular-json": "^0.3.0",
     "find-index-x": "^1.0.5",
-    "safe-to-string-x": "^1.1.1"
+    "safe-to-string-x": "^1.1.1",
+    "util": "^0.10.3",
+    "lodash.trunc": "^3.0.4"
   },
   "devDependencies": {
     "es5-shim": "^4.3.1",
