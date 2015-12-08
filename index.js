@@ -32,6 +32,8 @@
  * - They have a `frames` property which is an array of the parsed `stack`
  * message, so you have easy access to the information.
  *
+ * On ES3 browsers you will need to load `es5-shim` and `es5-sham`, though it
+ * is recommended to load `es5-shim` in all environments to fix naive bugs.
  * @example
  * var errorX = require('error-x');
  * var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
@@ -63,7 +65,7 @@
  *   "stack": "Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\nwindow.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.2.1
+ * @version 1.2.2
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}

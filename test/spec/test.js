@@ -14,6 +14,7 @@
   var lib;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
+    require('es5-shim/es5-sham.js');
     if (typeof JSON === 'undefined') {
       JSON = {};
     }

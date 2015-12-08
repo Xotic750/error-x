@@ -32,7 +32,10 @@ messages and stacks are parsed and then re-formatted.
 - They have a `frames` property which is an array of the parsed `stack`
 message, so you have easy access to the information.
 
-**Version**: 1.2.1  
+On ES3 browsers you will need to load `es5-shim` and `es5-sham`, though it
+is recommended to load `es5-shim` in all environments to fix naive bugs.
+
+**Version**: 1.2.2  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
