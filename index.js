@@ -62,10 +62,10 @@
  *       "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
  *     }
  *   ],
- *   "stack": "Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\nwindow.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
+ *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.2.2
+ * @version 1.2.3
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -85,8 +85,8 @@
 ;(function () {
   'use strict';
 
-  var hasToStringTag = typeof Symbol === 'function' &&
-      typeof Symbol.toStringTag === 'symbol',
+  var $toStringTag = require('has-symbol-support-x') &&
+      typeof Symbol.toStringTag === 'symbol' && Symbol.toStringTag,
     pMap = Array.prototype.map,
     pJoin = Array.prototype.join,
     pSlice = Array.prototype.slice,
@@ -101,7 +101,7 @@
     CircularJSON = require('circular-json'),
     findIndex = require('find-index-x'),
     ES = require('es-abstract'),
-    inspect = require('util').inspect,
+    inspect = require('inspect-x'),
     truncate = require('lodash.trunc'),
     ERROR = Error,
     TYPEERROR = TypeError,
@@ -181,13 +181,15 @@
    * @private
    * @param {!Object} context The Custom Error this object.
    * @param {!Array.<!Object>} frames Array of StackFrames.
+   * @param {string} name The name of the constructor.
    */
-  function defContext(context, frames) {
+  function defContext(context, frames, name) {
     defProps(context, {
       frames: frames,
-      stack: ES.Call(pJoin, ES.Call(pMap, frames, [function (frame) {
-        return frame.toString();
-      }]), ['\n'])
+      stack: name + '\n    ' +
+        ES.Call(pJoin, ES.Call(pMap, frames, [function (frame) {
+          return frame.toString();
+        }]), ['\n    '])
     }, {
       frames: truePredicate,
       stack: truePredicate
@@ -223,7 +225,7 @@
         frames = ES.Call(pSlice, frames, [0, end]);
       }
     }
-    defContext(context, frames);
+    defContext(context, frames, name);
     return true;
   }
 
@@ -238,7 +240,7 @@
   function parse(context, name) {
     var err;
     if (cV8) {
-      defContext(context, cV8(context));
+      defContext(context, cV8(context), name);
     } else {
       try {
         // Error must be thrown to get stack in IE
@@ -454,13 +456,13 @@
       '__proto__': truePredicate,
       toJSON: truePredicate
     });
-    if (hasToStringTag) {
+    if ($toStringTag) {
       /**
        * name Symbol.toStringTag
        * @memberof module:error-x.CstmCtr.prototype
        * @type {string}
        */
-      defProp(CstmCtr.prototype, Symbol.toStringTag, '[object Error]', true);
+      defProp(CstmCtr.prototype, $toStringTag, '[object Error]', true);
     }
     return CstmCtr;
   }

@@ -35,7 +35,7 @@ message, so you have easy access to the information.
 On ES3 browsers you will need to load `es5-shim` and `es5-sham`, though it
 is recommended to load `es5-shim` in all environments to fix naive bugs.
 
-**Version**: 1.2.2  
+**Version**: 1.2.3  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
@@ -68,7 +68,7 @@ JSON.stringify(err); // => see below.
       "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
     }
   ],
-  "stack": "Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\nwindow.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
+  "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
 }
 ```
 
