@@ -213,7 +213,10 @@
       return false;
     }
     start = findIndex(frames, function (frame) {
-      return ES.Call(pIndexOf, frame.functionName, [name]) > -1;
+      var functionName = typeof frame.functionName === 'string' ?
+        frame.functionName :
+        '';
+      return ES.Call(pIndexOf, functionName, [name]) > -1;
     });
     if (start > -1) {
       item = frames[start];
@@ -275,7 +278,7 @@
    * @return {boolean} True if ErrorCtr creates an Error, otherwise false.
    */
   function isErrorCtr(ErrorCtr) {
-    if (ES.IsCallable(ErrorCtr)) {
+    if (ErrorCtr && ES.IsCallable(ErrorCtr)) {
       try {
         return new ErrorCtr() instanceof ERROR;
       } catch (ignore) {}
