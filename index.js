@@ -310,14 +310,15 @@
     if (name === 'AssertionError') {
       return true;
     }
-    if (isErrorCtr(ErrorCtr)) {
+    if (ES.IsCallable(ErrorCtr)) {
       err = new ErrorCtr({
         message: 'a',
         actual: 'b',
         expected: 'c',
         operator: 'd'
       });
-      return err.message === 'a' &&
+      return typeof err.name === 'string' &&
+        err.message === 'a' &&
         err.actual === 'b' &&
         err.expected === 'c' &&
         err.operator === 'd';
