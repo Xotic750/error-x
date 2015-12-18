@@ -100,7 +100,8 @@
 ;(function () {
   'use strict';
 
-  var $toStringTag = require('has-to-string-tag-x') && Symbol.toStringTag,
+  var $create = Object.create,
+    $toStringTag = require('has-to-string-tag-x') && Symbol.toStringTag,
     pMap = Array.prototype.map,
     pJoin = Array.prototype.join,
     pSlice = Array.prototype.slice,
@@ -443,14 +444,12 @@
     /*jshint evil:true */
     CstmCtr = eval(
       '(0,function ' + customName + ' (message){' +
-      'if(message===truePredicate){return;}' +
       'if(!(this instanceof CstmCtr)){return new CstmCtr(message);}' +
       'init(this,message,customName,ErrorCtr);})');
     /*jshint evil:false */
 
     // Inherit the prototype methods from `ErrorCtr`.
-    CstmCtr.prototype = ErrorCtr.prototype;
-    CstmCtr.prototype = new CstmCtr(truePredicate);
+    CstmCtr.prototype = $create(ErrorCtr.prototype);
     defProps(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
       /**
        * Specifies the function that created an instance's prototype.
@@ -466,14 +465,6 @@
        */
       name: customName,
       /**
-       * IE<9 has no built-in implementation of `Object.getPrototypeOf` neither
-       * `__proto__`, but this manually setting `__proto__` will guarantee that
-       * `Object.getPrototypeOf` will work as expected.
-       *
-       * @type {Object}
-       */
-      '__proto__': ErrorCtr.prototype,
-      /**
        * The toJSON method returns a string representation of the Error object.
        *
        * @return {string} A JSON stringified representation.
@@ -482,7 +473,6 @@
     }, {
       constructor: truePredicate,
       name: truePredicate,
-      '__proto__': truePredicate,
       toJSON: truePredicate
     });
     if ($toStringTag) {
