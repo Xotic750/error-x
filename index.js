@@ -310,7 +310,7 @@
     if (name === 'AssertionError') {
       return true;
     }
-    if (ES.IsCallable(ErrorCtr)) {
+    if (isErrorCtr(ErrorCtr)) {
       err = new ErrorCtr({
         message: 'a',
         actual: 'b',
