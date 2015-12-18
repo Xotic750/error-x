@@ -32,8 +32,23 @@
  * - They have a `frames` property which is an array of the parsed `stack`
  * message, so you have easy access to the information.
  *
- * On ES3 browsers you will need to load `es5-shim` and `es5-sham`, though it
- * is recommended to load `es5-shim` in all environments to fix naive bugs.
+ * <h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
+ * `es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
+ * methods that can be faithfully emulated with a legacy JavaScript engine.
+ *
+ * `es5-sham.js` monkey-patches other ES5 methods as closely as possible.
+ * For these methods, as closely as possible to ES5 is not very close.
+ * Many of these shams are intended only to allow code to be written to ES5
+ * without causing run-time errors in older engines. In many cases,
+ * this means that these shams cause many ES5 methods to silently fail.
+ * Decide carefully whether this is what you want. Note: es5-sham.js requires
+ * es5-shim.js to be able to work properly.
+ *
+ * `json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
+ *
+ * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
+ * behave as closely as possible to ECMAScript 6 (Harmony).
+ *
  * @example
  * var errorX = require('error-x');
  * var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
@@ -65,7 +80,7 @@
  *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.2.4
+ * @version 1.3.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -85,8 +100,7 @@
 ;(function () {
   'use strict';
 
-  var $toStringTag = require('has-symbol-support-x') &&
-      typeof Symbol.toStringTag === 'symbol' && Symbol.toStringTag,
+  var $toStringTag = require('has-to-string-tag-x') && Symbol.toStringTag,
     pMap = Array.prototype.map,
     pJoin = Array.prototype.join,
     pSlice = Array.prototype.slice,
@@ -103,14 +117,10 @@
     ES = require('es-abstract'),
     inspect = require('inspect-x'),
     truncate = require('lodash.trunc'),
+    isError = require('is-error-x'),
+    isNil = require('is-nil-x'),
+    isUndefined = require('validate.io-undefined'),
     ERROR = Error,
-    TYPEERROR = TypeError,
-    SYNTAXERROR = SyntaxError,
-    RANGEERROR = RangeError,
-    EVALERROR = EvalError,
-    REFERENCEERROR = ReferenceError,
-    URIERROR = URIError,
-    ASSERTIONERROR,
     cV8 = ERROR.captureStackTrace && (function () {
       // Capture the function (if any).
       var captureStackTrace = ERROR.captureStackTrace;
@@ -155,7 +165,7 @@
             frame.toString()
           );
         }]);
-        if (typeof temp === 'undefined') {
+        if (isUndefined(temp)) {
           delete ERROR.prepareStackTrace;
         } else {
           ERROR.prepareStackTrace = temp;
@@ -256,13 +266,13 @@
         // `opera#sourceloc` property that offers a trace of which functions
         // were called, in what order, from which line and  file, and with what
         // argument, then we will set it.
-        if (typeof err['opera#sourceloc'] !== 'undefined') {
+        if (!isUndefined(err['opera#sourceloc'])) {
           defProp(context, 'opera#sourceloc', err['opera#sourceloc'], true);
         }
-        if (typeof err.stacktrace !== 'undefined') {
+        if (!isUndefined(err.stacktrace)) {
           defProp(context, 'stacktrace', err.stacktrace, true);
         }
-        if (typeof err.stack !== 'undefined') {
+        if (!isUndefined(err.stack)) {
           defProp(context, 'stack', err.stack, true);
         }
         defProp(context, 'frames', [], true);
@@ -278,9 +288,9 @@
    * @return {boolean} True if ErrorCtr creates an Error, otherwise false.
    */
   function isErrorCtr(ErrorCtr) {
-    if (ErrorCtr && ES.IsCallable(ErrorCtr)) {
+    if (ES.IsCallable(ErrorCtr)) {
       try {
-        return new ErrorCtr() instanceof ERROR;
+        return isError(new ErrorCtr({}));
       } catch (ignore) {}
     }
     return false;
@@ -295,8 +305,23 @@
    * @return {boolean} True if either arguments asserts, otherwise false.
    */
   function asAssertionError(name, ErrorCtr) {
-    return name === 'AssertionError' ||
-      isErrorCtr(ASSERTIONERROR) && new ErrorCtr() instanceof ASSERTIONERROR;
+    var err;
+    if (name === 'AssertionError') {
+      return true;
+    }
+    if (isErrorCtr(ErrorCtr)) {
+      err = new ErrorCtr({
+        message: 'a',
+        actual: 'b',
+        expected: 'c',
+        operator: 'd'
+      });
+      return err.message === 'a' &&
+        err.actual === 'b' &&
+        err.expected === 'c' &&
+        err.operator === 'd';
+    }
+    return false;
   }
 
   /**
@@ -365,7 +390,7 @@
     } else {
       // Standard Errors. Only set `this.message` if the argument `message`
       // was not `undefined`.
-      if (typeof message !== 'undefined') {
+      if (!isUndefined(message)) {
         defProp(context, 'message', safeToString(message), true);
       }
     }
@@ -373,6 +398,7 @@
     parse(context, name);
   }
 
+  // `init` is used in `eval`, don't delete.
   init({}, 'message', 'name', ERROR);
 
   /**
@@ -386,7 +412,7 @@
    */
   function create(name, ErrorCtr) {
     /*jshint eqnull:true */
-    var customName = name == null ? 'CustomError' : name,
+    var customName = isNil(name) ? 'CustomError' : name,
       CstmCtr;
     /*jshint eqnull:false */
 
@@ -472,21 +498,10 @@
 
   // Test if we can use more than just the Error constructor.
   try {
-    allCtrs = create('X', SYNTAXERROR)('x') instanceof SYNTAXERROR;
+    allCtrs = create('X', SyntaxError)('x') instanceof SyntaxError;
   } catch (ignore) {
     allCtrs = false;
   }
-
-  /**
-   * Error constructor for test and validation frameworks that implement the
-   * standardized AssertionError specification.
-   *
-   * @private
-   * @constructor
-   * @augments Error
-   * @param {Object} [message] Need to document the properties.
-   */
-  ASSERTIONERROR = create('AssertionError', ERROR);
 
   defProps(module.exports, {
     /**
@@ -514,7 +529,7 @@
      * @augments Error
      * @param {string} [message] Human-readable description of the error.
      */
-    Error: create('Error', ERROR),
+    Error: create('Error', Error),
     /**
      * Creates an instance representing a syntax error that occurs while parsing
      * code in eval().
@@ -523,7 +538,7 @@
      * @augments SyntaError
      * @param {string} [message] Human-readable description of the error.
      */
-    SyntaxError: create('SyntaxError', SYNTAXERROR),
+    SyntaxError: create('SyntaxError', SyntaxError),
     /**
      * Creates an instance representing an error that occurs when a variable or
      * parameter is not of a valid type.
@@ -532,7 +547,7 @@
      * @augments TypeError
      * @param {string} [message] Human-readable description of the error.
      */
-    TypeError: create('TypeError', TYPEERROR),
+    TypeError: create('TypeError', TypeError),
     /**
      * Creates an instance representing an error that occurs when a numeric
      * variable or parameter is outside of its valid range.
@@ -541,7 +556,7 @@
      * @augments RangeError
      * @param {string} [message] Human-readable description of the error.
      */
-    RangeError: create('RangeError', RANGEERROR),
+    RangeError: create('RangeError', RangeError),
     /**
      * Creates an instance representing an error that occurs regarding the
      * global function eval().
@@ -550,7 +565,7 @@
      * @augments EvalError
      * @param {string} [message] Human-readable description of the error.
      */
-    EvalError: create('EvalError', EVALERROR),
+    EvalError: create('EvalError', EvalError),
     /**
      * Creates an instance representing an error that occurs when de-referencing
      * an invalid reference
@@ -559,7 +574,7 @@
      * @augments ReferenceError
      * @param {string} [message] Human-readable description of the error.
      */
-    ReferenceError: create('ReferenceError', REFERENCEERROR),
+    ReferenceError: create('ReferenceError', ReferenceError),
     /**
      * Creates an instance representing an error that occurs when encodeURI() or
      * decodeURI() are passed invalid parameters.
@@ -568,7 +583,7 @@
      * @augments URIError
      * @param {string} [message] Human-readable description of the error.
      */
-    URIError: create('URIError', URIERROR),
+    URIError: create('URIError', URIError),
     /**
      * The InternalError object indicates an error that occurred internally in
      * the JavaScript engine. For example: "InternalError: too much recursion".
@@ -577,7 +592,7 @@
      * @augments Error
      * @param {string} [message] Human-readable description of the error.
      */
-    InternalError: create('InternalError', ERROR),
+    InternalError: create('InternalError', Error),
     /**
      * Error constructor for test and validation frameworks that implement the
      * standardized AssertionError specification.
@@ -586,6 +601,15 @@
      * @augments Error
      * @param {Object} [message] Need to document the properties.
      */
-    AssertionError: ASSERTIONERROR
+    AssertionError: create('AssertionError', Error),
+    /**
+     * Determine whether or not a given `value` is an `Error` type.
+     *
+     * @function
+     * @param {*} value The object to be tested.
+     * @return {boolean} Returns `true` if `value` is an `Error` type,
+     *  else `false`.
+     */
+    isError: isError
   });
 }());

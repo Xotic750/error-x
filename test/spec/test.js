@@ -3,8 +3,8 @@
 /*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:false, plusplus:true, maxparams:1, maxdepth:2,
-  maxstatements:11, maxcomplexity:3 */
+  es3:true, esnext:false, plusplus:true, maxparams:2, maxdepth:2,
+  maxstatements:28, maxcomplexity:3 */
 
 /*global module, require, describe, it, expect, JSON:true, returnExports */
 
@@ -14,48 +14,184 @@
   var lib;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
-    require('es5-shim/es5-sham.js');
+    require('es5-shim/es5-sham');
     if (typeof JSON === 'undefined') {
       JSON = {};
     }
     require('json3').runInContext(null, JSON);
+    require('es6-shim');
     lib = require('../../index.js');
   } else {
     lib = returnExports;
   }
 
   describe('error-x', function () {
-    it('should not throw an error with bad arguments', function () {
-      lib.create();
-      lib.create(undefined);
-      lib.create(null);
-      lib.create('');
-      lib.create('NullError', null);
-      lib.create('FnError', function () {});
+    describe('standard error type', function () {
+      it('should not throw an error with bad arguments', function () {
+        lib.create();
+        lib.create(undefined);
+        lib.create(null);
+        lib.create('');
+        lib.create('NullError', null);
+        lib.create('FnError', function () {});
+      });
+
+      it('should work with `Error`', function () {
+        var MyError = lib.create('MyError', Error),
+          error = new MyError('test');
+        expect(MyError.prototype.constructor).toBe(MyError);
+        expect(error instanceof Error).toBe(true);
+        expect(error instanceof MyError).toBe(true);
+        expect(lib.isError(error)).toBe(true);
+      });
+
+      it('environment supports all `Error` types', function () {
+        var MyError = lib.create('MyError', SyntaxError),
+          error = new MyError('test');
+        expect(MyError.prototype.constructor).toBe(MyError);
+        expect(error instanceof Error).toBe(true);
+        expect(error instanceof MyError).toBe(true);
+        expect(lib.isError(error)).toBe(true);
+      });
+
+      it('can be sub-classed', function () {
+        var MyError = lib.create('MyError', Error),
+          MySubError = lib.create('MySubError', MyError),
+          error = new MySubError('test');
+        expect(MySubError.prototype.constructor).toBe(MySubError);
+        expect(error instanceof Error).toBe(true);
+        expect(error instanceof MyError).toBe(true);
+        expect(error instanceof MySubError).toBe(true);
+        expect(lib.isError(error)).toBe(true);
+      });
+
+      it('should have correct `name`', function () {
+        expect(lib.create('MyError')('test').name).toBe('MyError');
+      });
+
+      it('should have correct `message`', function () {
+        expect(lib.create('MyError')('test').message).toBe('test');
+      });
+
+      it('should have correct `toString`', function () {
+        var s = lib.create('MyError')('test').toString().slice(0, 13);
+        expect(s).toBe('MyError: test');
+      });
     });
-    it('should work with `Error`', function () {
-      var MyError = lib.create('MyError', Error),
-        error = new MyError('test');
-      expect(MyError.prototype.constructor).toBe(MyError);
-      expect(error instanceof Error).toBe(true);
-      expect(error instanceof MyError).toBe(true);
-    });
-    it('environment supports all `Error` types', function () {
-      var MyError = lib.create('MyError', SyntaxError),
-        error = new MyError('test');
-      expect(MyError.prototype.constructor).toBe(MyError);
-      expect(error instanceof Error).toBe(true);
-      expect(error instanceof MyError).toBe(true);
-    });
-    it('should have correct `name`', function () {
-      expect(lib.create('MyError')('test').name).toBe('MyError');
-    });
-    it('should have correct `message`', function () {
-      expect(lib.create('MyError')('test').message).toBe('test');
-    });
-    it('should have correct `toString`', function () {
-      var s = lib.create('MyError')('test').toString().slice(0, 13);
-      expect(s).toBe('MyError: test');
+
+    describe('AssertionError type', function () {
+      it('messages', function () {
+        var circular = {
+          y: 1
+        };
+        circular.x = circular;
+
+        function testAssertionMessage(actual, expected) {
+          try {
+            throw new lib.AssertionError({
+              actual: actual,
+              expected: '',
+              operator: '=='
+            });
+          } catch (e) {
+            expect(lib.isError(e)).toBe(true);
+            expect(e.toString())
+              .toBe('AssertionError: ' + expected + ' == \'\'');
+            expect(e.generatedMessage)
+              .toBe(true, 'Message not marked as generated');
+          }
+        }
+
+        testAssertionMessage(undefined, 'undefined');
+        testAssertionMessage(null, 'null');
+        testAssertionMessage(true, 'true');
+        testAssertionMessage(false, 'false');
+        testAssertionMessage(0, '0');
+        testAssertionMessage(100, '100');
+        testAssertionMessage(NaN, 'NaN');
+        testAssertionMessage(Infinity, 'Infinity');
+        testAssertionMessage(-Infinity, '-Infinity');
+        testAssertionMessage('', '\'\'');
+        testAssertionMessage('foo', '\'foo\'');
+        testAssertionMessage([], '[]');
+        testAssertionMessage([1, 2, 3], '[ 1, 2, 3 ]');
+        testAssertionMessage(/a/, '/a/');
+        testAssertionMessage(/abc/gim, '/abc/gim');
+        testAssertionMessage(function f() {}, '[Function: f]');
+        testAssertionMessage(function () {}, '[Function]');
+        testAssertionMessage({}, '{}');
+        testAssertionMessage(circular, '{ y: 1, x: [Circular] }');
+        testAssertionMessage({
+          a: undefined,
+          b: null
+        }, '{ a: undefined, b: null }');
+        testAssertionMessage({
+            a: NaN,
+            b: Infinity,
+            c: -Infinity
+          },
+          '{ a: NaN, b: Infinity, c: -Infinity }');
+      });
+
+      it('can be sub-classed', function () {
+        var AE = lib.create('MyAssertionError', lib.AssertionError),
+          error = new AE({});
+
+        expect(error instanceof Error).toBe(true);
+        expect(error instanceof lib.AssertionError).toBe(true);
+        expect(lib.isError(error)).toBe(true);
+
+        var circular = {
+          y: 1
+        };
+        circular.x = circular;
+
+        function testAssertionMessage(actual, expected) {
+          try {
+            throw new AE({
+              actual: actual,
+              expected: '',
+              operator: '=='
+            });
+          } catch (e) {
+            expect(lib.isError(e)).toBe(true);
+            expect(e.toString())
+              .toBe('MyAssertionError: ' + expected + ' == \'\'');
+            expect(e.generatedMessage)
+              .toBe(true, 'Message not marked as generated');
+          }
+        }
+
+        testAssertionMessage(undefined, 'undefined');
+        testAssertionMessage(null, 'null');
+        testAssertionMessage(true, 'true');
+        testAssertionMessage(false, 'false');
+        testAssertionMessage(0, '0');
+        testAssertionMessage(100, '100');
+        testAssertionMessage(NaN, 'NaN');
+        testAssertionMessage(Infinity, 'Infinity');
+        testAssertionMessage(-Infinity, '-Infinity');
+        testAssertionMessage('', '\'\'');
+        testAssertionMessage('foo', '\'foo\'');
+        testAssertionMessage([], '[]');
+        testAssertionMessage([1, 2, 3], '[ 1, 2, 3 ]');
+        testAssertionMessage(/a/, '/a/');
+        testAssertionMessage(/abc/gim, '/abc/gim');
+        testAssertionMessage(function f() {}, '[Function: f]');
+        testAssertionMessage(function () {}, '[Function]');
+        testAssertionMessage({}, '{}');
+        testAssertionMessage(circular, '{ y: 1, x: [Circular] }');
+        testAssertionMessage({
+          a: undefined,
+          b: null
+        }, '{ a: undefined, b: null }');
+        testAssertionMessage({
+            a: NaN,
+            b: Infinity,
+            c: -Infinity
+          },
+          '{ a: NaN, b: Infinity, c: -Infinity }');
+      });
     });
   });
 }());
