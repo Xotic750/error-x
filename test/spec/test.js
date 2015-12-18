@@ -40,18 +40,18 @@
         var MyError = lib.create('MyError', Error),
           error = new MyError('test');
         expect(MyError.prototype.constructor).toBe(MyError);
-        expect(error instanceof Error).toBe(true);
-        expect(error instanceof MyError).toBe(true);
-        expect(lib.isError(error)).toBe(true);
+        expect(error instanceof Error).toBe(true, 'instanceof Error');
+        expect(error instanceof MyError).toBe(true, 'instanceof MyError');
+        expect(lib.isError(error)).toBe(true, 'isError');
       });
 
       it('environment supports all `Error` types', function () {
         var MyError = lib.create('MyError', SyntaxError),
           error = new MyError('test');
         expect(MyError.prototype.constructor).toBe(MyError);
-        expect(error instanceof Error).toBe(true);
-        expect(error instanceof MyError).toBe(true);
-        expect(lib.isError(error)).toBe(true);
+        expect(error instanceof Error).toBe(true, 'instanceof Error');
+        expect(error instanceof MyError).toBe(true, 'instanceof MyError');
+        expect(lib.isError(error)).toBe(true, 'isError');
       });
 
       it('can be sub-classed', function () {
@@ -59,10 +59,10 @@
           MySubError = lib.create('MySubError', MyError),
           error = new MySubError('test');
         expect(MySubError.prototype.constructor).toBe(MySubError);
-        expect(error instanceof Error).toBe(true);
-        expect(error instanceof MyError).toBe(true);
-        expect(error instanceof MySubError).toBe(true);
-        expect(lib.isError(error)).toBe(true);
+        expect(error instanceof Error).toBe(true, 'instanceof Error');
+        expect(error instanceof MyError).toBe(true, 'instanceof MyError');
+        expect(error instanceof MySubError).toBe(true, 'instanceof MySubError');
+        expect(lib.isError(error)).toBe(true, 'isError');
       });
 
       it('should have correct `name`', function () {
@@ -94,7 +94,7 @@
               operator: '=='
             });
           } catch (e) {
-            expect(lib.isError(e)).toBe(true);
+            expect(lib.isError(e)).toBe(true, 'isError');
             expect(e.toString())
               .toBe('AssertionError: ' + expected + ' == \'\'');
             expect(e.generatedMessage)
@@ -137,9 +137,10 @@
         var AE = lib.create('MyAssertionError', lib.AssertionError),
           error = new AE({});
 
-        expect(error instanceof Error).toBe(true);
-        expect(error instanceof lib.AssertionError).toBe(true);
-        expect(lib.isError(error)).toBe(true);
+        expect(error instanceof Error).toBe(true, 'instanceof Error');
+        expect(error instanceof lib.AssertionError)
+          .toBe(true, 'instanceof lib.AssertionError');
+        expect(lib.isError(error)).toBe(true, 'isError');
 
         var circular = {
           y: 1
@@ -154,7 +155,7 @@
               operator: '=='
             });
           } catch (e) {
-            expect(lib.isError(e)).toBe(true);
+            expect(lib.isError(e)).toBe(true, 'isError');
             expect(e.toString())
               .toBe('MyAssertionError: ' + expected + ' == \'\'');
             expect(e.generatedMessage)
