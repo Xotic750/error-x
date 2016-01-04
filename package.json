@@ -35,7 +35,7 @@
     "noop-x": "^1.0.6",
     "circular-json": "^0.3.0",
     "find-index-x": "^1.0.6",
-    "safe-to-string-x": "^1.1.2",
+    "safe-to-string-x": "^1.1.3",
     "inspect-x": "^1.0.6",
     "lodash.trunc": "^3.0.4",
     "has-to-string-tag-x": "^1.0.1",
