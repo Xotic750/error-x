@@ -80,7 +80,7 @@
  *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.3.2
+ * @version 1.3.3
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -108,7 +108,6 @@
     pIndexOf = String.prototype.indexOf,
     pTrim = String.prototype.trim,
     safeToString = require('safe-to-string-x'),
-    noop = require('noop-x'),
     StackFrame = require('stackframe'),
     errorStackParser = require('error-stack-parser'),
     defProps = require('define-properties'),
@@ -159,7 +158,7 @@
         frames = ES.Call(pMap, error.stack, [function (frame) {
           return new StackFrame(
             frame.getFunctionName(),
-            noop(),
+            void 0,
             frame.getFileName(),
             frame.getLineNumber(),
             frame.getColumnNumber(),

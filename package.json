@@ -2,7 +2,7 @@
   "name": "error-x",
   "homepage": "http://xotic750.github.io/error-x/",
   "description": "Create custom Javascript Error objects.",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "keywords": [
     "javascript",
     "library",
@@ -29,18 +29,17 @@
   "dependencies": {
     "es-abstract": "^1.5.0",
     "define-properties": "^1.1.2",
-    "define-property-x": "^1.0.6",
+    "define-property-x": "^1.0.7",
     "stackframe": "^1.0.2",
     "error-stack-parser": "^1.3.3",
-    "noop-x": "^1.0.8",
     "circular-json": "^0.3.0",
-    "find-index-x": "^1.0.8",
-    "safe-to-string-x": "^1.1.4",
-    "inspect-x": "^1.0.8",
+    "find-index-x": "^1.0.9",
+    "safe-to-string-x": "^1.1.5",
+    "inspect-x": "^1.0.9",
     "lodash.trunc": "^3.0.4",
-    "has-to-string-tag-x": "^1.0.3",
-    "is-nil-x": "^1.0.3",
-    "is-error-x": "^1.0.6",
+    "has-to-string-tag-x": "^1.0.4",
+    "is-nil-x": "^1.0.4",
+    "is-error-x": "^1.0.7",
     "validate.io-undefined": "^1.0.3"
   },
   "devDependencies": {
@@ -49,15 +48,18 @@
     "json3": "^3.3.2",
     "jscs": "^2.8.0",
     "uglify-js": "^2.6.1",
-    "browserify": "^12.0.1",
+    "browserify": "^13.0.0",
+    "browserify-derequire": "^0.9.4",
     "jasmine-node": "^1.14.5",
-    "jsdoc-to-markdown": "^1.3.3"
+    "jsdoc-to-markdown": "^1.3.3",
+    "nsp": "^2.2.0"
   },
   "scripts": {
-    "test": "jasmine-node --matchall test/spec/",
+    "test": "jasmine-node --matchall tests/spec/",
+    "security": "nsp check",
     "style": "jscs index.js",
     "docs": "jsdoc2md --name-format --example-lang js index.js > README.md",
-    "build": "browserify -e index.js -o lib/error-x.js -s returnExports",
+    "build": "browserify -p browserify-derequire -e index.js -o lib/error-x.js -u 'crypto' -s returnExports",
     "build-uglify": "uglifyjs lib/error-x.js -o lib/error-x.min.js --compress --keep-fnames --mangle --beautify ascii_only=true,beautify=false --source-map lib/error-x.map"
   }
 }
