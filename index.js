@@ -80,7 +80,7 @@
  *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.3.3
+ * @version 1.3.4
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -93,35 +93,35 @@
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
   es3:true, esnext:true, plusplus:true, maxparams:4, maxdepth:3,
-  maxstatements:17, maxcomplexity:8 */
+  maxstatements:38, maxcomplexity:7 */
 
 /*global require, module */
 
 ;(function () {
   'use strict';
 
-  var $create = Object.create,
-    $toStringTag = require('has-to-string-tag-x') && Symbol.toStringTag,
-    pMap = Array.prototype.map,
-    pJoin = Array.prototype.join,
-    pSlice = Array.prototype.slice,
-    pIndexOf = String.prototype.indexOf,
-    pTrim = String.prototype.trim,
-    safeToString = require('safe-to-string-x'),
-    StackFrame = require('stackframe'),
-    errorStackParser = require('error-stack-parser'),
-    defProps = require('define-properties'),
-    defProp = require('define-property-x'),
-    CircularJSON = require('circular-json'),
-    findIndex = require('find-index-x'),
-    ES = require('es-abstract'),
-    inspect = require('inspect-x'),
-    truncate = require('lodash.trunc'),
-    isError = require('is-error-x'),
-    isNil = require('is-nil-x'),
-    isUndefined = require('validate.io-undefined'),
-    ERROR = Error,
-    cV8 = ERROR.captureStackTrace && (function () {
+  var $create = Object.create;
+  var $toStringTag = require('has-to-string-tag-x') && Symbol.toStringTag;
+  var pMap = Array.prototype.map;
+  var pJoin = Array.prototype.join;
+  var pSlice = Array.prototype.slice;
+  var pIndexOf = String.prototype.indexOf;
+  var pTrim = String.prototype.trim;
+  var safeToString = require('safe-to-string-x');
+  var StackFrame = require('stackframe');
+  var errorStackParser = require('error-stack-parser');
+  var define = require('define-properties-x');
+  var CircularJSON = require('circular-json');
+  var pFindIndex = Array.prototype.findIndex;
+  var isCallable = require('is-callable');
+  var inspect = require('inspect-x');
+  var truncate = require('lodash.trunc');
+  var isError = require('is-error-x');
+  var isNil = require('is-nil-x');
+  var isUndefined = require('validate.io-undefined');
+  var toLength = require('to-length-x');
+  var ERROR = Error;
+  var cV8 = ERROR.captureStackTrace && (function () {
       // Capture the function (if any).
       var captureStackTrace = ERROR.captureStackTrace;
       // Test to see if the function works.
@@ -150,12 +150,11 @@
        * @return {!Array.<!Object>} Array of StackFrames.
        */
       return function captureV8(context) {
-        var temp = ERROR.prepareStackTrace,
-          error, frames;
+        var temp = ERROR.prepareStackTrace;
         ERROR.prepareStackTrace = prepareStackTrace;
-        error = new ERROR();
+        var error = new ERROR();
         captureStackTrace(error, context.constructor);
-        frames = ES.Call(pMap, error.stack, [function (frame) {
+        var frames = pMap.call(error.stack, function (frame) {
           return new StackFrame(
             frame.getFunctionName(),
             void 0,
@@ -164,7 +163,7 @@
             frame.getColumnNumber(),
             frame.toString()
           );
-        }]);
+        });
         if (isUndefined(temp)) {
           delete ERROR.prepareStackTrace;
         } else {
@@ -172,11 +171,11 @@
         }
         return frames;
       };
-    }(ERROR)),
-    allCtrs = true;
+    }(ERROR));
+  var allCtrs = true;
 
   /**
-   * For use with defProps, a predicate that returns `true`.
+   * For use with define.defineProperties, a predicate that returns `true`.
    *
    * @private
    * @return {boolean} `true`.
@@ -194,12 +193,12 @@
    * @param {string} name The name of the constructor.
    */
   function defContext(context, frames, name) {
-    defProps(context, {
+    define.defineProperties(context, {
       frames: frames,
       stack: name + '\n    ' +
-        ES.Call(pJoin, ES.Call(pMap, frames, [function (frame) {
+        pJoin.call(pMap.call(frames, function (frame) {
           return frame.toString();
-        }]), ['\n    '])
+        }), '\n    ')
     }, {
       frames: truePredicate,
       stack: truePredicate
@@ -216,26 +215,26 @@
    * @return {boolean} True if the Error object was parsed, otherwise false.
    */
   function errParse(context, err, name) {
-    var frames, start, end, item;
+    var frames;
     try {
       frames = errorStackParser.parse(err);
     } catch (ignore) {
       return false;
     }
-    start = findIndex(frames, function (frame) {
-      var functionName = typeof frame.functionName === 'string' ?
-        frame.functionName :
-        '';
-      return ES.Call(pIndexOf, functionName, [name]) > -1;
+    var start = pFindIndex.call(frames, function (frame) {
+      return pIndexOf.call(
+        typeof frame.functionName === 'string' ? frame.functionName : '',
+        name
+      ) > -1;
     });
     if (start > -1) {
-      item = frames[start];
-      frames = ES.Call(pSlice, frames, [start + 1]);
-      end = findIndex(frames, function (frame) {
+      var item = frames[start];
+      frames = pSlice.call(frames, start + 1);
+      var end = pFindIndex.call(frames, function (frame) {
         return item.source === frame.source;
       });
       if (end > -1) {
-        frames = ES.Call(pSlice, frames, [0, end]);
+        frames = pSlice.call(frames, 0, end);
       }
     }
     defContext(context, frames, name);
@@ -267,15 +266,20 @@
         // were called, in what order, from which line and  file, and with what
         // argument, then we will set it.
         if (!isUndefined(err['opera#sourceloc'])) {
-          defProp(context, 'opera#sourceloc', err['opera#sourceloc'], true);
+          define.defineProperty(
+            context,
+            'opera#sourceloc',
+            err['opera#sourceloc'],
+            true
+          );
         }
         if (!isUndefined(err.stacktrace)) {
-          defProp(context, 'stacktrace', err.stacktrace, true);
+          define.defineProperty(context, 'stacktrace', err.stacktrace, true);
         }
         if (!isUndefined(err.stack)) {
-          defProp(context, 'stack', err.stack, true);
+          define.defineProperty(context, 'stack', err.stack, true);
         }
-        defProp(context, 'frames', [], true);
+        define.defineProperty(context, 'frames', [], true);
       }
     }
   }
@@ -288,7 +292,7 @@
    * @return {boolean} True if ErrorCtr creates an Error, otherwise false.
    */
   function isErrorCtr(ErrorCtr) {
-    if (ES.IsCallable(ErrorCtr)) {
+    if (isCallable(ErrorCtr)) {
       try {
         return isError(new ErrorCtr({}));
       } catch (ignore) {}
@@ -305,12 +309,11 @@
    * @return {boolean} True if either arguments asserts, otherwise false.
    */
   function asAssertionError(name, ErrorCtr) {
-    var err;
     if (name === 'AssertionError') {
       return true;
     }
     if (isErrorCtr(ErrorCtr)) {
-      err = new ErrorCtr({
+      var err = new ErrorCtr({
         message: 'a',
         actual: 'b',
         expected: 'c',
@@ -334,9 +337,9 @@
    */
   function getMessage(message) {
     var opts = {
-      length: message.length ? ES.ToLength(message.length) : 128,
-      separator: message.separator ? ES.ToString(message.separator) : '',
-      omission: message.omission ? ES.ToString(message.omission) : ''
+      length: message.length ? toLength(message.length) : 128,
+      separator: message.separator ? safeToString(message.separator) : '',
+      omission: message.omission ? safeToString(message.omission) : ''
     };
     return truncate(inspect(message.actual), opts) + ' ' +
       message.operator + ' ' +  truncate(inspect(message.expected), opts);
@@ -375,7 +378,7 @@
    */
   function init(context, message, name, ErrorCtr) {
     if (asAssertionError(name, ErrorCtr)) {
-      defProps(context, {
+      define.defineProperties(context, {
         actual: message.actual,
         expected: message.expected,
         message: message.message ? message.message : getMessage(message),
@@ -392,7 +395,7 @@
       // Standard Errors. Only set `this.message` if the argument `message`
       // was not `undefined`.
       if (!isUndefined(message)) {
-        defProp(context, 'message', safeToString(message), true);
+        define.defineProperty(context, 'message', safeToString(message), true);
       }
     }
     // Parse and set the 'this' properties.
@@ -419,7 +422,7 @@
 
     if (customName !== 'CustomError') {
       try {
-        customName = ES.Call(pTrim, ES.ToString(customName));
+        customName = pTrim.call(safeToString(customName));
         /*jshint evil:true */
         eval('(function ' + customName + ' () {})');
         /*jshint evil:false */
@@ -450,7 +453,7 @@
 
     // Inherit the prototype methods from `ErrorCtr`.
     CstmCtr.prototype = $create(ErrorCtr.prototype);
-    defProps(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
+    define.defineProperties(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
       /**
        * Specifies the function that created an instance's prototype.
        *
@@ -481,7 +484,12 @@
        * @memberof module:error-x.CstmCtr.prototype
        * @type {string}
        */
-      defProp(CstmCtr.prototype, $toStringTag, '[object Error]', true);
+      define.defineProperty(
+        CstmCtr.prototype,
+        $toStringTag,
+        '[object Error]',
+        true
+      );
     }
     return CstmCtr;
   }
@@ -493,7 +501,7 @@
     allCtrs = false;
   }
 
-  defProps(module.exports, {
+  define.defineProperties(module.exports, {
     /**
     * Indicates if the Javascript engine supports subclassing of all Error
     * types. If `true` then all are supported, if `false` (only very old
