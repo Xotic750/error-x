@@ -80,7 +80,7 @@
  *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.3.6
+ * @version 1.3.7
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -175,7 +175,7 @@
   var allCtrs = true;
 
   /**
-   * For use with define.defineProperties, a predicate that returns `true`.
+   * For use with define.properties, a predicate that returns `true`.
    *
    * @private
    * @return {boolean} `true`.
@@ -193,7 +193,7 @@
    * @param {string} name The name of the constructor.
    */
   function defContext(context, frames, name) {
-    define.defineProperties(context, {
+    define.properties(context, {
       frames: frames,
       stack: name + '\n    ' +
         pJoin.call(pMap.call(frames, function (frame) {
@@ -266,7 +266,7 @@
         // were called, in what order, from which line and  file, and with what
         // argument, then we will set it.
         if (!isUndefined(err['opera#sourceloc'])) {
-          define.defineProperty(
+          define.property(
             context,
             'opera#sourceloc',
             err['opera#sourceloc'],
@@ -274,12 +274,12 @@
           );
         }
         if (!isUndefined(err.stacktrace)) {
-          define.defineProperty(context, 'stacktrace', err.stacktrace, true);
+          define.property(context, 'stacktrace', err.stacktrace, true);
         }
         if (!isUndefined(err.stack)) {
-          define.defineProperty(context, 'stack', err.stack, true);
+          define.property(context, 'stack', err.stack, true);
         }
-        define.defineProperty(context, 'frames', [], true);
+        define.property(context, 'frames', [], true);
       }
     }
   }
@@ -378,7 +378,7 @@
    */
   function init(context, message, name, ErrorCtr) {
     if (asAssertionError(name, ErrorCtr)) {
-      define.defineProperties(context, {
+      define.properties(context, {
         actual: message.actual,
         expected: message.expected,
         message: message.message ? message.message : getMessage(message),
@@ -395,7 +395,7 @@
       // Standard Errors. Only set `this.message` if the argument `message`
       // was not `undefined`.
       if (!isUndefined(message)) {
-        define.defineProperty(context, 'message', safeToString(message), true);
+        define.property(context, 'message', safeToString(message), true);
       }
     }
     // Parse and set the 'this' properties.
@@ -453,7 +453,7 @@
 
     // Inherit the prototype methods from `ErrorCtr`.
     CstmCtr.prototype = $create(ErrorCtr.prototype);
-    define.defineProperties(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
+    define.properties(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
       /**
        * Specifies the function that created an instance's prototype.
        *
@@ -484,7 +484,7 @@
        * @memberof module:error-x.CstmCtr.prototype
        * @type {string}
        */
-      define.defineProperty(
+      define.property(
         CstmCtr.prototype,
         $toStringTag,
         '[object Error]',
@@ -501,7 +501,7 @@
     allCtrs = false;
   }
 
-  define.defineProperties(module.exports, {
+  define.properties(module.exports, {
     /**
     * Indicates if the Javascript engine supports subclassing of all Error
     * types. If `true` then all are supported, if `false` (only very old
