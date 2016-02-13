@@ -80,7 +80,7 @@
  *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.3.9
+ * @version 1.3.10
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -115,7 +115,7 @@
   var pFindIndex = Array.prototype.findIndex;
   var isCallable = require('is-callable');
   var inspect = require('inspect-x');
-  var truncate = require('lodash.trunc');
+  var truncate = require('./truncate.js');
   var isError = require('is-error-x');
   var isNil = require('is-nil-x');
   var isUndefined = require('validate.io-undefined');
