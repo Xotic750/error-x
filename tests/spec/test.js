@@ -1,4 +1,4 @@
-/*jslint maxlen:80, es6:false, this:true, white:true */
+/*jslint maxlen:80, esversion:6, this:true, white:true */
 
 /*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
@@ -20,6 +20,13 @@
     }
     require('json3').runInContext(null, JSON);
     require('es6-shim');
+    var es7 = require('es7-shim');
+    Object.keys(es7).forEach(function(key) {
+      var obj = es7[key];
+      if (typeof obj.shim === 'function'){
+        obj.shim();
+      }
+    });
     lib = require('../../index.js');
   } else {
     lib = returnExports;

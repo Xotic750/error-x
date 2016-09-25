@@ -1,4 +1,5 @@
 <a name="module_error-x"></a>
+
 ## error-x
 <a href="https://travis-ci.org/Xotic750/error-x"
 title="Travis status">
@@ -49,7 +50,7 @@ es5-shim.js to be able to work properly.
 `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
 behave as closely as possible to ECMAScript 6 (Harmony).
 
-**Version**: 1.3.11  
+**Version**: 1.3.12  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
@@ -110,10 +111,12 @@ JSON.stringify(err); // => see below.
     * [`~isError(value)`](#module_error-x..isError) ⇒ <code>boolean</code>
 
 <a name="module_error-x..Error"></a>
+
 ### error-x~Error ⇐ <code>Error</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>Error</code>  
 <a name="new_module_error-x..Error_new"></a>
+
 #### `new Error([message])`
 The Error constructor creates an error object.
 
@@ -123,10 +126,12 @@ The Error constructor creates an error object.
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..SyntaxError"></a>
+
 ### error-x~SyntaxError ⇐ <code>SyntaError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>SyntaError</code>  
 <a name="new_module_error-x..SyntaxError_new"></a>
+
 #### `new SyntaxError([message])`
 Creates an instance representing a syntax error that occurs while parsing
 code in eval().
@@ -137,10 +142,12 @@ code in eval().
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..TypeError"></a>
+
 ### error-x~TypeError ⇐ <code>TypeError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>TypeError</code>  
 <a name="new_module_error-x..TypeError_new"></a>
+
 #### `new TypeError([message])`
 Creates an instance representing an error that occurs when a variable or
 parameter is not of a valid type.
@@ -151,10 +158,12 @@ parameter is not of a valid type.
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..RangeError"></a>
+
 ### error-x~RangeError ⇐ <code>RangeError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>RangeError</code>  
 <a name="new_module_error-x..RangeError_new"></a>
+
 #### `new RangeError([message])`
 Creates an instance representing an error that occurs when a numeric
 variable or parameter is outside of its valid range.
@@ -165,10 +174,12 @@ variable or parameter is outside of its valid range.
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..EvalError"></a>
+
 ### error-x~EvalError ⇐ <code>EvalError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>EvalError</code>  
 <a name="new_module_error-x..EvalError_new"></a>
+
 #### `new EvalError([message])`
 Creates an instance representing an error that occurs regarding the
 global function eval().
@@ -179,10 +190,12 @@ global function eval().
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..ReferenceError"></a>
+
 ### error-x~ReferenceError ⇐ <code>ReferenceError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>ReferenceError</code>  
 <a name="new_module_error-x..ReferenceError_new"></a>
+
 #### `new ReferenceError([message])`
 Creates an instance representing an error that occurs when de-referencing
 an invalid reference
@@ -193,10 +206,12 @@ an invalid reference
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..URIError"></a>
+
 ### error-x~URIError ⇐ <code>URIError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>URIError</code>  
 <a name="new_module_error-x..URIError_new"></a>
+
 #### `new URIError([message])`
 Creates an instance representing an error that occurs when encodeURI() or
 decodeURI() are passed invalid parameters.
@@ -207,10 +222,12 @@ decodeURI() are passed invalid parameters.
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..InternalError"></a>
+
 ### error-x~InternalError ⇐ <code>Error</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>Error</code>  
 <a name="new_module_error-x..InternalError_new"></a>
+
 #### `new InternalError([message])`
 The InternalError object indicates an error that occurred internally in
 the JavaScript engine. For example: "InternalError: too much recursion".
@@ -221,10 +238,12 @@ the JavaScript engine. For example: "InternalError: too much recursion".
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x..AssertionError"></a>
+
 ### error-x~AssertionError ⇐ <code>Error</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
 **Extends:** <code>Error</code>  
 <a name="new_module_error-x..AssertionError_new"></a>
+
 #### `new AssertionError([message])`
 Error constructor for test and validation frameworks that implement the
 standardized AssertionError specification.
@@ -235,6 +254,7 @@ standardized AssertionError specification.
 | [message] | <code>Object</code> | Need to document the properties. |
 
 <a name="module_error-x..supportsAllConstructors"></a>
+
 ### `error-x~supportsAllConstructors` : <code>boolean</code>
 Indicates if the Javascript engine supports subclassing of all Error
 types. If `true` then all are supported, if `false` (only very old
@@ -242,6 +262,7 @@ browsers IE6) then only `Error` is supported.
 
 **Kind**: inner property of <code>[error-x](#module_error-x)</code>  
 <a name="module_error-x..create"></a>
+
 ### `error-x~create([name], [ErrorCtr])` ⇒ <code>function</code>
 Creates a custom Error constructor. Will use `Error` if argument is not
 a valid constructor.
@@ -255,6 +276,7 @@ a valid constructor.
 | [ErrorCtr] | <code>function</code> | <code>Error</code> | Error constructor to be used. |
 
 <a name="module_error-x..isError"></a>
+
 ### `error-x~isError(value)` ⇒ <code>boolean</code>
 Determine whether or not a given `value` is an `Error` type.
 
