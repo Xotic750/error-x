@@ -33,25 +33,8 @@ messages and stacks are parsed and then re-formatted.
 - They have a `frames` property which is an array of the parsed `stack`
 message, so you have easy access to the information.
 
-<h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
-`es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
-methods that can be faithfully emulated with a legacy JavaScript engine.
-
-`es5-sham.js` monkey-patches other ES5 methods as closely as possible.
-For these methods, as closely as possible to ES5 is not very close.
-Many of these shams are intended only to allow code to be written to ES5
-without causing run-time errors in older engines. In many cases,
-this means that these shams cause many ES5 methods to silently fail.
-Decide carefully whether this is what you want. Note: es5-sham.js requires
-es5-shim.js to be able to work properly.
-
-`json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
-
-`es6.shim.js` provides compatibility shims so that legacy JavaScript engines
-behave as closely as possible to ECMAScript 6 (Harmony).
-
-**Version**: 1.3.12  
-**Author:** Xotic750 <Xotic750@gmail.com>  
+**Version**: 1.4.0  
+**Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
 **Example**  
@@ -107,14 +90,14 @@ JSON.stringify(err); // => see below.
     * [~AssertionError](#module_error-x..AssertionError) ⇐ <code>Error</code>
         * [`new AssertionError([message])`](#new_module_error-x..AssertionError_new)
     * [`~supportsAllConstructors`](#module_error-x..supportsAllConstructors) : <code>boolean</code>
-    * [`~create([name], [ErrorCtr])`](#module_error-x..create) ⇒ <code>function</code>
+    * [`~create([name], [ECTR])`](#module_error-x..create) ⇒ <code>function</code>
     * [`~isError(value)`](#module_error-x..isError) ⇒ <code>boolean</code>
 
 <a name="module_error-x..Error"></a>
 
 ### error-x~Error ⇐ <code>Error</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>Error</code>  
+**Extends**: <code>Error</code>  
 <a name="new_module_error-x..Error_new"></a>
 
 #### `new Error([message])`
@@ -129,7 +112,7 @@ The Error constructor creates an error object.
 
 ### error-x~SyntaxError ⇐ <code>SyntaError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>SyntaError</code>  
+**Extends**: <code>SyntaError</code>  
 <a name="new_module_error-x..SyntaxError_new"></a>
 
 #### `new SyntaxError([message])`
@@ -145,7 +128,7 @@ code in eval().
 
 ### error-x~TypeError ⇐ <code>TypeError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>TypeError</code>  
+**Extends**: <code>TypeError</code>  
 <a name="new_module_error-x..TypeError_new"></a>
 
 #### `new TypeError([message])`
@@ -161,7 +144,7 @@ parameter is not of a valid type.
 
 ### error-x~RangeError ⇐ <code>RangeError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>RangeError</code>  
+**Extends**: <code>RangeError</code>  
 <a name="new_module_error-x..RangeError_new"></a>
 
 #### `new RangeError([message])`
@@ -177,7 +160,7 @@ variable or parameter is outside of its valid range.
 
 ### error-x~EvalError ⇐ <code>EvalError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>EvalError</code>  
+**Extends**: <code>EvalError</code>  
 <a name="new_module_error-x..EvalError_new"></a>
 
 #### `new EvalError([message])`
@@ -193,7 +176,7 @@ global function eval().
 
 ### error-x~ReferenceError ⇐ <code>ReferenceError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>ReferenceError</code>  
+**Extends**: <code>ReferenceError</code>  
 <a name="new_module_error-x..ReferenceError_new"></a>
 
 #### `new ReferenceError([message])`
@@ -209,7 +192,7 @@ an invalid reference
 
 ### error-x~URIError ⇐ <code>URIError</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>URIError</code>  
+**Extends**: <code>URIError</code>  
 <a name="new_module_error-x..URIError_new"></a>
 
 #### `new URIError([message])`
@@ -225,7 +208,7 @@ decodeURI() are passed invalid parameters.
 
 ### error-x~InternalError ⇐ <code>Error</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>Error</code>  
+**Extends**: <code>Error</code>  
 <a name="new_module_error-x..InternalError_new"></a>
 
 #### `new InternalError([message])`
@@ -241,7 +224,7 @@ the JavaScript engine. For example: "InternalError: too much recursion".
 
 ### error-x~AssertionError ⇐ <code>Error</code>
 **Kind**: inner class of <code>[error-x](#module_error-x)</code>  
-**Extends:** <code>Error</code>  
+**Extends**: <code>Error</code>  
 <a name="new_module_error-x..AssertionError_new"></a>
 
 #### `new AssertionError([message])`
@@ -263,7 +246,7 @@ browsers IE6) then only `Error` is supported.
 **Kind**: inner property of <code>[error-x](#module_error-x)</code>  
 <a name="module_error-x..create"></a>
 
-### `error-x~create([name], [ErrorCtr])` ⇒ <code>function</code>
+### `error-x~create([name], [ECTR])` ⇒ <code>function</code>
 Creates a custom Error constructor. Will use `Error` if argument is not
 a valid constructor.
 
@@ -273,7 +256,7 @@ a valid constructor.
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [name] | <code>string</code> | <code>&quot;&#x27;Error&#x27;&quot;</code> | The name for the custom Error. |
-| [ErrorCtr] | <code>function</code> | <code>Error</code> | Error constructor to be used. |
+| [ECTR] | <code>function</code> | <code>Error</code> | Error constructor to be used. |
 
 <a name="module_error-x..isError"></a>
 

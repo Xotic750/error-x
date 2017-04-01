@@ -1,14 +1,10 @@
-/*jslint maxlen:80, esversion:6, this:true, white:true */
 
-/*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-  freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-  nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:false, plusplus:true, maxparams:2, maxdepth:2,
-  maxstatements:28, maxcomplexity:3 */
+/* eslint strict: 1, max-statements: 1, max-nested-callbacks: 1 */
 
-/*global module, require, describe, it, expect, JSON:true, returnExports */
+/* global module, require, describe, it, expect, JSON:true, returnExports */
 
-(function () {
+;(function () { // eslint-disable-line no-extra-semi
+
   'use strict';
 
   var lib;
@@ -21,9 +17,9 @@
     require('json3').runInContext(null, JSON);
     require('es6-shim');
     var es7 = require('es7-shim');
-    Object.keys(es7).forEach(function(key) {
+    Object.keys(es7).forEach(function (key) {
       var obj = es7[key];
-      if (typeof obj.shim === 'function'){
+      if (typeof obj.shim === 'function') {
         obj.shim();
       }
     });
@@ -88,12 +84,10 @@
 
     describe('AssertionError type', function () {
       it('messages', function () {
-        var circular = {
-          y: 1
-        };
+        var circular = { y: 1 };
         circular.x = circular;
 
-        function testAssertionMessage(actual, expected) {
+        var testAssertionMessage = function (actual, expected) {
           try {
             throw new lib.AssertionError({
               actual: actual,
@@ -107,7 +101,7 @@
             expect(e.generatedMessage)
               .toBe(true, 'Message not marked as generated');
           }
-        }
+        };
 
         testAssertionMessage(undefined, 'undefined');
         testAssertionMessage(null, 'null');
@@ -133,10 +127,10 @@
           b: null
         }, '{ a: undefined, b: null }');
         testAssertionMessage({
-            a: NaN,
-            b: Infinity,
-            c: -Infinity
-          },
+          a: NaN,
+          b: Infinity,
+          c: -Infinity
+        },
           '{ a: NaN, b: Infinity, c: -Infinity }');
       });
 
@@ -149,12 +143,10 @@
           .toBe(true, 'instanceof lib.AssertionError');
         expect(lib.isError(error)).toBe(true, 'isError');
 
-        var circular = {
-          y: 1
-        };
+        var circular = { y: 1 };
         circular.x = circular;
 
-        function testAssertionMessage(actual, expected) {
+        var testAssertionMessage = function (actual, expected) {
           try {
             throw new AE({
               actual: actual,
@@ -168,7 +160,7 @@
             expect(e.generatedMessage)
               .toBe(true, 'Message not marked as generated');
           }
-        }
+        };
 
         testAssertionMessage(undefined, 'undefined');
         testAssertionMessage(null, 'null');
@@ -194,10 +186,10 @@
           b: null
         }, '{ a: undefined, b: null }');
         testAssertionMessage({
-            a: NaN,
-            b: Infinity,
-            c: -Infinity
-          },
+          a: NaN,
+          b: Infinity,
+          c: -Infinity
+        },
           '{ a: NaN, b: Infinity, c: -Infinity }');
       });
     });

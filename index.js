@@ -32,23 +32,6 @@
  * - They have a `frames` property which is an array of the parsed `stack`
  * message, so you have easy access to the information.
  *
- * <h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
- * `es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
- * methods that can be faithfully emulated with a legacy JavaScript engine.
- *
- * `es5-sham.js` monkey-patches other ES5 methods as closely as possible.
- * For these methods, as closely as possible to ES5 is not very close.
- * Many of these shams are intended only to allow code to be written to ES5
- * without causing run-time errors in older engines. In many cases,
- * this means that these shams cause many ES5 methods to silently fail.
- * Decide carefully whether this is what you want. Note: es5-sham.js requires
- * es5-shim.js to be able to work properly.
- *
- * `json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
- *
- * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
- * behave as closely as possible to ECMAScript 6 (Harmony).
- *
  * @example
  * var errorX = require('error-x');
  * var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
@@ -80,56 +63,79 @@
  *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.3.12
+ * @version 1.4.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
  * @module error-x
  */
 
-/*jslint maxlen:80, esversion:6, this:true, white:true */
+/* eslint strict: 1, max-statements: 1 , sort-keys: 1, no-eval: 1 */
 
-/*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-  freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-  nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:true, plusplus:true, maxparams:4, maxdepth:3,
-  maxstatements:38, maxcomplexity:7 */
+/* global require, module */
 
-/*global require, module */
+;(function () { // eslint-disable-line no-extra-semi
 
-;(function () {
   'use strict';
 
-  var $create = Object.create;
   var $toStringTag = require('has-to-string-tag-x') && Symbol.toStringTag;
-  var pMap = Array.prototype.map;
-  var pJoin = Array.prototype.join;
-  var pSlice = Array.prototype.slice;
-  var pIndexOf = String.prototype.indexOf;
-  var pTrim = String.prototype.trim;
+  var trim = require('string.prototype.trim');
+  var map = require('lodash._arraymap');
   var safeToString = require('safe-to-string-x');
   var StackFrame = require('stackframe');
   var errorStackParser = require('error-stack-parser');
   var define = require('define-properties-x');
   var CircularJSON = require('circular-json');
-  var pFindIndex = Array.prototype.findIndex;
+  var findIndex = require('find-index-x');
   var isCallable = require('is-callable');
   var inspect = require('inspect-x');
   var truncate = require('./truncate.js');
   var isError = require('is-error-x');
   var isNil = require('is-nil-x');
   var isUndefined = require('validate.io-undefined');
+  var isNull = require('lodash.isnull');
   var toLength = require('to-length-x');
-  var ERROR = Error;
-  var cV8 = ERROR.captureStackTrace && (function () {
-      // Capture the function (if any).
-      var captureStackTrace = ERROR.captureStackTrace;
-      // Test to see if the function works.
-      try {
-        captureStackTrace(new ERROR(), captureStackTrace);
-      } catch (ignore) {
-        return false;
+  var isPrimitive = require('is-primitive');
+  var $create = Object.create || function create(prototype, properties) {
+    var object;
+    var T = function Type() {}; // An empty constructor.
+
+    if (isNull(prototype)) {
+      object = {};
+    } else {
+      if (!isNull(prototype) && isPrimitive(prototype)) {
+        // In the native implementation `parent` can be `null`
+        // OR *any* `instanceof Object`  (Object|Function|Array|RegExp|etc)
+        // Use `typeof` tho, b/c in old IE, DOM elements are not `instanceof Object`
+        // like they are in modern browsers. Using `Object.create` on DOM elements
+        // is...err...probably inappropriate, but the native version allows for it.
+        throw new TypeError('Object prototype may only be an Object or null'); // same msg as Chrome
       }
+      T.prototype = prototype;
+      object = new T();
+      // IE has no built-in implementation of `Object.getPrototypeOf`
+      // neither `__proto__`, but this manually setting `__proto__` will
+      // guarantee that `Object.getPrototypeOf` will work as expected with
+      // objects created using `Object.create`
+      object.__proto__ = prototype; // eslint-disable-line no-proto
+    }
+
+    if (!isUndefined(properties)) {
+      define.properties(object, properties);
+    }
+
+    return object;
+  };
+  var $Error = Error;
+  var cV8 = $Error.captureStackTrace && (function () {
+      // Capture the function (if any).
+    var captureStackTrace = $Error.captureStackTrace;
+      // Test to see if the function works.
+    try {
+      captureStackTrace(new $Error(), captureStackTrace);
+    } catch (ignore) {
+      return false;
+    }
       /**
        * The stack preparation function for the V8 stack.
        *
@@ -138,9 +144,9 @@
        * @param {!Object} thisStack The V8 stack.
        * @return {!Object} The V8 stack.
        */
-      function prepareStackTrace(ignore, thisStack) {
-        return thisStack;
-      }
+    var prepareStackTrace = function (ignore, thisStack) {
+      return thisStack;
+    };
       /**
        * Captures the V8 stack and converts it to an array of Stackframes.
        *
@@ -149,13 +155,13 @@
        * @param {!Object} context The Custom Error this object.
        * @return {!Array.<!Object>} Array of StackFrames.
        */
-      return function captureV8(context) {
-        var temp = ERROR.prepareStackTrace;
-        ERROR.prepareStackTrace = prepareStackTrace;
-        var error = new ERROR();
-        captureStackTrace(error, context.constructor);
-        var frames = pMap.call(error.stack, function (frame) {
-          return new StackFrame(
+    return function captureV8(context) {
+      var temp = $Error.prepareStackTrace;
+      $Error.prepareStackTrace = prepareStackTrace;
+      var error = new $Error();
+      captureStackTrace(error, context.constructor);
+      var frames = map(error.stack, function (frame) {
+        return new StackFrame(
             frame.getFunctionName(),
             void 0,
             frame.getFileName(),
@@ -163,15 +169,15 @@
             frame.getColumnNumber(),
             frame.toString()
           );
-        });
-        if (isUndefined(temp)) {
-          delete ERROR.prepareStackTrace;
-        } else {
-          ERROR.prepareStackTrace = temp;
-        }
-        return frames;
-      };
-    }(ERROR));
+      });
+      if (isUndefined(temp)) {
+        delete $Error.prepareStackTrace;
+      } else {
+        $Error.prepareStackTrace = temp;
+      }
+      return frames;
+    };
+  }($Error));
   var allCtrs = true;
 
   /**
@@ -180,9 +186,9 @@
    * @private
    * @return {boolean} `true`.
    */
-  function truePredicate() {
+  var truePredicate = function () {
     return true;
-  }
+  };
 
   /**
    * Defines frames and stack on the Custom Error this object.
@@ -192,18 +198,17 @@
    * @param {!Array.<!Object>} frames Array of StackFrames.
    * @param {string} name The name of the constructor.
    */
-  function defContext(context, frames, name) {
+  var defContext = function (context, frames, name) {
     define.properties(context, {
       frames: frames,
-      stack: name + '\n    ' +
-        pJoin.call(pMap.call(frames, function (frame) {
-          return frame.toString();
-        }), '\n    ')
+      stack: name + '\n    ' + map(frames, function (frame) {
+        return frame.toString();
+      }).join('\n    ')
     }, {
       frames: truePredicate,
       stack: truePredicate
     });
-  }
+  };
 
   /**
    * Captures the other stacks and converts them to an array of Stackframes.
@@ -214,32 +219,30 @@
    * @param {string} name The name of the constructor.
    * @return {boolean} True if the Error object was parsed, otherwise false.
    */
-  function errParse(context, err, name) {
+  var errParse = function (context, err, name) {
     var frames;
     try {
       frames = errorStackParser.parse(err);
     } catch (ignore) {
       return false;
     }
-    var start = pFindIndex.call(frames, function (frame) {
-      return pIndexOf.call(
-        typeof frame.functionName === 'string' ? frame.functionName : '',
-        name
-      ) > -1;
+    var start = findIndex(frames, function (frame) {
+      var fName = typeof frame.functionName === 'string' ? frame.functionName : '';
+      return fName.indexOf(name) > -1;
     });
     if (start > -1) {
       var item = frames[start];
-      frames = pSlice.call(frames, start + 1);
-      var end = pFindIndex.call(frames, function (frame) {
+      frames = frames.slice(start + 1);
+      var end = findIndex(frames, function (frame) {
         return item.source === frame.source;
       });
       if (end > -1) {
-        frames = pSlice.call(frames, 0, end);
+        frames = frames.slice(0, end);
       }
     }
     defContext(context, frames, name);
     return true;
-  }
+  };
 
   /**
    * The main function for capturing and parsing stacks and setting properties
@@ -249,14 +252,14 @@
    * @param {!Object} context The Custom Error this object.
    * @param {string} name The name of the constructor.
    */
-  function parse(context, name) {
+  var parse = function (context, name) {
     var err;
     if (cV8) {
       defContext(context, cV8(context), name);
     } else {
       try {
         // Error must be thrown to get stack in IE
-        throw ERROR();
+        throw $Error();
       } catch (e) {
         err = e;
       }
@@ -282,7 +285,7 @@
         define.property(context, 'frames', [], true);
       }
     }
-  }
+  };
 
   /**
    * Test whether we have a valid Error constructor.
@@ -291,24 +294,24 @@
    * @param {Function} ErrorCtr Constructor to test it creates an Error.
    * @return {boolean} True if ErrorCtr creates an Error, otherwise false.
    */
-  function isErrorCtr(ErrorCtr) {
+  var isErrorCtr = function (ErrorCtr) {
     if (isCallable(ErrorCtr)) {
       try {
         return isError(new ErrorCtr({}));
       } catch (ignore) {}
     }
     return false;
-  }
+  };
 
   /**
    * Detect whether we are creating an 'AssertionError' constructor.
    *
    * @private
    * @param {string} name Name to test if it is 'AssertionError'.
-   * @param {Function} ErrorCtr Constructor to test it creates ASSERTIONERROR.
+   * @param {Function} ErrorCtr Constructor to test it creates ASSERTION$Error.
    * @return {boolean} True if either arguments asserts, otherwise false.
    */
-  function asAssertionError(name, ErrorCtr) {
+  var asAssertionError = function (name, ErrorCtr) {
     if (name === 'AssertionError') {
       return true;
     }
@@ -319,14 +322,10 @@
         expected: 'c',
         operator: 'd'
       });
-      return typeof err.name === 'string' &&
-        err.message === 'a' &&
-        err.actual === 'b' &&
-        err.expected === 'c' &&
-        err.operator === 'd';
+      return typeof err.name === 'string' && err.message === 'a' && err.actual === 'b' && err.expected === 'c' && err.operator === 'd';
     }
     return false;
-  }
+  };
 
   /**
    * Message generator for AssertionError.
@@ -335,15 +334,14 @@
    * @param {!Object} message The message object.
    * @return {string} The generated message.
    */
-  function getMessage(message) {
+  var getMessage = function (message) {
     var opts = {
       length: message.length ? toLength(message.length) : 128,
       separator: message.separator ? safeToString(message.separator) : '',
       omission: message.omission ? safeToString(message.omission) : ''
     };
-    return truncate(inspect(message.actual), opts) + ' ' +
-      message.operator + ' ' +  truncate(inspect(message.expected), opts);
-  }
+    return truncate(inspect(message.actual), opts) + ' ' + message.operator + ' ' + truncate(inspect(message.expected), opts);
+  };
 
   /**
    * The toJSON method returns a string representation of the Error object.
@@ -352,8 +350,8 @@
    * @this {!Object} A custom error instance.
    * @return {string} A JSON stringified representation.
    */
-  function toJSON() {
-    /*jshint validthis:true */
+  var toJSON = function () {
+    /* jshint validthis:true */
     return CircularJSON.stringify({
       name: this.name,
       message: this.message,
@@ -365,7 +363,7 @@
       expected: this.expected,
       operator: this.operator
     });
-  }
+  };
 
   /**
    * Initialise a new instance of a custom error.
@@ -376,7 +374,7 @@
    * @param {string} name The name for the custom Error.
    * @param {Function} [ErrorCtr=Error] Error constructor to be used.
    */
-  function init(context, message, name, ErrorCtr) {
+  var init = function (context, message, name, ErrorCtr) {
     if (asAssertionError(name, ErrorCtr)) {
       define.properties(context, {
         actual: message.actual,
@@ -391,19 +389,17 @@
         operator: truePredicate,
         generatedMessage: truePredicate
       });
-    } else {
+    } else if (!isUndefined(message)) {
       // Standard Errors. Only set `this.message` if the argument `message`
       // was not `undefined`.
-      if (!isUndefined(message)) {
-        define.property(context, 'message', safeToString(message), true);
-      }
+      define.property(context, 'message', safeToString(message), true);
     }
     // Parse and set the 'this' properties.
     parse(context, name);
-  }
+  };
 
   // `init` is used in `eval`, don't delete.
-  init({}, 'message', 'name', ERROR);
+  init({}, 'message', 'name', $Error);
 
   /**
    * Creates a custom Error constructor. Will use `Error` if argument is not
@@ -414,25 +410,21 @@
    * @param {Function} [ErrorCtr=Error] Error constructor to be used.
    * @return {Function} The custom Error constructor.
    */
-  function create(name, ErrorCtr) {
-    /*jshint eqnull:true */
-    var customName = isNil(name) ? 'CustomError' : name,
-      CstmCtr;
-    /*jshint eqnull:false */
-
+  var create = function (name, ErrorCtr) {
+    var ECTR = ErrorCtr;
+    var customName = isNil(name) ? 'CustomError' : name;
+    var CstmCtr;
     if (customName !== 'CustomError') {
       try {
-        customName = pTrim.call(safeToString(customName));
-        /*jshint evil:true */
+        customName = trim(safeToString(customName));
         eval('(function ' + customName + ' () {})');
-        /*jshint evil:false */
       } catch (ignore) {
         customName = 'CustomError';
       }
     }
 
-    if (!allCtrs || !isErrorCtr(ErrorCtr)) {
-      ErrorCtr = ERROR;
+    if (!allCtrs || !isErrorCtr(ECTR)) {
+      ECTR = $Error;
     }
 
     /**
@@ -444,15 +436,10 @@
      * @augments Error
      * @param {string} [message] Human-readable description of the error.
      */
-    /*jshint evil:true */
-    CstmCtr = eval(
-      '(0,function ' + customName + ' (message){' +
-      'if(!(this instanceof CstmCtr)){return new CstmCtr(message);}' +
-      'init(this,message,customName,ErrorCtr);})');
-    /*jshint evil:false */
+    CstmCtr = eval('(0,function ' + customName + ' (message){if(!(this instanceof CstmCtr)){return new CstmCtr(message);}init(this,message,customName,ErrorCtr);})');
 
-    // Inherit the prototype methods from `ErrorCtr`.
-    CstmCtr.prototype = $create(ErrorCtr.prototype);
+    // Inherit the prototype methods from `ECTR`.
+    CstmCtr.prototype = $create(ECTR.prototype);
     define.properties(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
       /**
        * Specifies the function that created an instance's prototype.
@@ -492,7 +479,7 @@
       );
     }
     return CstmCtr;
-  }
+  };
 
   // Test if we can use more than just the Error constructor.
   try {
@@ -516,7 +503,7 @@
      *
      * @function
      * @param {string} [name='Error'] The name for the custom Error.
-     * @param {Function} [ErrorCtr=Error] Error constructor to be used.
+     * @param {Function} [ECTR=Error] Error constructor to be used.
      * @return {Function} The custom Error constructor.
      */
     create: create,

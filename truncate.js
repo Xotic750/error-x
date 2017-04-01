@@ -22,52 +22,21 @@
  *
  * truncate module.
  *
- * <h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
- * `es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
- * methods that can be faithfully emulated with a legacy JavaScript engine.
- *
- * `es5-sham.js` monkey-patches other ES5 methods as closely as possible.
- * For these methods, as closely as possible to ES5 is not very close.
- * Many of these shams are intended only to allow code to be written to ES5
- * without causing run-time errors in older engines. In many cases,
- * this means that these shams cause many ES5 methods to silently fail.
- * Decide carefully whether this is what you want. Note: es5-sham.js requires
- * es5-shim.js to be able to work properly.
- *
- * `json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
- *
- * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
- * behave as closely as possible to ECMAScript 6 (Harmony).
- *
- * @version 1.0.0
+ * @version 1.1.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
  * @module truncate-x
  */
 
-/*jslint maxlen:80, es6:false, this:true, white:true */
+/* eslint strict: 1, max-statements: 1, complexity: 1 */
 
-/*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-  freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-  nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:true, plusplus:true, maxparams:2, maxdepth:3,
-  maxstatements:42, maxcomplexity:18 */
+/* global require, module */
 
-/*global require, module */
+;(function () { // eslint-disable-line no-extra-semi
 
-;(function () {
   'use strict';
 
-  var RE = RegExp;
-  var pTest = RE.prototype.test;
-  var pExec = RE.prototype.exec;
-  var sSlice = String.prototype.slice;
-  var sIndexOf = String.prototype.indexOf;
-  var sLastIndexOf = String.prototype.lastIndexOf;
-  var pMatch = String.prototype.match;
-  var aSlice = Array.prototype.slice;
-  var pJoin = Array.prototype.join;
   var isUndefined = require('validate.io-undefined');
   var toLength = require('to-length-x');
   var isRegExp = require('is-regex');
@@ -96,33 +65,21 @@
   /** Used to compose unicode regexes. */
   var reOptMod = rsModifier + '?';
   var rsOptVar = '[' + rsVarRange + ']?';
-  var rsOptJoin = '(?:' + rsZWJ + '(?:' + pJoin.call(
-    [rsNonAstral, rsRegional, rsSurrPair],
-    '|'
-  ) + ')' + rsOptVar + reOptMod + ')*';
+  var rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*';
   var rsSeq = rsOptVar + reOptMod + rsOptJoin;
-  var rsSymbol = '(?:' + pJoin.call(
-    [rsNonAstral + rsCombo + '?', rsCombo, rsRegional, rsSurrPair, rsAstral],
-    '|'
-  ) + ')';
+  var rsSymbol = '(?:' + [rsNonAstral + rsCombo + '?', rsCombo, rsRegional, rsSurrPair, rsAstral].join('|') + ')';
 
   /**
    * Used to match string symbols
    * @see https://mathiasbynens.be/notes/javascript-unicode
    */
-  var reComplexSymbol = new RE(
-    rsFitz + '(?=' + rsFitz + ')|' + rsSymbol + rsSeq,
-    'g'
-  );
+  var reComplexSymbol = new RegExp(rsFitz + '(?=' + rsFitz + ')|' + rsSymbol + rsSeq, 'g');
 
   /**
    * Used to detect strings with [zero-width joiners or code points from
    * the astral planes](http://eev.ee/blog/2015/09/12/dark-corners-of-unicode/).
    */
-  var reHasComplexSymbol = new RE(
-    '[' + rsZWJ + rsAstralRange + rsComboMarksRange +
-    rsComboSymbolsRange + rsVarRange + ']'
-  );
+  var reHasComplexSymbol = new RegExp('[' + rsZWJ + rsAstralRange + rsComboMarksRange + rsComboSymbolsRange + rsVarRange + ']');
 
   /**
    * Gets the number of symbols in `string`.
@@ -131,16 +88,17 @@
    * @param {string} string The string to inspect.
    * @returns {number} Returns the string size.
    */
-  function stringSize(string) {
-    if (!string || !pTest.call(reHasComplexSymbol, string)) {
+  var stringSize = function (string) {
+    if (!string || !reHasComplexSymbol.tes(string)) {
       return string.length;
     }
-    var result = reComplexSymbol.lastIndex = 0;
-    while (pTest.call(reComplexSymbol, string)) {
+    reComplexSymbol.lastIndex = 0;
+    var result = 0;
+    while (reComplexSymbol.test(string)) {
       result += 1;
     }
     return result;
-  }
+  };
 
   /**
    * Truncates `string` if it's longer than the given maximum string length.
@@ -194,10 +152,10 @@
       }
     }
     var strLength = str.length;
-    var strSymbols;
-    if (pTest.call(reHasComplexSymbol, str)) {
-      strSymbols = pMatch.call(str, reComplexSymbol);
-      strLength = strSymbols.length;
+    var matchSymbols;
+    if (reHasComplexSymbol.test(str)) {
+      matchSymbols = str.match(reComplexSymbol);
+      strLength = matchSymbols.length;
     }
     if (length >= strLength) {
       return str;
@@ -206,37 +164,32 @@
     if (end < 1) {
       return omission;
     }
-    var result = strSymbols ?
-      pJoin.call(aSlice.call(strSymbols, 0, end), '') :
-      sSlice.call(str, 0, end);
+    var result = matchSymbols ? matchSymbols.slice(0, end).join('') : str.slice(0, end);
     if (isUndefined(separator)) {
       return result + omission;
     }
-    if (strSymbols) {
+    if (matchSymbols) {
       end += result.length - end;
     }
     if (isRegExp(separator)) {
-      if (sSlice.call(str, end).search(separator)) {
+      if (str.slice(end).search(separator)) {
         var substr = result;
         if (!separator.global) {
-          separator = new RE(
-            separator.source,
-            safeToString(pExec.call(reFlags, separator)) + 'g'
-          );
+          separator = new RegExp(separator.source, safeToString(reFlags.exec(separator)) + 'g');
         }
         separator.lastIndex = 0;
         var newEnd;
-        var match = pExec.call(separator, substr);
+        var match = separator.exec(substr);
         while (match) {
           newEnd = match.index;
-          match = pExec.call(separator, substr);
+          match = separator.exec(substr);
         }
-        result = sSlice.call(result, 0, isUndefined(newEnd) ? end : newEnd);
+        result = result.slice(0, isUndefined(newEnd) ? end : newEnd);
       }
-    } else if (sIndexOf.call(str, separator, end) !== end) {
-      var index = sLastIndexOf.call(result, separator);
+    } else if (str.indexOf(separator, end) !== end) {
+      var index = result.lastIndexOf(separator);
       if (index > -1) {
-        result = sSlice.call(result, 0, index);
+        result = result.slice(0, index);
       }
     }
     return result + omission;
