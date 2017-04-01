@@ -2,7 +2,7 @@
   "name": "error-x",
   "homepage": "http://xotic750.github.io/error-x/",
   "description": "Create custom Javascript Error objects.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "keywords": [
     "javascript",
     "library",
@@ -58,6 +58,7 @@
     "eslint": "^3.19.0",
     "eslint-plugin-import": "^2.2.0",
     "jasmine-node": "^1.14.5",
+    "json3": "^3.3.2",
     "jsdoc-to-markdown": "^3.0.0",
     "make-jasmine-spec-runner-html": "^1.1.0",
     "nodemon": "^1.11.0",
