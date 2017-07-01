@@ -63,7 +63,7 @@
  *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
  * }
  *
- * @version 1.6.0
+ * @version 1.7.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -126,14 +126,18 @@ var cV8 = $Error.captureStackTrace && (function _cV8() {
     var error = new $Error();
     captureStackTrace(error, context.constructor);
     var frames = map(error.stack, function _mapper(frame) {
-      return new StackFrame(
-        frame.getFunctionName(),
-        void 0,
-        frame.getFileName(),
-        frame.getLineNumber(),
-        frame.getColumnNumber(),
-        frame.toString()
-      );
+      var stackFrame = new StackFrame({
+        args: void 0,
+        columnNumber: frame.getColumnNumber(),
+        fileName: frame.getFileName(),
+        functionName: frame.getFunctionName(),
+        isEval: frame.isEval(),
+        isNative: frame.isNative(),
+        lineNumber: frame.getLineNumber(),
+        source: frame.toString()
+      });
+
+      return stackFrame;
     });
 
     if (isUndefined(temp)) {
@@ -144,7 +148,7 @@ var cV8 = $Error.captureStackTrace && (function _cV8() {
 
     return frames;
   };
-}($Error));
+}());
 
 var allCtrs = true;
 

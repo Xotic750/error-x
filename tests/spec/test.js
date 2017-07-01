@@ -33,8 +33,8 @@ describe('error-x', function () {
     });
 
     it('should work with `Error`', function () {
-      var MyError = lib.create('MyError', Error),
-        error = new MyError('test');
+      var MyError = lib.create('MyError', Error);
+      var error = new MyError('test');
       expect(MyError.prototype.constructor).toBe(MyError);
       expect(error instanceof Error).toBe(true, 'instanceof Error');
       expect(error instanceof MyError).toBe(true, 'instanceof MyError');
@@ -42,8 +42,8 @@ describe('error-x', function () {
     });
 
     it('environment supports all `Error` types', function () {
-      var MyError = lib.create('MyError', SyntaxError),
-        error = new MyError('test');
+      var MyError = lib.create('MyError', SyntaxError);
+      var error = new MyError('test');
       expect(MyError.prototype.constructor).toBe(MyError);
       expect(error instanceof Error).toBe(true, 'instanceof Error');
       expect(error instanceof MyError).toBe(true, 'instanceof MyError');
@@ -51,9 +51,9 @@ describe('error-x', function () {
     });
 
     it('can be sub-classed', function () {
-      var MyError = lib.create('MyError', Error),
-        MySubError = lib.create('MySubError', MyError),
-        error = new MySubError('test');
+      var MyError = lib.create('MyError', Error);
+      var MySubError = lib.create('MySubError', MyError);
+      var error = new MySubError('test');
       expect(MySubError.prototype.constructor).toBe(MySubError);
       expect(error instanceof Error).toBe(true, 'instanceof Error');
       expect(error instanceof MyError).toBe(true, 'instanceof MyError');
@@ -89,10 +89,8 @@ describe('error-x', function () {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString())
-            .toBe('AssertionError: ' + expected + ' == \'\'');
-          expect(e.generatedMessage)
-            .toBe(true, 'Message not marked as generated');
+          expect(e.toString()).toBe('AssertionError: ' + expected + ' == \'\'');
+          expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
 
@@ -132,12 +130,11 @@ describe('error-x', function () {
     });
 
     it('can be sub-classed', function () {
-      var AE = lib.create('MyAssertionError', lib.AssertionError),
-        error = new AE({});
+      var AE = lib.create('MyAssertionError', lib.AssertionError);
+      var error = new AE({});
 
       expect(error instanceof Error).toBe(true, 'instanceof Error');
-      expect(error instanceof lib.AssertionError)
-        .toBe(true, 'instanceof lib.AssertionError');
+      expect(error instanceof lib.AssertionError).toBe(true, 'instanceof lib.AssertionError');
       expect(lib.isError(error)).toBe(true, 'isError');
 
       var circular = { y: 1 };
@@ -152,10 +149,8 @@ describe('error-x', function () {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString())
-            .toBe('MyAssertionError: ' + expected + ' == \'\'');
-          expect(e.generatedMessage)
-            .toBe(true, 'Message not marked as generated');
+          expect(e.toString()).toBe('MyAssertionError: ' + expected + ' == \'\'');
+          expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
 
@@ -192,6 +187,24 @@ describe('error-x', function () {
         c: -Infinity
       },
       '{ a: NaN, b: Infinity, c: -Infinity }');
+    });
+
+    it('toJSON has correct properties', function () {
+      var MyError = lib.create('MyError', Error);
+      var err = new MyError();
+      var obj = err.toJSON();
+      expect(obj).not.toBe(null);
+      expect(typeof obj).toBe('object');
+      expect(Object.keys(obj).sort()).toEqual([
+        'frames',
+        'message',
+        'name',
+        'stack'
+      ]);
+      expect(typeof obj.frames).toBe('object');
+      expect(typeof obj.message).toBe('string');
+      expect(typeof obj.name).toBe('string');
+      expect(typeof obj.stack).toBe('string');
     });
   });
 });
