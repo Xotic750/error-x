@@ -90,9 +90,9 @@ describe('error-x', function () {
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
           expect(e.toString())
-              .toBe('AssertionError: ' + expected + ' == \'\'');
+            .toBe('AssertionError: ' + expected + ' == \'\'');
           expect(e.generatedMessage)
-              .toBe(true, 'Message not marked as generated');
+            .toBe(true, 'Message not marked as generated');
         }
       };
 
@@ -108,7 +108,11 @@ describe('error-x', function () {
       testAssertionMessage('', '\'\'');
       testAssertionMessage('foo', '\'foo\'');
       testAssertionMessage([], '[]');
-      testAssertionMessage([1, 2, 3], '[ 1, 2, 3 ]');
+      testAssertionMessage([
+        1,
+        2,
+        3
+      ], '[ 1, 2, 3 ]');
       testAssertionMessage(/a/, '/a/');
       testAssertionMessage(/abc/gim, '/abc/gim');
       testAssertionMessage(function f() {}, '[Function: f]');
@@ -124,7 +128,7 @@ describe('error-x', function () {
         b: Infinity,
         c: -Infinity
       },
-          '{ a: NaN, b: Infinity, c: -Infinity }');
+      '{ a: NaN, b: Infinity, c: -Infinity }');
     });
 
     it('can be sub-classed', function () {
@@ -133,7 +137,7 @@ describe('error-x', function () {
 
       expect(error instanceof Error).toBe(true, 'instanceof Error');
       expect(error instanceof lib.AssertionError)
-          .toBe(true, 'instanceof lib.AssertionError');
+        .toBe(true, 'instanceof lib.AssertionError');
       expect(lib.isError(error)).toBe(true, 'isError');
 
       var circular = { y: 1 };
@@ -149,9 +153,9 @@ describe('error-x', function () {
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
           expect(e.toString())
-              .toBe('MyAssertionError: ' + expected + ' == \'\'');
+            .toBe('MyAssertionError: ' + expected + ' == \'\'');
           expect(e.generatedMessage)
-              .toBe(true, 'Message not marked as generated');
+            .toBe(true, 'Message not marked as generated');
         }
       };
 
@@ -167,7 +171,11 @@ describe('error-x', function () {
       testAssertionMessage('', '\'\'');
       testAssertionMessage('foo', '\'foo\'');
       testAssertionMessage([], '[]');
-      testAssertionMessage([1, 2, 3], '[ 1, 2, 3 ]');
+      testAssertionMessage([
+        1,
+        2,
+        3
+      ], '[ 1, 2, 3 ]');
       testAssertionMessage(/a/, '/a/');
       testAssertionMessage(/abc/gim, '/abc/gim');
       testAssertionMessage(function f() {}, '[Function: f]');
@@ -183,7 +191,7 @@ describe('error-x', function () {
         b: Infinity,
         c: -Infinity
       },
-          '{ a: NaN, b: Infinity, c: -Infinity }');
+      '{ a: NaN, b: Infinity, c: -Infinity }');
     });
   });
 });

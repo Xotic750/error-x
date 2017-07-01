@@ -33,7 +33,7 @@ messages and stacks are parsed and then re-formatted.
 - They have a `frames` property which is an array of the parsed `stack`
 message, so you have easy access to the information.
 
-**Version**: 1.5.0  
+**Version**: 1.6.0  
 **Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
@@ -45,7 +45,7 @@ var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
 var err = new MyError('somethingHappened');
 
 JSON.stringify(err); // => see below.
-// A searialised error, showing the custom error object's structure and
+// A serialised error, showing the custom error object's structure and
 // format
 {
   "name": "MyError",
