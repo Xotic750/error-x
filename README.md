@@ -1,6 +1,8 @@
 <a name="module_error-x"></a>
 
 ## error-x
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/Xotic750/error-x.svg)](https://greenkeeper.io/)
 <a href="https://travis-ci.org/Xotic750/error-x"
 title="Travis status">
 <img src="https://travis-ci.org/Xotic750/error-x.svg?branch=master"
