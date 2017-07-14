@@ -1,69 +1,6 @@
 /**
- * @file
- * <a href="https://travis-ci.org/Xotic750/error-x"
- * title="Travis status">
- * <img src="https://travis-ci.org/Xotic750/error-x.svg?branch=master"
- * alt="Travis status" height="18">
- * </a>
- * <a href="https://david-dm.org/Xotic750/error-x"
- * title="Dependency status">
- * <img src="https://david-dm.org/Xotic750/error-x.svg"
- * alt="Dependency status" height="18"/>
- * </a>
- * <a href="https://david-dm.org/Xotic750/error-x#info=devDependencies"
- * title="devDependency status">
- * <img src="https://david-dm.org/Xotic750/error-x/dev-status.svg"
- * alt="devDependency status" height="18"/>
- * </a>
- * <a href="https://badge.fury.io/js/error-x" title="npm version">
- * <img src="https://badge.fury.io/js/error-x.svg"
- * alt="npm version" height="18">
- * </a>
- *
- * Create custom Javascript Error objects.
- *
- * Want to create your own Error objects, this module will allow you to do
- * just that. It ships with all the standard Error objects already created
- * for you. Why? Well, these offer some improvements over the native versions.
- * - They have a `toJSON` method and so they can be serialised.
- * - They have a standardised `stack` property, using
- * [`error-stack-parser`](https://github.com/stacktracejs/error-stack-parser)
- * messages and stacks are parsed and then re-formatted.
- * - They have a `frames` property which is an array of the parsed `stack`
- * message, so you have easy access to the information.
- *
- * @example
- * var errorX = require('error-x');
- * var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
- *                                         // specified.
- * var err = new MyError('somethingHappened');
- *
- * JSON.stringify(err); // => see below.
- * // A serialised error, showing the custom error object's structure and
- * // format
- * {
- *   "name": "MyError",
- *   "message": "somethingHappened",
- *   "frames": [
- *     {
- *       "functionName": "Y.x",
- *       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
- *       "lineNumber": 65,
- *       "columnNumber": 13,
- *       "source": "Y.x (http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13)"
- *     },
- *     {
- *       "functionName": "window.onload",
- *       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
- *       "lineNumber": 73,
- *       "columnNumber": 3,
- *       "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
- *     }
- *   ],
- *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
- * }
- *
- * @version 1.8.0
+ * @file Create custom Javascript Error objects.
+ * @version 1.9.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -72,13 +9,15 @@
 
 'use strict';
 
-var $toStringTag = require('has-to-string-tag-x') && Symbol.toStringTag;
-var trim = require('string.prototype.trim');
+var hasToStringTag = require('has-to-string-tag-x');
+var $toStringTag = hasToStringTag && Symbol.toStringTag;
+var trim = require('trim-x');
 var map = require('lodash._arraymap');
 var safeToString = require('safe-to-string-x');
 var StackFrame = require('stackframe');
 var errorStackParser = require('error-stack-parser');
-var define = require('define-properties-x');
+var defineProperty = require('object-define-property-x');
+var defineProperties = require('object-define-properties-x');
 var findIndex = require('find-index-x');
 var isFunction = require('is-function-x');
 var inspect = require('inspect-x');
@@ -87,7 +26,6 @@ var isError = require('is-error-x');
 var isNil = require('is-nil-x');
 var isUndefined = require('validate.io-undefined');
 var toLength = require('to-length-x');
-var stubTrue = require('lodash.stubtrue');
 var $create = require('object-create-x');
 var $Error = Error;
 var cV8 = $Error.captureStackTrace && (function _cV8() {
@@ -161,14 +99,15 @@ var allCtrs = true;
  * @param {string} name - The name of the constructor.
  */
 var defContext = function _defContext(context, frames, name) {
-  define.properties(context, {
-    frames: frames,
-    stack: name + '\n    ' + map(frames, function (frame) {
-      return frame.toString();
-    }).join('\n    ')
-  }, {
-    frames: stubTrue,
-    stack: stubTrue
+  defineProperties(context, {
+    frames: {
+      value: frames
+    },
+    stack: {
+      value: name + '\n    ' + map(frames, function (frame) {
+        return frame.toString();
+      }).join('\n    ')
+    }
   });
 };
 
@@ -248,8 +187,14 @@ var parse = function _parse(context, name) {
         }
       }
 
-      define.property(context, 'stack', stack, true);
-      define.property(context, 'frames', [], true);
+      defineProperties(context, {
+        frames: {
+          value: []
+        },
+        stack: {
+          value: stack
+        }
+      });
     }
   }
 };
@@ -335,31 +280,39 @@ var toJSON = function _toJSON() {
  * Initialise a new instance of a custom error.
  *
  * @private
- * @param {!Object} context The Custom Error this object.
- * @param {string} message Human-readable description of the error.
- * @param {string} name The name for the custom Error.
- * @param {Function} [ErrorCtr=Error] Error constructor to be used.
+ * @param {!Object} context - The Custom Error this object.
+ * @param {string} message - Human-readable description of the error.
+ * @param {string} name - The name for the custom Error.
+ * @param {Function} [ErrorCtr=Error] - Error constructor to be used.
  */
 // eslint-disable-next-line max-params
 var init = function _init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
-    define.properties(context, {
-      actual: message.actual,
-      expected: message.expected,
-      generatedMessage: !message.message,
-      message: message.message ? message.message : getMessage(message),
-      operator: message.operator
-    }, {
-      actual: stubTrue,
-      expected: stubTrue,
-      generatedMessage: stubTrue,
-      message: stubTrue,
-      operator: stubTrue
+    defineProperties(context, {
+      actual: {
+        value: message.actual
+      },
+      expected: {
+        value: message.expected
+      },
+      generatedMessage: {
+        value: Boolean(message.message) === false
+      },
+      message: {
+        value: message.message ? message.message : getMessage(message)
+      },
+      operator: {
+        value: message.operator
+      }
     });
   } else if (isUndefined(message) === false) {
     // Standard Errors. Only set `this.message` if the argument `message`
     // was not `undefined`.
-    define.property(context, 'message', safeToString(message), true);
+    defineProperties(context, {
+      message: {
+        value: safeToString(message)
+      }
+    });
   }
 
   // Parse and set the 'this' properties.
@@ -421,30 +374,32 @@ var create = function _createErrorCtr(name, ErrorCtr) {
 
   // Inherit the prototype methods from `ECTR`.
   CstmCtr.prototype = $create(ECTR.prototype);
-  define.properties(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
+  defineProperties(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
     /**
      * Specifies the function that created an instance's prototype.
      *
-     * @constructor
+     * @class
      */
-    constructor: CstmCtr,
+    constructor: {
+      value: CstmCtr
+    },
     /**
      * The name property represents a name for the type of error.
      *
      * @default 'Error'
      * @type {string}
      */
-    name: customName,
+    name: {
+      value: customName
+    },
     /**
      * The toJSON method returns a string representation of the Error object.
      *
-     * @return {string} A JSON stringified representation.
+     * @returns {string} A JSON stringified representation.
      */
-    toJSON: toJSON
-  }, {
-    constructor: stubTrue,
-    name: stubTrue,
-    toJSON: stubTrue
+    toJSON: {
+      value: toJSON
+    }
   });
 
   if ($toStringTag) {
@@ -453,12 +408,9 @@ var create = function _createErrorCtr(name, ErrorCtr) {
      * @memberof module:error-x.CstmCtr.prototype
      * @type {string}
      */
-    define.property(
-      CstmCtr.prototype,
-      $toStringTag,
-      '[object Error]',
-      true
-    );
+    defineProperty(CstmCtr.prototype, $toStringTag, {
+      value: '[object Error]'
+    });
   }
 
   return CstmCtr;
@@ -471,14 +423,25 @@ try {
   allCtrs = false;
 }
 
-define.properties(module.exports, {
+/**
+ * Want to create your own Error objects, this module will allow you to do
+ * just that. It ships with all the standard Error objects already created
+ * for you. Why? Well, these offer some improvements over the native versions.
+ * - They have a `toJSON` method and so they can be serialised.
+ * - They have a standardised `stack` property, using
+ * [`error-stack-parser`](https://github.com/stacktracejs/error-stack-parser)
+ * messages and stacks are parsed and then re-formatted.
+ * - They have a `frames` property which is an array of the parsed `stack`
+ * message, so you have easy access to the information.
+ */
+module.exports = {
   /**
    * Error constructor for test and validation frameworks that implement the
    * standardized AssertionError specification.
    *
-   * @constructor
+   * @class
    * @augments Error
-   * @param {Object} [message] Need to document the properties.
+   * @param {Object} [message] - Need to document the properties.
    */
   AssertionError: create('AssertionError', Error),
   /**
@@ -486,43 +449,73 @@ define.properties(module.exports, {
    * a valid constructor.
    *
    * @function
-   * @param {string} [name='Error'] The name for the custom Error.
-   * @param {Function} [ECTR=Error] Error constructor to be used.
-   * @return {Function} The custom Error constructor.
+   * @param {string} [name='Error'] - The name for the custom Error.
+   * @param {Function} [ECTR=Error] - Error constructor to be used.
+   * @returns {Function} The custom Error constructor.
+   * @example
+   * var errorX = require('error-x');
+   * var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
+   *                                         // specified.
+   * var err = new MyError('somethingHappened');
+   *
+   * JSON.stringify(err); // => see below.
+   * // A serialised error, showing the custom error object's structure and
+   * // format
+   * {
+   *   "name": "MyError",
+   *   "message": "somethingHappened",
+   *   "frames": [
+   *     {
+   *       "functionName": "Y.x",
+   *       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
+   *       "lineNumber": 65,
+   *       "columnNumber": 13,
+   *       "source": "Y.x (http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13)"
+   *     },
+   *     {
+   *       "functionName": "window.onload",
+   *       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
+   *       "lineNumber": 73,
+   *       "columnNumber": 3,
+   *       "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
+   *     }
+   *   ],
+   *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
+   * }
    */
   create: create,
   /**
    * The Error constructor creates an error object.
    *
-   * @constructor
+   * @class
    * @augments Error
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} [message] - Human-readable description of the error.
    */
   Error: create('Error', Error),
   /**
    * Creates an instance representing an error that occurs regarding the
    * global function eval().
    *
-   * @constructor
+   * @class
    * @augments EvalError
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} [message] - Human-readable description of the error.
    */
   EvalError: create('EvalError', EvalError),
   /**
    * The InternalError object indicates an error that occurred internally in
    * the JavaScript engine. For example: "InternalError: too much recursion".
    *
-   * @constructor
+   * @class
    * @augments Error
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} [message] - Human-readable description of the error.
    */
   InternalError: create('InternalError', Error),
   /**
    * Determine whether or not a given `value` is an `Error` type.
    *
    * @function
-   * @param {*} value The object to be tested.
-   * @return {boolean} Returns `true` if `value` is an `Error` type,
+   * @param {*} value - The object to be tested.
+   * @returns {boolean} Returns `true` if `value` is an `Error` type,
    *  else `false`.
    */
   isError: isError,
@@ -530,18 +523,18 @@ define.properties(module.exports, {
    * Creates an instance representing an error that occurs when a numeric
    * variable or parameter is outside of its valid range.
    *
-   * @constructor
+   * @class
    * @augments RangeError
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} - [message] Human-readable description of the error.
    */
   RangeError: create('RangeError', RangeError),
   /**
    * Creates an instance representing an error that occurs when de-referencing
    * an invalid reference
    *
-   * @constructor
+   * @class
    * @augments ReferenceError
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} [message] - Human-readable description of the error.
    */
   ReferenceError: create('ReferenceError', ReferenceError),
   /**
@@ -556,27 +549,27 @@ define.properties(module.exports, {
    * Creates an instance representing a syntax error that occurs while parsing
    * code in eval().
    *
-   * @constructor
+   * @class
    * @augments SyntaError
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} [message] - Human-readable description of the error.
    */
   SyntaxError: create('SyntaxError', SyntaxError),
   /**
    * Creates an instance representing an error that occurs when a variable or
    * parameter is not of a valid type.
    *
-   * @constructor
+   * @class
    * @augments TypeError
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} [message] - Human-readable description of the error.
    */
   TypeError: create('TypeError', TypeError),
   /**
    * Creates an instance representing an error that occurs when encodeURI() or
    * decodeURI() are passed invalid parameters.
    *
-   * @constructor
+   * @class
    * @augments URIError
-   * @param {string} [message] Human-readable description of the error.
+   * @param {string} [message] - Human-readable description of the error.
    */
   URIError: create('URIError', URIError)
-});
+};
