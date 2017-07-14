@@ -1,6 +1,6 @@
 /**
  * @file Create custom Javascript Error objects.
- * @version 1.9.0
+ * @version 1.10.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
