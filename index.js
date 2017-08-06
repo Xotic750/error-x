@@ -1,6 +1,6 @@
 /**
  * @file Create custom Javascript Error objects.
- * @version 1.10.0
+ * @version 2.0.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -51,6 +51,19 @@ var cV8 = $Error.captureStackTrace && (function _cV8() {
   };
 
   /**
+   * Tests for number as specified in StackTrace library.
+   *
+   * @private
+   * @param {*} n - The value to test.
+   * @returns {boolean} True if parsable, otherwise false.
+   */
+  var isNumber = function _isNumber(n) {
+    return isNaN(parseFloat(n)) === false && isFinite(n);
+  };
+
+  var isObjectLike = require('is-object-like-x');
+
+  /**
    * Captures the V8 stack and converts it to an array of Stackframes.
    *
    * @private
@@ -64,18 +77,37 @@ var cV8 = $Error.captureStackTrace && (function _cV8() {
     var error = new $Error();
     captureStackTrace(error, context.constructor);
     var frames = map(error.stack, function _mapper(frame) {
-      var stackFrame = new StackFrame({
-        args: void 0,
-        columnNumber: frame.getColumnNumber(),
-        fileName: frame.getFileName(),
+      var opts = {
+        // args: void 0,
         functionName: frame.getFunctionName(),
+        isConstructor: frame.isConstructor(),
         isEval: frame.isEval(),
         isNative: frame.isNative(),
-        lineNumber: frame.getLineNumber(),
+        isToplevel: frame.isToplevel(),
         source: frame.toString()
-      });
+      };
 
-      return stackFrame;
+      var getFileName = isFunction(frame.getFileName) && frame.getFileName();
+      if (getFileName) {
+        opts.getFileName = getFileName;
+      }
+
+      var columnNumber = isFunction(frame.getColumnNumber) && frame.getColumnNumber();
+      if (isNumber(columnNumber)) {
+        opts.columnNumber = columnNumber;
+      }
+
+      var lineNumber = isFunction(frame.getLineNumber) && frame.getLineNumber();
+      if (isNumber(lineNumber)) {
+        opts.lineNumber = lineNumber;
+      }
+
+      var evalOrigin = isFunction(frame.getEvalOrigin) && frame.getEvalOrigin();
+      if (isObjectLike(evalOrigin)) {
+        opts.evalOrigin = evalOrigin;
+      }
+
+      return new StackFrame(opts);
     });
 
     if (isUndefined(temp)) {
