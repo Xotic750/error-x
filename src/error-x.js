@@ -7,139 +7,145 @@
  * @module error-x
  */
 
-'use strict';
+const hasToStringTag = require('has-to-string-tag-x');
 
-var hasToStringTag = require('has-to-string-tag-x');
-var $toStringTag = hasToStringTag && Symbol.toStringTag;
-var trim = require('trim-x');
-var map = require('lodash._arraymap');
-var safeToString = require('safe-to-string-x');
-var StackFrame = require('stackframe');
-var errorStackParser = require('error-stack-parser');
-var defineProperty = require('object-define-property-x');
-var defineProperties = require('object-define-properties-x');
-var findIndex = require('find-index-x');
-var isFunction = require('is-function-x');
-var inspect = require('inspect-x');
-var truncate = require('truncate-x');
-var isError = require('is-error-x');
-var isNil = require('is-nil-x');
-var isUndefined = require('validate.io-undefined');
-var toLength = require('to-length-x');
-var $create = require('object-create-x');
-var $Error = Error;
-var cV8 = $Error.captureStackTrace && (function _cV8() {
-  // Capture the function (if any).
-  var captureStackTrace = $Error.captureStackTrace;
-  // Test to see if the function works.
-  try {
-    captureStackTrace(new $Error(), captureStackTrace);
-  } catch (ignore) {
-    return false;
-  }
+const $toStringTag = hasToStringTag && Symbol.toStringTag;
+const trim = require('trim-x');
+const map = require('lodash._arraymap');
+const safeToString = require('safe-to-string-x');
+const StackFrame = require('stackframe');
+const errorStackParser = require('error-stack-parser');
+const defineProperty = require('object-define-property-x');
+const defineProperties = require('object-define-properties-x');
+const findIndex = require('find-index-x');
+const isFunction = require('is-function-x');
+const inspect = require('inspect-x');
+const truncate = require('truncate-x');
+const isError = require('is-error-x');
+const isNil = require('is-nil-x');
+const isUndefined = require('validate.io-undefined');
+const toLength = require('to-length-x');
+const $create = require('object-create-x');
 
-  /**
-   * The stack preparation function for the V8 stack.
-   *
-   * @private
-   * @param {*} ignore - Unused argument.
-   * @param {!Object} thisStack - The V8 stack.
-   * @returns {!Object} The V8 stack.
-   */
-  var prepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
-    return thisStack;
-  };
-
-  /**
-   * Tests for number as specified in StackTrace library.
-   *
-   * @private
-   * @param {*} n - The value to test.
-   * @returns {boolean} True if parsable, otherwise false.
-   */
-  var isNumber = function _isNumber(n) {
-    return isNaN(parseFloat(n)) === false && isFinite(n);
-  };
-
-  var isObjectLike = require('is-object-like-x');
-
-  /**
-   * Captures the V8 stack and converts it to an array of Stackframes.
-   *
-   * @private
-   * @function captureV8
-   * @param {!Object} context - The Custom Error this object.
-   * @returns {!Array.<!Object>} Array of StackFrames.
-   */
-  return function captureV8(context) {
-    var temp = $Error.prepareStackTrace;
-    $Error.prepareStackTrace = prepareStackTrace;
-    var error = new $Error();
-    captureStackTrace(error, context.constructor);
-    var frames = map(error.stack, function _mapper(frame) {
-      var opts = {
-        // args: void 0,
-        functionName: frame.getFunctionName(),
-        isConstructor: frame.isConstructor(),
-        isEval: frame.isEval(),
-        isNative: frame.isNative(),
-        isToplevel: frame.isToplevel(),
-        source: frame.toString()
-      };
-
-      var getFileName = isFunction(frame.getFileName) && frame.getFileName();
-      if (getFileName) {
-        opts.getFileName = getFileName;
-      }
-
-      var columnNumber = isFunction(frame.getColumnNumber) && frame.getColumnNumber();
-      if (isNumber(columnNumber)) {
-        opts.columnNumber = columnNumber;
-      }
-
-      var lineNumber = isFunction(frame.getLineNumber) && frame.getLineNumber();
-      if (isNumber(lineNumber)) {
-        opts.lineNumber = lineNumber;
-      }
-
-      var evalOrigin = isFunction(frame.getEvalOrigin) && frame.getEvalOrigin();
-      if (isObjectLike(evalOrigin)) {
-        opts.evalOrigin = evalOrigin;
-      }
-
-      return new StackFrame(opts);
-    });
-
-    if (isUndefined(temp)) {
-      delete $Error.prepareStackTrace;
-    } else {
-      $Error.prepareStackTrace = temp;
+const $Error = Error;
+const cV8 =
+  $Error.captureStackTrace &&
+  (function _cV8() {
+    // Capture the function (if any).
+    const {captureStackTrace} = $Error;
+    // Test to see if the function works.
+    try {
+      captureStackTrace(new $Error(), captureStackTrace);
+    } catch (ignore) {
+      return false;
     }
 
-    return frames;
-  };
-}());
+    /**
+     * The stack preparation function for the V8 stack.
+     *
+     * @private
+     * @param {*} ignore - Unused argument.
+     * @param {!object} thisStack - The V8 stack.
+     * @returns {!object} The V8 stack.
+     */
+    const prepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+      return thisStack;
+    };
 
-var allCtrs = true;
+    /**
+     * Tests for number as specified in StackTrace library.
+     *
+     * @private
+     * @param {*} n - The value to test.
+     * @returns {boolean} True if parsable, otherwise false.
+     */
+    const isNumber = function _isNumber(n) {
+      return isNaN(parseFloat(n)) === false && isFinite(n);
+    };
+
+    const isObjectLike = require('is-object-like-x');
+
+    /**
+     * Captures the V8 stack and converts it to an array of Stackframes.
+     *
+     * @private
+     * @function captureV8
+     * @param {!object} context - The Custom Error this object.
+     * @returns {!Array.<!object>} Array of StackFrames.
+     */
+    return function captureV8(context) {
+      const temp = $Error.prepareStackTrace;
+      $Error.prepareStackTrace = prepareStackTrace;
+      const error = new $Error();
+      captureStackTrace(error, context.constructor);
+      const frames = map(error.stack, function _mapper(frame) {
+        const opts = {
+          // args: void 0,
+          functionName: frame.getFunctionName(),
+          isConstructor: frame.isConstructor(),
+          isEval: frame.isEval(),
+          isNative: frame.isNative(),
+          isToplevel: frame.isToplevel(),
+          source: frame.toString(),
+        };
+
+        const getFileName = isFunction(frame.getFileName) && frame.getFileName();
+
+        if (getFileName) {
+          opts.getFileName = getFileName;
+        }
+
+        const columnNumber = isFunction(frame.getColumnNumber) && frame.getColumnNumber();
+
+        if (isNumber(columnNumber)) {
+          opts.columnNumber = columnNumber;
+        }
+
+        const lineNumber = isFunction(frame.getLineNumber) && frame.getLineNumber();
+
+        if (isNumber(lineNumber)) {
+          opts.lineNumber = lineNumber;
+        }
+
+        const evalOrigin = isFunction(frame.getEvalOrigin) && frame.getEvalOrigin();
+
+        if (isObjectLike(evalOrigin)) {
+          opts.evalOrigin = evalOrigin;
+        }
+
+        return new StackFrame(opts);
+      });
+
+      if (isUndefined(temp)) {
+        delete $Error.prepareStackTrace;
+      } else {
+        $Error.prepareStackTrace = temp;
+      }
+
+      return frames;
+    };
+  })();
+
+let allCtrs = true;
 
 /**
  * Defines frames and stack on the Custom Error this object.
  *
  * @private
- * @param {!Object} context - The Custom Error this object.
- * @param {!Array.<!Object>} frames - Array of StackFrames.
+ * @param {!object} context - The Custom Error this object.
+ * @param {!Array.<!object>} frames - Array of StackFrames.
  * @param {string} name - The name of the constructor.
  */
-var defContext = function _defContext(context, frames, name) {
+const defContext = function _defContext(context, frames, name) {
   defineProperties(context, {
     frames: {
-      value: frames
+      value: frames,
     },
     stack: {
-      value: name + '\n    ' + map(frames, function (frame) {
+      value: `${name}\n    ${map(frames, function(frame) {
         return frame.toString();
-      }).join('\n    ')
-    }
+      }).join('\n    ')}`,
+    },
   });
 };
 
@@ -147,29 +153,30 @@ var defContext = function _defContext(context, frames, name) {
  * Captures the other stacks and converts them to an array of Stackframes.
  *
  * @private
- * @param {!Object} context - The Custom Error this object.
- * @param {!Object} err - The Error object to be parsed.
+ * @param {!object} context - The Custom Error this object.
+ * @param {!object} err - The Error object to be parsed.
  * @param {string} name - The name of the constructor.
  * @returns {boolean} True if the Error object was parsed, otherwise false.
  */
-var errParse = function _errParse(context, err, name) {
-  var frames;
+const errParse = function _errParse(context, err, name) {
+  let frames;
   try {
     frames = errorStackParser.parse(err);
   } catch (ignore) {
     return false;
   }
 
-  var start = findIndex(frames, function _finderStart(frame) {
-    var fName = typeof frame.functionName === 'string' ? frame.functionName : '';
+  const start = findIndex(frames, function _finderStart(frame) {
+    const fName = typeof frame.functionName === 'string' ? frame.functionName : '';
+
     return fName.indexOf(name) > -1;
   });
 
   if (start > -1) {
-    var item = frames[start];
+    const item = frames[start];
     frames = frames.slice(start + 1);
 
-    var end = findIndex(frames, function _finderEnd(frame) {
+    const end = findIndex(frames, function _finderEnd(frame) {
       return item.source === frame.source;
     });
 
@@ -179,6 +186,7 @@ var errParse = function _errParse(context, err, name) {
   }
 
   defContext(context, frames, name);
+
   return true;
 };
 
@@ -187,14 +195,14 @@ var errParse = function _errParse(context, err, name) {
  * on Custom Error.
  *
  * @private
- * @param {!Object} context - The Custom Error this object.
+ * @param {!object} context - The Custom Error this object.
  * @param {string} name - The name of the constructor.
  */
-var parse = function _parse(context, name) {
+const parse = function _parse(context, name) {
   if (cV8) {
     defContext(context, cV8(context), name);
   } else {
-    var err;
+    let err;
     try {
       // Error must be thrown to get stack in IE
       throw $Error();
@@ -203,7 +211,8 @@ var parse = function _parse(context, name) {
     }
 
     if (errParse(context, err, name) === false) {
-      var stack = '';
+      let stack = '';
+
       // If `Error` has a non-standard `stack`, `stacktrace` or
       // `opera#sourceloc` property that offers a trace of which functions
       // were called, in what order, from which line and  file, and with what
@@ -213,7 +222,8 @@ var parse = function _parse(context, name) {
       } else if (isUndefined(err.stacktrace) === false) {
         stack = err.stacktrace;
       } else {
-        var sourceloc = err['opera#sourceloc'];
+        const sourceloc = err['opera#sourceloc'];
+
         if (isUndefined(sourceloc) === false) {
           stack = sourceloc;
         }
@@ -221,11 +231,11 @@ var parse = function _parse(context, name) {
 
       defineProperties(context, {
         frames: {
-          value: []
+          value: [],
         },
         stack: {
-          value: stack
-        }
+          value: stack,
+        },
       });
     }
   }
@@ -238,7 +248,7 @@ var parse = function _parse(context, name) {
  * @param {Function} ErrorCtr - Constructor to test it creates an Error.
  * @returns {boolean} True if ErrorCtr creates an Error, otherwise false.
  */
-var isErrorCtr = function _isErrorCtr(ErrorCtr) {
+const isErrorCtr = function _isErrorCtr(ErrorCtr) {
   if (isFunction(ErrorCtr)) {
     try {
       return isError(new ErrorCtr({}));
@@ -256,20 +266,22 @@ var isErrorCtr = function _isErrorCtr(ErrorCtr) {
  * @param {Function} ErrorCtr - Constructor to test it creates ASSERTION$Error.
  * @returns {boolean} True if either arguments asserts, otherwise false.
  */
-var asAssertionError = function _asAssertionError(name, ErrorCtr) {
+const asAssertionError = function _asAssertionError(name, ErrorCtr) {
   if (name === 'AssertionError') {
     return true;
   }
 
   if (isErrorCtr(ErrorCtr)) {
-    var err = new ErrorCtr({
+    const err = new ErrorCtr({
       actual: 'b',
       expected: 'c',
       message: 'a',
-      operator: 'd'
+      operator: 'd',
     });
 
-    return typeof err.name === 'string' && err.message === 'a' && err.actual === 'b' && err.expected === 'c' && err.operator === 'd';
+    return (
+      typeof err.name === 'string' && err.message === 'a' && err.actual === 'b' && err.expected === 'c' && err.operator === 'd'
+    );
   }
 
   return false;
@@ -279,17 +291,17 @@ var asAssertionError = function _asAssertionError(name, ErrorCtr) {
  * Message generator for AssertionError.
  *
  * @private
- * @param {!Object} message - The message object.
+ * @param {!object} message - The message object.
  * @returns {string} The generated message.
  */
-var getMessage = function _getMessage(message) {
-  var opts = {
+const getMessage = function _getMessage(message) {
+  const opts = {
     length: message.length ? toLength(message.length) : 128,
     omission: message.omission ? safeToString(message.omission) : '',
-    separator: message.separator ? safeToString(message.separator) : ''
+    separator: message.separator ? safeToString(message.separator) : '',
   };
 
-  return truncate(inspect(message.actual), opts) + ' ' + message.operator + ' ' + truncate(inspect(message.expected), opts);
+  return `${truncate(inspect(message.actual), opts)} ${message.operator} ${truncate(inspect(message.expected), opts)}`;
 };
 
 /**
@@ -297,14 +309,14 @@ var getMessage = function _getMessage(message) {
  *
  * @private
  * @this {!Object} A custom error instance.
- * @returns {Object} An object representation.
+ * @returns {object} An object representation.
  */
-var toJSON = function _toJSON() {
+const toJSON = function _toJSON() {
   return {
     frames: this.frames,
     message: this.message,
     name: this.name,
-    stack: this.stack
+    stack: this.stack,
   };
 };
 
@@ -312,38 +324,38 @@ var toJSON = function _toJSON() {
  * Initialise a new instance of a custom error.
  *
  * @private
- * @param {!Object} context - The Custom Error this object.
+ * @param {!object} context - The Custom Error this object.
  * @param {string} message - Human-readable description of the error.
  * @param {string} name - The name for the custom Error.
  * @param {Function} [ErrorCtr=Error] - Error constructor to be used.
  */
 // eslint-disable-next-line max-params
-var init = function _init(context, message, name, ErrorCtr) {
+const init = function _init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
     defineProperties(context, {
       actual: {
-        value: message.actual
+        value: message.actual,
       },
       expected: {
-        value: message.expected
+        value: message.expected,
       },
       generatedMessage: {
-        value: Boolean(message.message) === false
+        value: Boolean(message.message) === false,
       },
       message: {
-        value: message.message ? message.message : getMessage(message)
+        value: message.message ? message.message : getMessage(message),
       },
       operator: {
-        value: message.operator
-      }
+        value: message.operator,
+      },
     });
   } else if (isUndefined(message) === false) {
     // Standard Errors. Only set `this.message` if the argument `message`
     // was not `undefined`.
     defineProperties(context, {
       message: {
-        value: safeToString(message)
-      }
+        value: safeToString(message),
+      },
     });
   }
 
@@ -363,15 +375,16 @@ init({}, 'message', 'name', $Error);
  * @param {Function} [ErrorCtr=Error] - Error constructor to be used.
  * @returns {Function} The custom Error constructor.
  */
-var create = function _createErrorCtr(name, ErrorCtr) {
-  var ECTR = ErrorCtr;
-  var customName = isNil(name) ? 'CustomError' : name;
-  var CstmCtr;
+const create = function _createErrorCtr(name, ErrorCtr) {
+  let ECTR = ErrorCtr;
+  let customName = isNil(name) ? 'CustomError' : name;
+  let CstmCtr;
+
   if (customName !== 'CustomError') {
     try {
       customName = trim(safeToString(customName));
       // eslint-disable-next-line no-eval
-      eval('(function ' + customName + ' () {})');
+      eval(`(function ${customName} () {})`);
     } catch (ignore) {
       customName = 'CustomError';
     }
@@ -382,13 +395,15 @@ var create = function _createErrorCtr(name, ErrorCtr) {
   }
 
   // eslint-disable-next-line no-unused-vars
-  var f = function _f(context, message) {
-    var isInstCtr = context instanceof CstmCtr;
+  const f = function _f(context, message) {
+    const isInstCtr = context instanceof CstmCtr;
+
     if (isInstCtr === false) {
       return new CstmCtr(message);
     }
 
     init(context, message, customName, ErrorCtr);
+
     return context;
   };
 
@@ -397,51 +412,55 @@ var create = function _createErrorCtr(name, ErrorCtr) {
    * constructor.
    *
    * @private
-   * @constructor CstmCtr
+   * @class CstmCtr
    * @augments Error
    * @param {string} [message] - Human-readable description of the error.
    */
   // eslint-disable-next-line no-eval
-  CstmCtr = eval('(0,function ' + customName + '(message){return f(this,message)})');
+  CstmCtr = eval(`(0,function ${customName}(message){return f(this,message)})`);
 
   // Inherit the prototype methods from `ECTR`.
   CstmCtr.prototype = $create(ECTR.prototype);
-  defineProperties(CstmCtr.prototype, /** @lends module:error-x.CstmCtr.prototype */ {
-    /**
-     * Specifies the function that created an instance's prototype.
-     *
-     * @class
-     */
-    constructor: {
-      value: CstmCtr
+  defineProperties(
+    CstmCtr.prototype,
+    /** @lends module:error-x.CstmCtr.prototype */ {
+      /**
+       * Specifies the function that created an instance's prototype.
+       *
+       * @class
+       */
+      constructor: {
+        value: CstmCtr,
+      },
+      /**
+       * The name property represents a name for the type of error.
+       *
+       * @default 'Error'
+       * @type {string}
+       */
+      name: {
+        value: customName,
+      },
+      /**
+       * The toJSON method returns a string representation of the Error object.
+       *
+       * @returns {string} A JSON stringified representation.
+       */
+      toJSON: {
+        value: toJSON,
+      },
     },
-    /**
-     * The name property represents a name for the type of error.
-     *
-     * @default 'Error'
-     * @type {string}
-     */
-    name: {
-      value: customName
-    },
-    /**
-     * The toJSON method returns a string representation of the Error object.
-     *
-     * @returns {string} A JSON stringified representation.
-     */
-    toJSON: {
-      value: toJSON
-    }
-  });
+  );
 
   if ($toStringTag) {
     /**
-     * name Symbol.toStringTag
+     * Name Symbol.toStringTag.
+     *
      * @memberof module:error-x.CstmCtr.prototype
      * @type {string}
      */
     defineProperty(CstmCtr.prototype, $toStringTag, {
-      value: '[object Error]'
+      value: '[object Error]',
     });
   }
 
@@ -473,7 +492,7 @@ module.exports = {
    *
    * @class
    * @augments Error
-   * @param {Object} [message] - Need to document the properties.
+   * @param {object} [message] - Need to document the properties.
    */
   AssertionError: create('AssertionError', Error),
   /**
@@ -515,7 +534,7 @@ module.exports = {
    *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
    * }
    */
-  create: create,
+  create,
   /**
    * The Error constructor creates an error object.
    *
@@ -550,19 +569,19 @@ module.exports = {
    * @returns {boolean} Returns `true` if `value` is an `Error` type,
    *  else `false`.
    */
-  isError: isError,
+  isError,
   /**
    * Creates an instance representing an error that occurs when a numeric
    * variable or parameter is outside of its valid range.
    *
    * @class
    * @augments RangeError
-   * @param {string} - [message] Human-readable description of the error.
+   * @param {string} - - [message] Human-readable description of the error.
    */
   RangeError: create('RangeError', RangeError),
   /**
    * Creates an instance representing an error that occurs when de-referencing
-   * an invalid reference
+   * an invalid reference.
    *
    * @class
    * @augments ReferenceError
@@ -570,12 +589,12 @@ module.exports = {
    */
   ReferenceError: create('ReferenceError', ReferenceError),
   /**
-  * Indicates if the Javascript engine supports subclassing of all Error
-  * types. If `true` then all are supported, if `false` (only very old
-  * browsers IE6) then only `Error` is supported.
-  *
-  * @type boolean
-  * */
+   * Indicates if the Javascript engine supports subclassing of all Error
+   * types. If `true` then all are supported, if `false` (only very old
+   * browsers IE6) then only `Error` is supported.
+   *
+   * @type boolean
+   * */
   supportsAllConstructors: allCtrs,
   /**
    * Creates an instance representing a syntax error that occurs while parsing
@@ -603,5 +622,5 @@ module.exports = {
    * @augments URIError
    * @param {string} [message] - Human-readable description of the error.
    */
-  URIError: create('URIError', URIError)
+  URIError: create('URIError', URIError),
 };
