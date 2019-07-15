@@ -61,7 +61,7 @@
     "lodash._arraymap": "^3.0.0",
     "object-create-x": "^2.1.0",
     "object-define-properties-x": "^4.2.0",
-    "object-define-property-x": "^4.1.0",
+    "object-define-property-x": "^5.0.0",
     "stackframe": "^1.0.4",
     "to-length-x": "^4.0.3",
     "trim-x": "^4.0.6",
