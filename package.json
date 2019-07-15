@@ -50,7 +50,7 @@
   "dependencies": {
     "define-properties-x": "^3.1.0",
     "error-stack-parser": "^2.0.2",
-    "find-index-x": "^2.1.0",
+    "find-index-x": "^3.0.0",
     "has-to-string-tag-x": "^2.0.4",
     "inspect-x": "^2.0.0",
     "is-error-x": "^2.0.0",
