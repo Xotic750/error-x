@@ -1,12 +1,3 @@
-/**
- * @file Create custom Javascript Error objects.
- * @version 2.0.0
- * @author Xotic750 <Xotic750@gmail.com>
- * @copyright  Xotic750
- * @license {@link <https://opensource.org/licenses/MIT> MIT}
- * @module error-x
- */
-
 import hasToStringTag from 'has-to-string-tag-x';
 import trim from 'trim-x';
 import map from 'lodash._arraymap';
@@ -503,36 +494,6 @@ export default {
    * @param {string} [name='Error'] - The name for the custom Error.
    * @param {Function} [ECTR=Error] - Error constructor to be used.
    * @returns {Function} The custom Error constructor.
-   * @example
-   * var errorX = require('error-x');
-   * var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
-   *                                         // specified.
-   * var err = new MyError('somethingHappened');
-   *
-   * JSON.stringify(err); // => see below.
-   * // A serialised error, showing the custom error object's structure and
-   * // format
-   * {
-   *   "name": "MyError",
-   *   "message": "somethingHappened",
-   *   "frames": [
-   *     {
-   *       "functionName": "Y.x",
-   *       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
-   *       "lineNumber": 65,
-   *       "columnNumber": 13,
-   *       "source": "Y.x (http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13)"
-   *     },
-   *     {
-   *       "functionName": "window.onload",
-   *       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
-   *       "lineNumber": 73,
-   *       "columnNumber": 3,
-   *       "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
-   *     }
-   *   ],
-   *   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
-   * }
    */
   create,
   /**
