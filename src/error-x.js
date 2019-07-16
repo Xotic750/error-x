@@ -7,25 +7,25 @@
  * @module error-x
  */
 
-const hasToStringTag = require('has-to-string-tag-x');
+import hasToStringTag from 'has-to-string-tag-x';
+import trim from 'trim-x';
+import map from 'lodash._arraymap';
+import safeToString from 'to-string-symbols-supported-x';
+import StackFrame from 'stackframe';
+import errorStackParser from 'error-stack-parser';
+import defineProperty from 'object-define-property-x';
+import defineProperties from 'object-define-properties-x';
+import findIndex from 'find-index-x';
+import isFunction from 'is-function-x';
+import inspect from 'inspect-x';
+import truncate from 'truncate-x';
+import isError from 'is-error-x';
+import isNil from 'is-nil-x';
+import isUndefined from 'validate.io-undefined';
+import toLength from 'to-length-x';
+import $create from 'object-create-x';
 
 const $toStringTag = hasToStringTag && Symbol.toStringTag;
-const trim = require('trim-x');
-const map = require('lodash._arraymap');
-const safeToString = require('to-string-symbols-supported-x');
-const StackFrame = require('stackframe');
-const errorStackParser = require('error-stack-parser');
-const defineProperty = require('object-define-property-x');
-const defineProperties = require('object-define-properties-x');
-const findIndex = require('find-index-x');
-const isFunction = require('is-function-x');
-const inspect = require('inspect-x');
-const truncate = require('truncate-x');
-const isError = require('is-error-x');
-const isNil = require('is-nil-x');
-const isUndefined = require('validate.io-undefined');
-const toLength = require('to-length-x');
-const $create = require('object-create-x');
 
 const $Error = Error;
 const cV8 =
@@ -485,7 +485,7 @@ try {
  * - They have a `frames` property which is an array of the parsed `stack`
  * message, so you have easy access to the information.
  */
-module.exports = {
+export default {
   /**
    * Error constructor for test and validation frameworks that implement the
    * standardized AssertionError specification.

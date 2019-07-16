@@ -26,6 +26,7 @@ if (typeof module === 'object' && module.exports) {
 describe('error-x', function() {
   describe('standard error type', function() {
     it('should not throw an error with bad arguments', function() {
+      expect.assertions(1);
       lib.create();
       lib.create(undefined);
       lib.create(null);
@@ -35,6 +36,7 @@ describe('error-x', function() {
     });
 
     it('should work with `Error`', function() {
+      expect.assertions(1);
       const MyError = lib.create('MyError', Error);
       const error = new MyError('test');
       expect(MyError.prototype.constructor).toBe(MyError);
@@ -44,6 +46,7 @@ describe('error-x', function() {
     });
 
     it('environment supports all `Error` types', function() {
+      expect.assertions(1);
       const MyError = lib.create('MyError', SyntaxError);
       const error = new MyError('test');
       expect(MyError.prototype.constructor).toBe(MyError);
@@ -53,6 +56,7 @@ describe('error-x', function() {
     });
 
     it('can be sub-classed', function() {
+      expect.assertions(1);
       const MyError = lib.create('MyError', Error);
       const MySubError = lib.create('MySubError', MyError);
       const error = new MySubError('test');
@@ -64,14 +68,17 @@ describe('error-x', function() {
     });
 
     it('should have correct `name`', function() {
+      expect.assertions(1);
       expect(lib.create('MyError')('test').name).toBe('MyError');
     });
 
     it('should have correct `message`', function() {
+      expect.assertions(1);
       expect(lib.create('MyError')('test').message).toBe('test');
     });
 
     it('should have correct `toString`', function() {
+      expect.assertions(1);
       const s = lib
         .create('MyError')('test')
         .toString()
@@ -82,6 +89,7 @@ describe('error-x', function() {
 
   describe('assertionError type', function() {
     it('messages', function() {
+      expect.assertions(1);
       const circular = {y: 1};
       circular.x = circular;
 
@@ -136,6 +144,7 @@ describe('error-x', function() {
     });
 
     it('can be sub-classed', function() {
+      expect.assertions(1);
       const AE = lib.create('MyAssertionError', lib.AssertionError);
       const error = new AE({});
 
@@ -197,6 +206,7 @@ describe('error-x', function() {
     });
 
     it('toJSON has correct properties', function() {
+      expect.assertions(1);
       const MyError = lib.create('MyError', Error);
       const err = new MyError();
       const obj = err.toJSON();
