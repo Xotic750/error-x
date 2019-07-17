@@ -58,7 +58,6 @@
     "is-nil-x": "^2.0.11",
     "is-object-like-x": "^2.0.12",
     "is-regex": "^1.0.4",
-    "lodash._arraymap": "^3.0.0",
     "object-create-x": "^3.0.0",
     "object-define-properties-x": "^5.0.2",
     "object-define-property-x": "^5.0.5",
