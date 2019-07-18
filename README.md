@@ -21,197 +21,205 @@
 <a name="module_error-x"></a>
 
 ## error-x
+
 Create custom Javascript Error objects.
 
-**Version**: 2.0.0  
-**Author**: Xotic750 <Xotic750@gmail.com>  
-**License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
-**Copyright**: Xotic750  
-
-* [error-x](#module_error-x)
-    * [`module.exports`](#exp_module_error-x--module.exports) ⏏
-        * [.AssertionError](#module_error-x--module.exports.AssertionError) ⇐ <code>Error</code>
-            * [`new AssertionError([message])`](#new_module_error-x--module.exports.AssertionError_new)
-        * [.Error](#module_error-x--module.exports.Error) ⇐ <code>Error</code>
-            * [`new Error([message])`](#new_module_error-x--module.exports.Error_new)
-        * [.EvalError](#module_error-x--module.exports.EvalError) ⇐ <code>EvalError</code>
-            * [`new EvalError([message])`](#new_module_error-x--module.exports.EvalError_new)
-        * [.InternalError](#module_error-x--module.exports.InternalError) ⇐ <code>Error</code>
-            * [`new InternalError([message])`](#new_module_error-x--module.exports.InternalError_new)
-        * [.RangeError](#module_error-x--module.exports.RangeError) ⇐ <code>RangeError</code>
-            * [`new RangeError()`](#new_module_error-x--module.exports.RangeError_new)
-        * [.ReferenceError](#module_error-x--module.exports.ReferenceError) ⇐ <code>ReferenceError</code>
-            * [`new ReferenceError([message])`](#new_module_error-x--module.exports.ReferenceError_new)
-        * [.SyntaxError](#module_error-x--module.exports.SyntaxError) ⇐ <code>SyntaError</code>
-            * [`new SyntaxError([message])`](#new_module_error-x--module.exports.SyntaxError_new)
-        * [.TypeError](#module_error-x--module.exports.TypeError) ⇐ <code>TypeError</code>
-            * [`new TypeError([message])`](#new_module_error-x--module.exports.TypeError_new)
-        * [.URIError](#module_error-x--module.exports.URIError) ⇐ <code>URIError</code>
-            * [`new URIError([message])`](#new_module_error-x--module.exports.URIError_new)
-        * [`.supportsAllConstructors`](#module_error-x--module.exports.supportsAllConstructors) : <code>boolean</code>
-        * [`.create([name], [ECTR])`](#module_error-x--module.exports.create) ⇒ <code>function</code>
-        * [`.isError(value)`](#module_error-x--module.exports.isError) ⇒ <code>boolean</code>
+- [error-x](#module_error-x)
+  - [`module.exports`](#exp_module_error-x--module.exports) ⏏
+    - [.AssertionErrorConstructor](#module_error-x--module.exports.AssertionErrorConstructor) ⇐ <code>Error</code>
+      - [`new AssertionError([message])`](#new_module_error-x--module.exports.AssertionErrorConstructor_new)
+    - [.Error](#module_error-x--module.exports.ErrorConstructor) ⇐ <code>Error</code>
+      - [`new Error([message])`](#new_module_error-x--module.exports.ErrorConstructor_new)
+    - [.EvalErrorConstructor](#module_error-x--module.exports.EvalErrorConstructor) ⇐ <code>EvalError</code>
+      - [`new EvalError([message])`](#new_module_error-x--module.exports.EvalErrorConstructor_new)
+    - [.InternalErrorConstructor](#module_error-x--module.exports.InternalErrorConstructor) ⇐ <code>Error</code>
+      - [`new InternalError([message])`](#new_module_error-x--module.exports.InternalErrorConstructor_new)
+    - [.RangeErrorConstructor](#module_error-x--module.exports.RangeErrorConstructor) ⇐ <code>RangeError</code>
+      - [`new RangeError()`](#new_module_error-x--module.exports.RangeErrorConstructor_new)
+    - [.ReferenceErrorConstructor](#module_error-x--module.exports.ReferenceErrorConstructor) ⇐ <code>ReferenceError</code>
+      - [`new ReferenceError([message])`](#new_module_error-x--module.exports.ReferenceErrorConstructor_new)
+    - [.SyntaxErrorConstructor](#module_error-x--module.exports.SyntaxErrorConstructor) ⇐ <code>SyntaError</code>
+      - [`new SyntaxError([message])`](#new_module_error-x--module.exports.SyntaxErrorConstructor_new)
+    - [.TypeErrorConstructor](#module_error-x--module.exports.TypeErrorConstructor) ⇐ <code>TypeError</code>
+      - [`new TypeError([message])`](#new_module_error-x--module.exports.TypeErrorConstructor_new)
+    - [.URIErrorConstructor](#module_error-x--module.exports.URIErrorConstructor) ⇐ <code>URIError</code>
+      - [`new URIError([message])`](#new_module_error-x--module.exports.URIErrorConstructor_new)
+    - [`.supportsAllConstructors`](#module_error-x--module.exports.supportsAllConstructors) : <code>boolean</code>
+    - [`.create([name], [ECTR])`](#module_error-x--module.exports.create) ⇒ <code>function</code>
+    - [`.isErrorConstructor(value)`](#module_error-x--module.exports.isErrorConstructor) ⇒ <code>boolean</code>
 
 <a name="exp_module_error-x--module.exports"></a>
 
 ### `module.exports` ⏏
+
 Want to create your own Error objects, this module will allow you to do
-just that. It ships with all the standard Error objects already created
+just that. It ships with all the standard ErrorConstructor objects already created
 for you. Why? Well, these offer some improvements over the native versions.
+
 - They have a `toJSON` method and so they can be serialised.
 - They have a standardised `stack` property, using
-[`error-stack-parser`](https://github.com/stacktracejs/error-stack-parser)
-messages and stacks are parsed and then re-formatted.
+  [`error-stack-parser`](https://github.com/stacktracejs/error-stack-parser)
+  messages and stacks are parsed and then re-formatted.
 - They have a `frames` property which is an array of the parsed `stack`
-message, so you have easy access to the information.
+  message, so you have easy access to the information.
 
 **Kind**: Exported member  
-<a name="module_error-x--module.exports.AssertionError"></a>
+<a name="module_error-x--module.exports.AssertionErrorConstructor"></a>
 
-#### module.exports.AssertionError ⇐ <code>Error</code>
+#### module.exports.AssertionErrorConstructor ⇐ <code>Error</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>Error</code>  
-<a name="new_module_error-x--module.exports.AssertionError_new"></a>
+<a name="new_module_error-x--module.exports.AssertionErrorConstructor_new"></a>
 
 ##### `new AssertionError([message])`
+
 Error constructor for test and validation frameworks that implement the
 standardized AssertionError specification.
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                      |
+| --------- | ------------------- | -------------------------------- |
 | [message] | <code>Object</code> | Need to document the properties. |
 
-<a name="module_error-x--module.exports.Error"></a>
+<a name="module_error-x--module.exports.ErrorConstructor"></a>
 
-#### module.exports.Error ⇐ <code>Error</code>
+#### module.exports.ErrorConstructor ⇐ <code>Error</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>Error</code>  
-<a name="new_module_error-x--module.exports.Error_new"></a>
+<a name="new_module_error-x--module.exports.ErrorConstructor_new"></a>
 
 ##### `new Error([message])`
+
 The Error constructor creates an error object.
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                              |
+| --------- | ------------------- | ---------------------------------------- |
 | [message] | <code>string</code> | Human-readable description of the error. |
 
-<a name="module_error-x--module.exports.EvalError"></a>
+<a name="module_error-x--module.exports.EvalErrorConstructor"></a>
 
-#### module.exports.EvalError ⇐ <code>EvalError</code>
+#### module.exports.EvalErrorConstructor ⇐ <code>EvalError</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>EvalError</code>  
-<a name="new_module_error-x--module.exports.EvalError_new"></a>
+<a name="new_module_error-x--module.exports.EvalErrorConstructor_new"></a>
 
 ##### `new EvalError([message])`
+
 Creates an instance representing an error that occurs regarding the
 global function eval().
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                              |
+| --------- | ------------------- | ---------------------------------------- |
 | [message] | <code>string</code> | Human-readable description of the error. |
 
-<a name="module_error-x--module.exports.InternalError"></a>
+<a name="module_error-x--module.exports.InternalErrorConstructor"></a>
 
-#### module.exports.InternalError ⇐ <code>Error</code>
+#### module.exports.InternalErrorConstructor ⇐ <code>Error</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>Error</code>  
-<a name="new_module_error-x--module.exports.InternalError_new"></a>
+<a name="new_module_error-x--module.exports.InternalErrorConstructor_new"></a>
 
 ##### `new InternalError([message])`
+
 The InternalError object indicates an error that occurred internally in
-the JavaScript engine. For example: "InternalError: too much recursion".
+the JavaScript engine. For example: "InternalErrorConstructor: too much recursion".
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                              |
+| --------- | ------------------- | ---------------------------------------- |
 | [message] | <code>string</code> | Human-readable description of the error. |
 
-<a name="module_error-x--module.exports.RangeError"></a>
+<a name="module_error-x--module.exports.RangeErrorConstructor"></a>
 
-#### module.exports.RangeError ⇐ <code>RangeError</code>
+#### module.exports.RangeErrorConstructor ⇐ <code>RangeError</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>RangeError</code>  
-<a name="new_module_error-x--module.exports.RangeError_new"></a>
+<a name="new_module_error-x--module.exports.RangeErrorConstructor_new"></a>
 
 ##### `new RangeError()`
+
 Creates an instance representing an error that occurs when a numeric
 variable or parameter is outside of its valid range.
 
-
-| Type | Description |
-| --- | --- |
+| Type                | Description                                        |
+| ------------------- | -------------------------------------------------- |
 | <code>string</code> | [message] Human-readable description of the error. |
 
-<a name="module_error-x--module.exports.ReferenceError"></a>
+<a name="module_error-x--module.exports.ReferenceErrorConstructor"></a>
 
-#### module.exports.ReferenceError ⇐ <code>ReferenceError</code>
+#### module.exports.ReferenceErrorConstructor ⇐ <code>ReferenceError</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>ReferenceError</code>  
-<a name="new_module_error-x--module.exports.ReferenceError_new"></a>
+<a name="new_module_error-x--module.exports.ReferenceErrorConstructor_new"></a>
 
 ##### `new ReferenceError([message])`
+
 Creates an instance representing an error that occurs when de-referencing
 an invalid reference
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                              |
+| --------- | ------------------- | ---------------------------------------- |
 | [message] | <code>string</code> | Human-readable description of the error. |
 
-<a name="module_error-x--module.exports.SyntaxError"></a>
+<a name="module_error-x--module.exports.SyntaxErrorConstructor"></a>
 
-#### module.exports.SyntaxError ⇐ <code>SyntaError</code>
+#### module.exports.SyntaxErrorConstructor ⇐ <code>SyntaError</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>SyntaError</code>  
-<a name="new_module_error-x--module.exports.SyntaxError_new"></a>
+<a name="new_module_error-x--module.exports.SyntaxErrorConstructor_new"></a>
 
 ##### `new SyntaxError([message])`
+
 Creates an instance representing a syntax error that occurs while parsing
 code in eval().
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                              |
+| --------- | ------------------- | ---------------------------------------- |
 | [message] | <code>string</code> | Human-readable description of the error. |
 
-<a name="module_error-x--module.exports.TypeError"></a>
+<a name="module_error-x--module.exports.TypeErrorConstructor"></a>
 
-#### module.exports.TypeError ⇐ <code>TypeError</code>
+#### module.exports.TypeErrorConstructor ⇐ <code>TypeError</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>TypeError</code>  
-<a name="new_module_error-x--module.exports.TypeError_new"></a>
+<a name="new_module_error-x--module.exports.TypeErrorConstructor_new"></a>
 
 ##### `new TypeError([message])`
+
 Creates an instance representing an error that occurs when a variable or
 parameter is not of a valid type.
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                              |
+| --------- | ------------------- | ---------------------------------------- |
 | [message] | <code>string</code> | Human-readable description of the error. |
 
-<a name="module_error-x--module.exports.URIError"></a>
+<a name="module_error-x--module.exports.URIErrorConstructor"></a>
 
-#### module.exports.URIError ⇐ <code>URIError</code>
+#### module.exports.URIErrorConstructor ⇐ <code>URIError</code>
+
 **Kind**: static class of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Extends**: <code>URIError</code>  
-<a name="new_module_error-x--module.exports.URIError_new"></a>
+<a name="new_module_error-x--module.exports.URIErrorConstructor_new"></a>
 
 ##### `new URIError([message])`
+
 Creates an instance representing an error that occurs when encodeURI() or
 decodeURI() are passed invalid parameters.
 
-
-| Param | Type | Description |
-| --- | --- | --- |
+| Param     | Type                | Description                              |
+| --------- | ------------------- | ---------------------------------------- |
 | [message] | <code>string</code> | Human-readable description of the error. |
 
 <a name="module_error-x--module.exports.supportsAllConstructors"></a>
 
 #### `module.exports.supportsAllConstructors` : <code>boolean</code>
+
 Indicates if the Javascript engine supports subclassing of all Error
 types. If `true` then all are supported, if `false` (only very old
 browsers IE6) then only `Error` is supported.
@@ -220,59 +228,63 @@ browsers IE6) then only `Error` is supported.
 <a name="module_error-x--module.exports.create"></a>
 
 #### `module.exports.create([name], [ECTR])` ⇒ <code>function</code>
-Creates a custom Error constructor. Will use `Error` if argument is not
+
+Creates a custom Error constructor. Will use `ErrorConstructor` if argument is not
 a valid constructor.
 
 **Kind**: static method of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
-**Returns**: <code>function</code> - The custom Error constructor.  
+**Returns**: <code>function</code> - The custom Error constructor.
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [name] | <code>string</code> | <code>&quot;&#x27;Error&#x27;&quot;</code> | The name for the custom Error. |
-| [ECTR] | <code>function</code> | <code>Error</code> | Error constructor to be used. |
+| Param  | Type                  | Default                                    | Description                    |
+| ------ | --------------------- | ------------------------------------------ | ------------------------------ |
+| [name] | <code>string</code>   | <code>&quot;&#x27;Error&#x27;&quot;</code> | The name for the custom Error. |
+| [ECTR] | <code>function</code> | <code>Error</code>                         | Error constructor to be used.  |
 
-**Example**  
+**Example**
+
 ```js
-var errorX = require('error-x');
-var MyError = errorX.create('MyError'); // Uses `Error` as no constructor
-                                        // specified.
-var err = new MyError('somethingHappened');
+import * as errorX from 'error-x';
+
+const MyError = errorX.create('MyErrorConstructor'); // Uses `Error` as no constructor
+// specified.
+const err = new MyError('somethingHappened');
 
 JSON.stringify(err); // => see below.
 // A serialised error, showing the custom error object's structure and
 // format
-{
-  "name": "MyError",
-  "message": "somethingHappened",
-  "frames": [
-    {
-      "functionName": "Y.x",
-      "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
-      "lineNumber": 65,
-      "columnNumber": 13,
-      "source": "Y.x (http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13)"
-    },
-    {
-      "functionName": "window.onload",
-      "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
-      "lineNumber": 73,
-      "columnNumber": 3,
-      "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
-    }
-  ],
-  "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
-}
+// {
+//   "name": "MyError",
+//   "message": "somethingHappened",
+//   "frames": [
+//     {
+//       "functionName": "Y.x",
+//       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
+//       "lineNumber": 65,
+//       "columnNumber": 13,
+//       "source": "Y.x (http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13)"
+//     },
+//     {
+//       "functionName": "window.onload",
+//       "fileName": "http://fiddle.jshell.net/2k5x5dj8/183/show/",
+//       "lineNumber": 73,
+//       "columnNumber": 3,
+//       "source": "window.onload (http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3)"
+//     }
+//   ],
+//   "stack": "MyError\n    Y.x()@http://fiddle.jshell.net/2k5x5dj8/183/show/:65:13\n    window.onload()@http://fiddle.jshell.net/2k5x5dj8/183/show/:73:3"
+// }
 ```
-<a name="module_error-x--module.exports.isError"></a>
 
-#### `module.exports.isError(value)` ⇒ <code>boolean</code>
+<a name="module_error-x--module.exports.isErrorConstructor"></a>
+
+#### `module.exports.isErrorConstructor(value)` ⇒ <code>boolean</code>
+
 Determine whether or not a given `value` is an `Error` type.
 
 **Kind**: static method of [<code>module.exports</code>](#exp_module_error-x--module.exports)  
 **Returns**: <code>boolean</code> - Returns `true` if `value` is an `Error` type,
- else `false`.  
+else `false`.
 
-| Param | Type | Description |
-| --- | --- | --- |
+| Param | Type            | Description              |
+| ----- | --------------- | ------------------------ |
 | value | <code>\*</code> | The object to be tested. |
-

@@ -1,4 +1,4 @@
-let lib;
+import * as lib from '../src/error-x';
 
 describe('error-x', function() {
   describe('standard error type', function() {
@@ -10,10 +10,11 @@ describe('error-x', function() {
       lib.create('');
       lib.create('NullError', null);
       lib.create('FnError', function() {});
+      expect(true).toBe(true);
     });
 
     it('should work with `Error`', function() {
-      expect.assertions(1);
+      expect.assertions(4);
       const MyError = lib.create('MyError', Error);
       const error = new MyError('test');
       expect(MyError.prototype.constructor).toBe(MyError);
@@ -23,7 +24,7 @@ describe('error-x', function() {
     });
 
     it('environment supports all `Error` types', function() {
-      expect.assertions(1);
+      expect.assertions(4);
       const MyError = lib.create('MyError', SyntaxError);
       const error = new MyError('test');
       expect(MyError.prototype.constructor).toBe(MyError);
@@ -33,7 +34,7 @@ describe('error-x', function() {
     });
 
     it('can be sub-classed', function() {
-      expect.assertions(1);
+      expect.assertions(5);
       const MyError = lib.create('MyError', Error);
       const MySubError = lib.create('MySubError', MyError);
       const error = new MySubError('test');
@@ -66,13 +67,13 @@ describe('error-x', function() {
 
   describe('assertionError type', function() {
     it('messages', function() {
-      expect.assertions(1);
+      expect.assertions(63);
       const circular = {y: 1};
       circular.x = circular;
 
       const testAssertionMessage = function(actual, expected) {
         try {
-          throw new lib.AssertionError({
+          throw new lib.AssertionErrorConstructor({
             actual,
             expected: '',
             operator: '==',
@@ -121,12 +122,12 @@ describe('error-x', function() {
     });
 
     it('can be sub-classed', function() {
-      expect.assertions(1);
-      const AE = lib.create('MyAssertionError', lib.AssertionError);
+      expect.assertions(66);
+      const AE = lib.create('MyAssertionError', lib.AssertionErrorConstructor);
       const error = new AE({});
 
       expect(error instanceof Error).toBe(true, 'instanceof Error');
-      expect(error instanceof lib.AssertionError).toBe(true, 'instanceof lib.AssertionError');
+      expect(error instanceof lib.AssertionErrorConstructor).toBe(true, 'instanceof lib.AssertionError');
       expect(lib.isError(error)).toBe(true, 'isError');
 
       const circular = {y: 1};
@@ -183,7 +184,7 @@ describe('error-x', function() {
     });
 
     it('toJSON has correct properties', function() {
-      expect.assertions(1);
+      expect.assertions(7);
       const MyError = lib.create('MyError', Error);
       const err = new MyError();
       const obj = err.toJSON();
