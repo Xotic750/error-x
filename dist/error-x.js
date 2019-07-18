@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-18T11:20:53.696Z",
+  "date": "2019-07-18T12:34:56.428Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "589e622ca0ba71eee9fe",
+  "hash": "a8b0b5183d9bd75073a9",
   "license": "MIT",
-  "version": "3.0.1"
+  "version": "3.0.2"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -120,7 +120,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 70);
+/******/ 	return __webpack_require__(__webpack_require__.s = 71);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -131,7 +131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 var toStr = Object.prototype.toString;
-var hasSymbols = __webpack_require__(71)();
+var hasSymbols = __webpack_require__(72)();
 
 if (hasSymbols) {
 	var symToStr = Symbol.prototype.toString;
@@ -7277,7 +7277,7 @@ var slice = Array.prototype.slice;
 var isArgs = __webpack_require__(51);
 
 var origKeys = Object.keys;
-var keysShim = origKeys ? function keys(o) { return origKeys(o); } : __webpack_require__(73);
+var keysShim = origKeys ? function keys(o) { return origKeys(o); } : __webpack_require__(74);
 
 var originalKeys = Object.keys;
 
@@ -8339,7 +8339,7 @@ module.exports = function isPrimitive(val) {
 "use strict";
 
 
-var has = __webpack_require__(74);
+var has = __webpack_require__(75);
 var regexExec = RegExp.prototype.exec;
 var gOPD = Object.getOwnPropertyDescriptor;
 
@@ -8571,7 +8571,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var forEach = __webpack_require__(77);
+var forEach = __webpack_require__(78);
 
 var toStr = Object.prototype.toString;
 var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
@@ -8678,7 +8678,7 @@ module.exports = function isNumberObject(value) {
 ;(function () {
   // Detect the `define` function exposed by asynchronous module loaders. The
   // strict `define` check is necessary for compatibility with `r.js`.
-  var isLoader =  true && __webpack_require__(80);
+  var isLoader =  true && __webpack_require__(81);
 
   // A set of types used to distinguish objects from primitives.
   var objectTypes = {
@@ -9614,7 +9614,7 @@ module.exports = function isNumberObject(value) {
   }
 }).call(this);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(79)(module), __webpack_require__(43)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(80)(module), __webpack_require__(43)))
 
 /***/ }),
 /* 49 */
@@ -37054,7 +37054,7 @@ var define = __webpack_require__(52);
 
 var implementation = __webpack_require__(53);
 var getPolyfill = __webpack_require__(54);
-var shim = __webpack_require__(78);
+var shim = __webpack_require__(79);
 
 /* http://www.ecma-international.org/ecma-262/6.0/#sec-number.isnan */
 
@@ -37245,6 +37245,35 @@ module.exports = function isPrimitive(val) {
 
 /***/ }),
 /* 70 */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isVarName; });
+/*!
+ * is-var-name | ISC (c) Shinnosuke Watanabe
+ * https://github.com/shinnn/is-var-name
+*/
+function isVarName(str) {
+	if (typeof str !== 'string') {
+		return false;
+	}
+
+	if (str.trim() !== str) {
+		return false;
+	}
+
+	try {
+		new Function(str, 'var ' + str);
+	} catch (e) {
+		return false;
+	}
+
+	return true;
+}
+
+
+/***/ }),
+/* 71 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -37282,6 +37311,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var array_map_x__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(13);
 /* harmony import */ var is_nan_x__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(18);
 /* harmony import */ var is_finite_x__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(35);
+/* harmony import */ var is_var_name__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(70);
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 /*
@@ -37314,11 +37344,14 @@ function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { t
 
 
 
+
 var isError = is_error_x__WEBPACK_IMPORTED_MODULE_11__[/* default */ "a"];
+var parse = error_stack_parser__WEBPACK_IMPORTED_MODULE_4___default.a.parse;
 /**
  * @typedef {ErrorConstructor|TypeErrorConstructor|SyntaxErrorConstructor|URIErrorConstructor|ReferenceErrorConstructor|EvalErrorConstructor|RangeErrorConstructor} OfErrorConstructor
  */
 
+var EMPTY_STRING = '';
 /** @type {BooleanConstructor} */
 
 var castBoolean = true.constructor;
@@ -37327,42 +37360,29 @@ var castBoolean = true.constructor;
 var $toStringTag = has_to_string_tag_x__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"] && Symbol.toStringTag;
 /** @type {ErrorConstructor} */
 
-var $Error = Error;
+var $Error = Error; // Capture the function (if any).
 
-var cV8 = $Error.captureStackTrace && function _cV8() {
-  // Capture the function (if any).
-  var captureStackTrace = $Error.captureStackTrace; // Test to see if the function works.
+var captureStackTrace = $Error.captureStackTrace,
+    prepareStackTrace = $Error.prepareStackTrace;
+/**
+ * Tests for number as specified in StackTrace library.
+ *
+ * @private
+ * @param {*} n - The value to test.
+ * @returns {boolean} True if parsable, otherwise false.
+ */
 
+var isNumber = function isNumber(n) {
+  return Object(is_nan_x__WEBPACK_IMPORTED_MODULE_17__[/* default */ "a"])(parseFloat(n)) === false && Object(is_finite_x__WEBPACK_IMPORTED_MODULE_18__[/* default */ "a"])(n);
+};
+
+var cV8 = castBoolean(captureStackTrace) && function getCV8() {
+  // Test to see if the function works.
   try {
     captureStackTrace(new $Error(), captureStackTrace);
   } catch (ignore) {
     return false;
   }
-  /**
-   * The stack preparation function for the V8 stack.
-   *
-   * @private
-   * @param {*} ignore - Unused argument.
-   * @param {!object} thisStack - The V8 stack.
-   * @returns {!object} The V8 stack.
-   */
-
-
-  var prepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
-    return thisStack;
-  };
-  /**
-   * Tests for number as specified in StackTrace library.
-   *
-   * @private
-   * @param {*} n - The value to test.
-   * @returns {boolean} True if parsable, otherwise false.
-   */
-
-
-  var isNumber = function _isNumber(n) {
-    return Object(is_nan_x__WEBPACK_IMPORTED_MODULE_17__[/* default */ "a"])(parseFloat(n)) === false && Object(is_finite_x__WEBPACK_IMPORTED_MODULE_18__[/* default */ "a"])(n);
-  };
   /**
    * Captures the V8 stack and converts it to an array of Stackframes.
    *
@@ -37374,13 +37394,27 @@ var cV8 = $Error.captureStackTrace && function _cV8() {
 
 
   return function captureV8(context) {
-    var temp = $Error.prepareStackTrace;
-    $Error.prepareStackTrace = prepareStackTrace;
+    var _this = this;
+
+    /**
+     * The stack preparation function for the V8 stack.
+     *
+     * @private
+     * @param {*} ignore - Unused argument.
+     * @param {!object} thisStack - The V8 stack.
+     * @returns {!object} The V8 stack.
+     */
+    $Error.prepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+      return thisStack;
+    };
     /** @type {object} */
+
 
     var error = new $Error();
     captureStackTrace(error, context.constructor);
-    var frames = Object(array_map_x__WEBPACK_IMPORTED_MODULE_16__[/* default */ "a"])(error.stack, function _mapper(frame) {
+    var frames = Object(array_map_x__WEBPACK_IMPORTED_MODULE_16__[/* default */ "a"])(error.stack, function (frame) {
+      _newArrowCheck(this, _this);
+
       var opts = {
         // args: void 0,
         functionName: frame.getFunctionName(),
@@ -37415,12 +37449,12 @@ var cV8 = $Error.captureStackTrace && function _cV8() {
       }
 
       return new stackframe__WEBPACK_IMPORTED_MODULE_3___default.a(opts);
-    });
+    }.bind(this));
 
-    if (typeof temp === 'undefined') {
+    if (typeof prepareStackTrace === 'undefined') {
       delete $Error.prepareStackTrace;
     } else {
-      $Error.prepareStackTrace = temp;
+      $Error.prepareStackTrace = prepareStackTrace;
     }
 
     return frames;
@@ -37428,6 +37462,7 @@ var cV8 = $Error.captureStackTrace && function _cV8() {
 }();
 
 var allCtrs = true;
+var STACK_NEWLINE = '\n    ';
 /**
  * Defines frames and stack on the Custom Error this object.
  *
@@ -37437,19 +37472,19 @@ var allCtrs = true;
  * @param {string} name - The name of the constructor.
  */
 
-var defContext = function _defContext(context, frames, name) {
-  var _this = this;
+var defContext = function defContext(context, frames, name) {
+  var _this2 = this;
 
   Object(object_define_properties_x__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"])(context, {
     frames: {
       value: frames
     },
     stack: {
-      value: "".concat(name, "\n    ").concat(Object(array_map_x__WEBPACK_IMPORTED_MODULE_16__[/* default */ "a"])(frames, function (frame) {
-        _newArrowCheck(this, _this);
+      value: "".concat(name).concat(STACK_NEWLINE).concat(Object(array_map_x__WEBPACK_IMPORTED_MODULE_16__[/* default */ "a"])(frames, function (frame) {
+        _newArrowCheck(this, _this2);
 
         return frame.toString();
-      }.bind(this)).join('\n    '))
+      }.bind(this)).join(STACK_NEWLINE))
     }
   });
 };
@@ -37464,26 +37499,32 @@ var defContext = function _defContext(context, frames, name) {
  */
 
 
-var errParse = function _errParse(context, err, name) {
+var errParse = function errParse(context, err, name) {
+  var _this3 = this;
+
   var frames;
 
   try {
-    frames = error_stack_parser__WEBPACK_IMPORTED_MODULE_4___default.a.parse(err);
+    frames = parse(err);
   } catch (ignore) {
     return false;
   }
 
-  var start = Object(find_index_x__WEBPACK_IMPORTED_MODULE_7__[/* default */ "a"])(frames, function _finderStart(frame) {
-    var fName = typeof frame.functionName === 'string' ? frame.functionName : '';
+  var start = Object(find_index_x__WEBPACK_IMPORTED_MODULE_7__[/* default */ "a"])(frames, function (frame) {
+    _newArrowCheck(this, _this3);
+
+    var fName = typeof frame.functionName === 'string' ? frame.functionName : EMPTY_STRING;
     return fName.indexOf(name) > -1;
-  });
+  }.bind(this));
 
   if (start > -1) {
     var item = frames[start];
     frames = frames.slice(start + 1);
-    var end = Object(find_index_x__WEBPACK_IMPORTED_MODULE_7__[/* default */ "a"])(frames, function _finderEnd(frame) {
+    var end = Object(find_index_x__WEBPACK_IMPORTED_MODULE_7__[/* default */ "a"])(frames, function (frame) {
+      _newArrowCheck(this, _this3);
+
       return item.source === frame.source;
-    });
+    }.bind(this));
 
     if (end > -1) {
       frames = frames.slice(0, end);
@@ -37503,7 +37544,7 @@ var errParse = function _errParse(context, err, name) {
  */
 
 
-var parse = function _parse(context, name) {
+var parseStack = function parseStack(context, name) {
   if (cV8) {
     defContext(context, cV8(context), name);
   } else {
@@ -37519,7 +37560,7 @@ var parse = function _parse(context, name) {
     }
 
     if (errParse(context, err, name) === false) {
-      var stack = ''; // If `Error` has a non-standard `stack`, `stacktrace` or
+      var stack = EMPTY_STRING; // If `Error` has a non-standard `stack`, `stacktrace` or
       // `opera#sourceloc` property that offers a trace of which functions
       // were called, in what order, from which line and  file, and with what
       // argument, then we will set it.
@@ -37563,7 +37604,7 @@ var parse = function _parse(context, name) {
  */
 
 
-var isErrorCtr = function _isErrorCtr(ErrorCtr) {
+var isErrorCtr = function isErrorCtr(ErrorCtr) {
   if (Object(is_function_x__WEBPACK_IMPORTED_MODULE_8__[/* default */ "a"])(ErrorCtr)) {
     try {
       return isError(new ErrorCtr({}));
@@ -37583,7 +37624,7 @@ var isErrorCtr = function _isErrorCtr(ErrorCtr) {
  */
 
 
-var asAssertionError = function _asAssertionError(name, ErrorCtr) {
+var asAssertionError = function asAssertionError(name, ErrorCtr) {
   if (name === 'AssertionError') {
     return true;
   }
@@ -37600,6 +37641,8 @@ var asAssertionError = function _asAssertionError(name, ErrorCtr) {
 
   return false;
 };
+
+var MAX_MSG_LENGTH = 128;
 /**
  * Message generator for AssertionError.
  *
@@ -37608,12 +37651,11 @@ var asAssertionError = function _asAssertionError(name, ErrorCtr) {
  * @returns {string} The generated message.
  */
 
-
-var getMessage = function _getMessage(message) {
+var getMessage = function getMessage(message) {
   var opts = {
-    length: message.length ? Object(to_length_x__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"])(message.length) : 128,
-    omission: message.omission ? Object(to_string_symbols_supported_x__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(message.omission) : '',
-    separator: message.separator ? Object(to_string_symbols_supported_x__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(message.separator) : ''
+    length: message.length ? Object(to_length_x__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"])(message.length) : MAX_MSG_LENGTH,
+    omission: message.omission ? Object(to_string_symbols_supported_x__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(message.omission) : EMPTY_STRING,
+    separator: message.separator ? Object(to_string_symbols_supported_x__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(message.separator) : EMPTY_STRING
   };
   return "".concat(Object(truncate_x__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"])(Object(inspect_x__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"])(message.actual), opts), " ").concat(message.operator, " ").concat(Object(truncate_x__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"])(Object(inspect_x__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"])(message.expected), opts));
 };
@@ -37626,7 +37668,7 @@ var getMessage = function _getMessage(message) {
  */
 
 
-var toJSON = function _toJSON() {
+var toJSON = function toJSON() {
   return {
     frames: this.frames,
     message: this.message,
@@ -37645,7 +37687,7 @@ var toJSON = function _toJSON() {
  */
 
 
-var init = function _init(context, message, name, ErrorCtr) {
+var init = function init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
     Object(object_define_properties_x__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"])(context, {
       actual: {
@@ -37658,7 +37700,7 @@ var init = function _init(context, message, name, ErrorCtr) {
         value: castBoolean(message.message) === false
       },
       message: {
-        value: message.message ? message.message : getMessage(message)
+        value: message.message || getMessage(message)
       },
       operator: {
         value: message.operator
@@ -37675,11 +37717,12 @@ var init = function _init(context, message, name, ErrorCtr) {
   } // Parse and set the 'this' properties.
 
 
-  parse(context, name);
+  parseStack(context, name);
 }; // `init` is used in `eval`, don't delete.
 
 
 init({}, 'message', 'name', $Error);
+var CUSTOM_NAME = 'CustomError';
 /**
  * Creates a custom Error constructor. Will use `Error` if argument is not
  * a valid constructor.
@@ -37690,9 +37733,10 @@ init({}, 'message', 'name', $Error);
  * @returns {Function} The custom Error constructor.
  */
 
-var create = function _createErrorCtr(name, ErrorCtr) {
-  var ECTR = ErrorCtr;
-  var customName = Object(is_nil_x__WEBPACK_IMPORTED_MODULE_12__[/* default */ "a"])(name) ? 'CustomError' : name;
+var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
+  var ECTR = allCtrs === false || isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
+  var initialName = Object(is_nil_x__WEBPACK_IMPORTED_MODULE_12__[/* default */ "a"])(name) ? CUSTOM_NAME : Object(trim_x__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(Object(to_string_symbols_supported_x__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(name));
+  var customName = initialName === CUSTOM_NAME || Object(is_var_name__WEBPACK_IMPORTED_MODULE_19__[/* default */ "a"])(initialName) ? initialName : CUSTOM_NAME;
   /**
    * Create a new object, that prototypally inherits from the `Error`
    * constructor.
@@ -37702,23 +37746,7 @@ var create = function _createErrorCtr(name, ErrorCtr) {
    * @param {string} [message] - Human-readable description of the error.
    */
 
-  var CstmCtr;
-
-  if (customName !== 'CustomError') {
-    try {
-      customName = Object(trim_x__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(Object(to_string_symbols_supported_x__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(customName));
-      /* eslint-disable-next-line no-eval */
-
-      eval("(function ".concat(customName, " () {})"));
-    } catch (ignore) {
-      customName = 'CustomError';
-    }
-  }
-
-  if (allCtrs === false || isErrorCtr(ECTR) === false) {
-    ECTR = $Error;
-  } // noinspection JSUnusedLocalSymbols
-
+  var CstmCtr; // noinspection JSUnusedLocalSymbols
 
   var f =
   /* eslint-disable-line no-unused-vars */
@@ -37775,7 +37803,7 @@ var create = function _createErrorCtr(name, ErrorCtr) {
     /**
      * Name Symbol.toStringTag.
      *
-     * @memberof module:error-x.CstmCtr.prototype
+     * @memberof CstmCtr.prototype
      * @type {string}
      */
     Object(object_define_property_x__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"])(CstmCtr.prototype, $toStringTag, {
@@ -37784,10 +37812,12 @@ var create = function _createErrorCtr(name, ErrorCtr) {
   }
 
   return CstmCtr;
-}; // Test if we can use more than just the Error constructor.
+};
+
+var create = createErrorCtr; // Test if we can use more than just the Error constructor.
 
 try {
-  allCtrs = create('X', SyntaxError)('x') instanceof SyntaxError;
+  allCtrs = createErrorCtr('X', SyntaxError)('x') instanceof SyntaxError;
 } catch (ignore) {
   allCtrs = false;
 }
@@ -37800,7 +37830,7 @@ try {
  */
 
 
-var AssertionErrorConstructor = create('AssertionError', Error);
+var AssertionErrorConstructor = createErrorCtr('AssertionError', Error);
 /**
  * The Error constructor creates an error object.
  *
@@ -37808,7 +37838,7 @@ var AssertionErrorConstructor = create('AssertionError', Error);
  * @param {string} [message] - Human-readable description of the error.
  */
 
-var ErrorConstructor = create('Error', Error);
+var ErrorConstructor = createErrorCtr('Error', Error);
 /**
  * Creates an instance representing an error that occurs regarding the
  * global function eval().
@@ -37817,7 +37847,7 @@ var ErrorConstructor = create('Error', Error);
  * @param {string} [message] - Human-readable description of the error.
  */
 
-var EvalErrorConstructor = create('EvalError', EvalError); // noinspection JSUnusedGlobalSymbols
+var EvalErrorConstructor = createErrorCtr('EvalError', EvalError); // noinspection JSUnusedGlobalSymbols
 
 /**
  * The InternalError object indicates an error that occurred internally in
@@ -37827,7 +37857,7 @@ var EvalErrorConstructor = create('EvalError', EvalError); // noinspection JSUnu
  * @param {string} [message] - Human-readable description of the error.
  */
 
-var InternalErrorConstructor = create('InternalError', Error);
+var InternalErrorConstructor = createErrorCtr('InternalError', Error);
 /**
  * Creates an instance representing an error that occurs when a numeric
  * variable or parameter is outside of its valid range.
@@ -37836,7 +37866,7 @@ var InternalErrorConstructor = create('InternalError', Error);
  * @param {string} - - [message] Human-readable description of the error.
  */
 
-var RangeErrorConstructor = create('RangeError', RangeError);
+var RangeErrorConstructor = createErrorCtr('RangeError', RangeError);
 /**
  * Creates an instance representing an error that occurs when de-referencing
  * an invalid reference.
@@ -37845,7 +37875,7 @@ var RangeErrorConstructor = create('RangeError', RangeError);
  * @param {string} [message] - Human-readable description of the error.
  */
 
-var ReferenceErrorConstructor = create('ReferenceError', ReferenceError); // noinspection JSUnusedGlobalSymbols
+var ReferenceErrorConstructor = createErrorCtr('ReferenceError', ReferenceError); // noinspection JSUnusedGlobalSymbols
 
 /**
  * Indicates if the Javascript engine supports subclassing of all Error
@@ -37864,7 +37894,7 @@ var supportsAllConstructors = allCtrs;
  * @param {string} [message] - Human-readable description of the error.
  */
 
-var SyntaxErrorConstructor = create('SyntaxError', SyntaxError);
+var SyntaxErrorConstructor = createErrorCtr('SyntaxError', SyntaxError);
 /**
  * Creates an instance representing an error that occurs when a variable or
  * parameter is not of a valid type.
@@ -37873,7 +37903,7 @@ var SyntaxErrorConstructor = create('SyntaxError', SyntaxError);
  * @param {string} [message] - Human-readable description of the error.
  */
 
-var TypeErrorConstructor = create('TypeError', TypeError);
+var TypeErrorConstructor = createErrorCtr('TypeError', TypeError);
 /**
  * Creates an instance representing an error that occurs when encodeURI() or
  * decodeURI() are passed invalid parameters.
@@ -37882,19 +37912,19 @@ var TypeErrorConstructor = create('TypeError', TypeError);
  * @param {string} [message] - Human-readable description of the error.
  */
 
-var URIErrorConstructor = create('URIError', URIError);
+var URIErrorConstructor = createErrorCtr('URIError', URIError);
 
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
 var origSymbol = global.Symbol;
-var hasSymbolSham = __webpack_require__(72);
+var hasSymbolSham = __webpack_require__(73);
 
 module.exports = function hasNativeSymbols() {
 	if (typeof origSymbol !== 'function') { return false; }
@@ -37908,7 +37938,7 @@ module.exports = function hasNativeSymbols() {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(43)))
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37957,7 +37987,7 @@ module.exports = function hasSymbols() {
 
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38086,31 +38116,31 @@ module.exports = keysShim;
 
 
 /***/ }),
-/* 74 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var bind = __webpack_require__(75);
-
-module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
-
-
-/***/ }),
 /* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var implementation = __webpack_require__(76);
+var bind = __webpack_require__(76);
+
+module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
+
+
+/***/ }),
+/* 76 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var implementation = __webpack_require__(77);
 
 module.exports = Function.prototype.bind || implementation;
 
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38169,7 +38199,7 @@ module.exports = function bind(that) {
 
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, exports) {
 
 
@@ -38197,7 +38227,7 @@ module.exports = function forEach (obj, fn, ctx) {
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38216,7 +38246,7 @@ module.exports = function shimNumberIsNaN() {
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -38244,7 +38274,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
