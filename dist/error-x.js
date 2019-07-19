@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-18T23:06:58.781Z",
+  "date": "2019-07-19T23:08:44.481Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "c4098b30436c38209e86",
+  "hash": "d4c6777e48ff4afd619b",
   "license": "MIT",
-  "version": "3.0.3"
+  "version": "3.0.4"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -409,7 +409,7 @@ var hop = {}.hasOwnProperty;
  *
  * @param {!object} object - The object to test.
  * @throws {TypeError} If object is null or undefined.
- * @param {string|Symbol} property - The name or Symbol of the property to test.
+ * @param {string|number|Symbol} property - The name or Symbol of the property to test.
  * @returns {boolean} `true` if the property is set on `object`, else `false`.
  */
 
