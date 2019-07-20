@@ -1,6 +1,6 @@
 {
   "name": "error-x",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "Create custom Javascript Error objects.",
   "homepage": "http://xotic750.github.io/error-x/",
   "author": {
@@ -53,7 +53,7 @@
     "error-stack-parser": "^2.0.2",
     "find-index-x": "^3.0.8",
     "has-to-string-tag-x": "^2.0.13",
-    "inspect-x": "^3.0.2",
+    "inspect-x": "^3.0.3",
     "is-error-x": "^2.0.8",
     "is-finite-x": "^4.0.15",
     "is-function-x": "^4.0.18",
@@ -62,7 +62,7 @@
     "is-object-like-x": "^2.0.16",
     "is-regex": "^1.0.4",
     "is-var-name": "^2.0.0",
-    "object-create-x": "^3.0.3",
+    "object-create-x": "^3.0.4",
     "object-define-properties-x": "^5.0.5",
     "object-define-property-x": "^5.0.8",
     "stackframe": "^1.0.4",
