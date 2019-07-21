@@ -234,7 +234,7 @@ function createErrDiff(actual, expected, $operator) {
        * columns per line, add a mismatch indicator below the output. If it is
        * not a tty, use a default value of 80 characters.
        */
-      var _maxLength = process.stderr.isTTY ? process.stderr.columns : 80;
+      var _maxLength = 80;
 
       if (inputLength < _maxLength) {
         while (actualLines[0][i] === expectedLines[0][i]) {
