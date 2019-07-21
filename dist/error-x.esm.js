@@ -375,12 +375,13 @@ var toJSON = function toJSON() {
 
 var init = function init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
+    var code = 'ERR_ASSERTION';
     defineProperties(context, {
       actual: {
         value: message.actual
       },
       code: {
-        value: 'ERR_ASSERTION'
+        value: code
       },
       expected: {
         value: message.expected
@@ -390,6 +391,11 @@ var init = function init(context, message, name, ErrorCtr) {
       },
       message: {
         value: message.message || getMessage(message)
+      },
+      name: {
+        get: function get() {
+          return "".concat(this.constructor.name, " [").concat(code, "]");
+        }
       },
       operator: {
         value: message.operator
@@ -427,7 +433,7 @@ var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   var initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
   var customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
   /**
-   * Create a new object, that prototypally inherits from the `Error`
+   * Create a new object, that prototypically inherits from the `Error`
    * constructor.
    *
    * @private

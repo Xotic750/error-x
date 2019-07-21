@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-21T12:45:26.442Z",
+  "date": "2019-07-21T13:17:30.590Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "b3888eadfe3b699f3705",
+  "hash": "df266f2985272652c06e",
   "license": "MIT",
-  "version": "3.0.6"
+  "version": "3.0.7"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -11801,12 +11801,13 @@ var toJSON = function toJSON() {
 
 var init = function init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
+    var code = 'ERR_ASSERTION';
     Object(object_define_properties_x__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"])(context, {
       actual: {
         value: message.actual
       },
       code: {
-        value: 'ERR_ASSERTION'
+        value: code
       },
       expected: {
         value: message.expected
@@ -11816,6 +11817,11 @@ var init = function init(context, message, name, ErrorCtr) {
       },
       message: {
         value: message.message || getMessage(message)
+      },
+      name: {
+        get: function get() {
+          return "".concat(this.constructor.name, " [").concat(code, "]");
+        }
       },
       operator: {
         value: message.operator
@@ -11853,7 +11859,7 @@ var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   var initialName = Object(is_nil_x__WEBPACK_IMPORTED_MODULE_12__[/* default */ "a"])(name) ? CUSTOM_NAME : Object(trim_x__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(Object(to_string_symbols_supported_x__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(name));
   var customName = initialName === CUSTOM_NAME || Object(is_var_name__WEBPACK_IMPORTED_MODULE_19__[/* default */ "a"])(initialName) ? initialName : CUSTOM_NAME;
   /**
-   * Create a new object, that prototypally inherits from the `Error`
+   * Create a new object, that prototypically inherits from the `Error`
    * constructor.
    *
    * @private

@@ -80,7 +80,7 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(`AssertionError: ${expected} == ''`);
+          expect(e.toString()).toBe(`AssertionError [${e.code}]: ${expected} == ''`);
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
@@ -142,7 +142,7 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(`MyAssertionError: ${expected} == ''`);
+          expect(e.toString()).toBe(`MyAssertionError [${e.code}]: ${expected} == ''`);
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
