@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-20T20:06:19.977Z",
+  "date": "2019-07-21T12:45:26.442Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "6cfcb98a02c6f6df45ce",
+  "hash": "b3888eadfe3b699f3705",
   "license": "MIT",
-  "version": "3.0.5"
+  "version": "3.0.6"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -11804,6 +11804,9 @@ var init = function init(context, message, name, ErrorCtr) {
     Object(object_define_properties_x__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"])(context, {
       actual: {
         value: message.actual
+      },
+      code: {
+        value: 'ERR_ASSERTION'
       },
       expected: {
         value: message.expected

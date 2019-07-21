@@ -362,6 +362,9 @@ const init = function init(context, message, name, ErrorCtr) {
       actual: {
         value: message.actual,
       },
+      code: {
+        value: 'ERR_ASSERTION',
+      },
       expected: {
         value: message.expected,
       },
