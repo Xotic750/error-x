@@ -1,3 +1,4 @@
+import stripAnsi from 'strip-ansi';
 import * as lib from '../src/error-x';
 
 describe('error-x', function() {
@@ -80,7 +81,9 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(`AssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} !== ''\n`);
+          expect(stripAnsi(e.toString())).toBe(
+            `AssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} !== ''\n`,
+          );
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
@@ -94,7 +97,7 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(`AssertionError [${e.code}]: Values identical but not reference-equal:\n\n''\n`);
+          expect(stripAnsi(e.toString())).toBe(`AssertionError [${e.code}]: Values identical but not reference-equal:\n\n''\n`);
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
@@ -108,7 +111,7 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(
+          expect(stripAnsi(e.toString())).toBe(
             `AssertionError [${e.code}]: Expected values to be strictly equal:\n+ actual - expected\n\n+ ${expected}\n- ''`,
           );
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
@@ -172,7 +175,7 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(
+          expect(stripAnsi(e.toString())).toBe(
             `MyAssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} !== ''\n`,
           );
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
@@ -188,7 +191,7 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(`AssertionError [${e.code}]: Values identical but not reference-equal:\n\n''\n`);
+          expect(stripAnsi(e.toString())).toBe(`AssertionError [${e.code}]: Values identical but not reference-equal:\n\n''\n`);
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
@@ -202,7 +205,7 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(
+          expect(stripAnsi(e.toString())).toBe(
             `AssertionError [${e.code}]: Expected values to be strictly equal:\n+ actual - expected\n\n+ ${expected}\n- ''`,
           );
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
