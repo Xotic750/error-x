@@ -358,6 +358,10 @@ const toJSON = function toJSON() {
  */
 const init = function init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
+    if (typeof message !== 'object' || message === null) {
+      throw new TypeError(`The "options" argument must be of type Object. Received type ${typeof message}`);
+    }
+
     const code = 'ERR_ASSERTION';
 
     defineProperties(context, {

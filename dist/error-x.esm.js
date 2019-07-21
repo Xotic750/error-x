@@ -1,3 +1,5 @@
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 /*
@@ -375,6 +377,10 @@ var toJSON = function toJSON() {
 
 var init = function init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
+    if (_typeof(message) !== 'object' || message === null) {
+      throw new TypeError("The \"options\" argument must be of type Object. Received type ".concat(_typeof(message)));
+    }
+
     var code = 'ERR_ASSERTION';
     defineProperties(context, {
       actual: {

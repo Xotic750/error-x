@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-21T13:17:30.590Z",
+  "date": "2019-07-21T14:53:47.860Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "df266f2985272652c06e",
+  "hash": "c8b83e44319791e538d4",
   "license": "MIT",
-  "version": "3.0.7"
+  "version": "3.0.8"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -11424,6 +11424,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var is_nan_x__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(20);
 /* harmony import */ var is_finite_x__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(33);
 /* harmony import */ var is_var_name__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(70);
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 /*
@@ -11801,6 +11803,10 @@ var toJSON = function toJSON() {
 
 var init = function init(context, message, name, ErrorCtr) {
   if (asAssertionError(name, ErrorCtr)) {
+    if (_typeof(message) !== 'object' || message === null) {
+      throw new TypeError("The \"options\" argument must be of type Object. Received type ".concat(_typeof(message)));
+    }
+
     var code = 'ERR_ASSERTION';
     Object(object_define_properties_x__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"])(context, {
       actual: {
