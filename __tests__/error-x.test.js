@@ -76,11 +76,11 @@ describe('error-x', function() {
           throw new lib.AssertionErrorConstructor({
             actual,
             expected: '',
-            operator: '==',
+            operator: 'strictEqual',
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(`AssertionError [${e.code}]: ${expected} == ''`);
+          expect(e.toString()).toBe(`AssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} === ''`);
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };

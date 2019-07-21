@@ -34,6 +34,7 @@ import isVarName from 'is-var-name';
 export const isError = $isError;
 
 const {parse} = errorStackParser;
+
 /**
  * @typedef {ErrorConstructor|TypeErrorConstructor|SyntaxErrorConstructor|URIErrorConstructor|ReferenceErrorConstructor|EvalErrorConstructor|RangeErrorConstructor} OfErrorConstructor
  */
@@ -48,6 +49,25 @@ const $toStringTag = hasToStringTag && Symbol.toStringTag;
 const $Error = Error;
 // Capture the function (if any).
 const {captureStackTrace, prepareStackTrace} = $Error;
+
+const readableOperator = {
+  deepStrictEqual: 'Expected values to be strictly deep-equal:',
+  strictEqual: 'Expected values to be strictly equal:',
+  strictEqualObject: 'Expected "actual" to be reference-equal to "expected":',
+  deepEqual: 'Expected values to be loosely deep-equal:',
+  notDeepStrictEqual: 'Expected "actual" not to be strictly deep-equal to:',
+  notStrictEqual: 'Expected "actual" to be strictly unequal to:',
+  notStrictEqualObject: 'Expected "actual" not to be reference-equal to "expected":',
+  notDeepEqual: 'Expected "actual" not to be loosely deep-equal to:',
+  notIdentical: 'Values identical but not reference-equal:',
+  notDeepEqualUnequal: 'Expected values not to be loosely deep-equal:',
+};
+
+const shortOperator = {
+  strictEqual: '===',
+  notStrictEqual: '!==',
+};
+
 /**
  * Tests for number as specified in StackTrace library.
  *
@@ -328,7 +348,13 @@ const getMessage = function getMessage(message) {
     separator: message.separator ? safeToString(message.separator) : EMPTY_STRING,
   };
 
-  return `${truncate(inspect(message.actual), opts)} ${message.operator} ${truncate(inspect(message.expected), opts)}`;
+  const readable = readableOperator[message.operator];
+  const op = shortOperator[message.operator] || message.operator;
+
+  return `${readable ? `${readable}\n\n` : ''}${truncate(inspect(message.actual), opts)} ${op} ${truncate(
+    inspect(message.expected),
+    opts,
+  )}`;
 };
 
 /**

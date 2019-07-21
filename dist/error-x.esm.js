@@ -52,6 +52,22 @@ var $Error = Error; // Capture the function (if any).
 
 var captureStackTrace = $Error.captureStackTrace,
     prepareStackTrace = $Error.prepareStackTrace;
+var readableOperator = {
+  deepStrictEqual: 'Expected values to be strictly deep-equal:',
+  strictEqual: 'Expected values to be strictly equal:',
+  strictEqualObject: 'Expected "actual" to be reference-equal to "expected":',
+  deepEqual: 'Expected values to be loosely deep-equal:',
+  notDeepStrictEqual: 'Expected "actual" not to be strictly deep-equal to:',
+  notStrictEqual: 'Expected "actual" to be strictly unequal to:',
+  notStrictEqualObject: 'Expected "actual" not to be reference-equal to "expected":',
+  notDeepEqual: 'Expected "actual" not to be loosely deep-equal to:',
+  notIdentical: 'Values identical but not reference-equal:',
+  notDeepEqualUnequal: 'Expected values not to be loosely deep-equal:'
+};
+var shortOperator = {
+  strictEqual: '===',
+  notStrictEqual: '!=='
+};
 /**
  * Tests for number as specified in StackTrace library.
  *
@@ -345,7 +361,9 @@ var getMessage = function getMessage(message) {
     omission: message.omission ? safeToString(message.omission) : EMPTY_STRING,
     separator: message.separator ? safeToString(message.separator) : EMPTY_STRING
   };
-  return "".concat(truncate(inspect(message.actual), opts), " ").concat(message.operator, " ").concat(truncate(inspect(message.expected), opts));
+  var readable = readableOperator[message.operator];
+  var op = shortOperator[message.operator] || message.operator;
+  return "".concat(readable ? "".concat(readable, "\n\n") : '').concat(truncate(inspect(message.actual), opts), " ").concat(op, " ").concat(truncate(inspect(message.expected), opts));
 };
 /**
  * The toJSON method returns an object representation of the Error object.
