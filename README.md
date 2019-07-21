@@ -27,23 +27,23 @@ Create custom Javascript Error objects.
 - [error-x](#module_error-x)
   - [`module.exports`](#exp_module_error-x--module.exports) ⏏
     - [.AssertionErrorConstructor](#module_error-x--module.exports.AssertionErrorConstructor) ⇐ <code>Error</code>
-      - [`new AssertionError([message])`](#new_module_error-x--module.exports.AssertionErrorConstructor_new)
-    - [.Error](#module_error-x--module.exports.ErrorConstructor) ⇐ <code>Error</code>
-      - [`new Error([message])`](#new_module_error-x--module.exports.ErrorConstructor_new)
+      - [`new AssertionErrorConstructor([message])`](#new_module_error-x--module.exports.AssertionErrorConstructor_new)
+    - [.ErrorConstructor](#module_error-x--module.exports.ErrorConstructor) ⇐ <code>Error</code>
+      - [`new ErrorConstructor([message])`](#new_module_error-x--module.exports.ErrorConstructor_new)
     - [.EvalErrorConstructor](#module_error-x--module.exports.EvalErrorConstructor) ⇐ <code>EvalError</code>
-      - [`new EvalError([message])`](#new_module_error-x--module.exports.EvalErrorConstructor_new)
+      - [`new EvalErrorConstructor([message])`](#new_module_error-x--module.exports.EvalErrorConstructor_new)
     - [.InternalErrorConstructor](#module_error-x--module.exports.InternalErrorConstructor) ⇐ <code>Error</code>
-      - [`new InternalError([message])`](#new_module_error-x--module.exports.InternalErrorConstructor_new)
+      - [`new InternalErrorConstructor([message])`](#new_module_error-x--module.exports.InternalErrorConstructor_new)
     - [.RangeErrorConstructor](#module_error-x--module.exports.RangeErrorConstructor) ⇐ <code>RangeError</code>
-      - [`new RangeError()`](#new_module_error-x--module.exports.RangeErrorConstructor_new)
+      - [`new RangeErrorConstructor()`](#new_module_error-x--module.exports.RangeErrorConstructor_new)
     - [.ReferenceErrorConstructor](#module_error-x--module.exports.ReferenceErrorConstructor) ⇐ <code>ReferenceError</code>
-      - [`new ReferenceError([message])`](#new_module_error-x--module.exports.ReferenceErrorConstructor_new)
+      - [`new ReferenceErrorConstructor([message])`](#new_module_error-x--module.exports.ReferenceErrorConstructor_new)
     - [.SyntaxErrorConstructor](#module_error-x--module.exports.SyntaxErrorConstructor) ⇐ <code>SyntaError</code>
-      - [`new SyntaxError([message])`](#new_module_error-x--module.exports.SyntaxErrorConstructor_new)
+      - [`new SyntaxErrorConstructor([message])`](#new_module_error-x--module.exports.SyntaxErrorConstructor_new)
     - [.TypeErrorConstructor](#module_error-x--module.exports.TypeErrorConstructor) ⇐ <code>TypeError</code>
-      - [`new TypeError([message])`](#new_module_error-x--module.exports.TypeErrorConstructor_new)
+      - [`new TypeErrorConstructor([message])`](#new_module_error-x--module.exports.TypeErrorConstructor_new)
     - [.URIErrorConstructor](#module_error-x--module.exports.URIErrorConstructor) ⇐ <code>URIError</code>
-      - [`new URIError([message])`](#new_module_error-x--module.exports.URIErrorConstructor_new)
+      - [`new URIErrorConstructor([message])`](#new_module_error-x--module.exports.URIErrorConstructor_new)
     - [`.supportsAllConstructors`](#module_error-x--module.exports.supportsAllConstructors) : <code>boolean</code>
     - [`.create([name], [ECTR])`](#module_error-x--module.exports.create) ⇒ <code>function</code>
     - [`.isErrorConstructor(value)`](#module_error-x--module.exports.isErrorConstructor) ⇒ <code>boolean</code>
@@ -72,7 +72,7 @@ for you. Why? Well, these offer some improvements over the native versions.
 **Extends**: <code>Error</code>  
 <a name="new_module_error-x--module.exports.AssertionErrorConstructor_new"></a>
 
-##### `new AssertionError([message])`
+##### `new AssertionErrorConstructor_new([message])`
 
 Error constructor for test and validation frameworks that implement the
 standardized AssertionError specification.
@@ -89,7 +89,7 @@ standardized AssertionError specification.
 **Extends**: <code>Error</code>  
 <a name="new_module_error-x--module.exports.ErrorConstructor_new"></a>
 
-##### `new Error([message])`
+##### `new ErrorConstructor([message])`
 
 The Error constructor creates an error object.
 
@@ -105,7 +105,7 @@ The Error constructor creates an error object.
 **Extends**: <code>EvalError</code>  
 <a name="new_module_error-x--module.exports.EvalErrorConstructor_new"></a>
 
-##### `new EvalError([message])`
+##### `new EvalErrorConstructor_new([message])`
 
 Creates an instance representing an error that occurs regarding the
 global function eval().
@@ -122,7 +122,7 @@ global function eval().
 **Extends**: <code>Error</code>  
 <a name="new_module_error-x--module.exports.InternalErrorConstructor_new"></a>
 
-##### `new InternalError([message])`
+##### `new InternalErrorConstructor_new([message])`
 
 The InternalError object indicates an error that occurred internally in
 the JavaScript engine. For example: "InternalErrorConstructor: too much recursion".
@@ -139,7 +139,7 @@ the JavaScript engine. For example: "InternalErrorConstructor: too much recursio
 **Extends**: <code>RangeError</code>  
 <a name="new_module_error-x--module.exports.RangeErrorConstructor_new"></a>
 
-##### `new RangeError()`
+##### `new RangeErrorConstructor_new()`
 
 Creates an instance representing an error that occurs when a numeric
 variable or parameter is outside of its valid range.
@@ -156,7 +156,7 @@ variable or parameter is outside of its valid range.
 **Extends**: <code>ReferenceError</code>  
 <a name="new_module_error-x--module.exports.ReferenceErrorConstructor_new"></a>
 
-##### `new ReferenceError([message])`
+##### `new ReferenceErrorConstructor_new([message])`
 
 Creates an instance representing an error that occurs when de-referencing
 an invalid reference
@@ -173,7 +173,7 @@ an invalid reference
 **Extends**: <code>SyntaError</code>  
 <a name="new_module_error-x--module.exports.SyntaxErrorConstructor_new"></a>
 
-##### `new SyntaxError([message])`
+##### `new SyntaxErrorConstructor([message])`
 
 Creates an instance representing a syntax error that occurs while parsing
 code in eval().
@@ -190,7 +190,7 @@ code in eval().
 **Extends**: <code>TypeError</code>  
 <a name="new_module_error-x--module.exports.TypeErrorConstructor_new"></a>
 
-##### `new TypeError([message])`
+##### `new TypeErrorConstructor([message])`
 
 Creates an instance representing an error that occurs when a variable or
 parameter is not of a valid type.
@@ -207,7 +207,7 @@ parameter is not of a valid type.
 **Extends**: <code>URIError</code>  
 <a name="new_module_error-x--module.exports.URIErrorConstructor_new"></a>
 
-##### `new URIError([message])`
+##### `new URIErrorConstructor([message])`
 
 Creates an instance representing an error that occurs when encodeURI() or
 decodeURI() are passed invalid parameters.
@@ -245,7 +245,7 @@ a valid constructor.
 ```js
 import * as errorX from 'error-x';
 
-const MyError = errorX.create('MyErrorConstructor'); // Uses `Error` as no constructor
+const MyError = errorX.create('MyError'); // Uses `Error` as no constructor
 // specified.
 const err = new MyError('somethingHappened');
 

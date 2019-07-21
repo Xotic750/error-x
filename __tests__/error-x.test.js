@@ -80,7 +80,37 @@ describe('error-x', function() {
           });
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
-          expect(e.toString()).toBe(`AssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} === ''\n`);
+          expect(e.toString()).toBe(`AssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} !== ''\n`);
+          expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
+        }
+      };
+
+      const testAssertionMessage2 = function(actual /* , expected */) {
+        try {
+          throw new lib.AssertionErrorConstructor({
+            actual,
+            expected: '',
+            operator: 'strictEqual',
+          });
+        } catch (e) {
+          expect(lib.isError(e)).toBe(true, 'isError');
+          expect(e.toString()).toBe(`AssertionError [${e.code}]: Values identical but not reference-equal:\n\n''\n`);
+          expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
+        }
+      };
+
+      const testAssertionMessage3 = function(actual, expected) {
+        try {
+          throw new lib.AssertionErrorConstructor({
+            actual,
+            expected: '',
+            operator: 'strictEqual',
+          });
+        } catch (e) {
+          expect(lib.isError(e)).toBe(true, 'isError');
+          expect(e.toString()).toBe(
+            `AssertionError [${e.code}]: Expected values to be strictly equal:\n+ actual - expected\n\n+ ${expected}\n- ''`,
+          );
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
       };
@@ -94,24 +124,24 @@ describe('error-x', function() {
       testAssertionMessage(NaN, 'NaN');
       testAssertionMessage(Infinity, 'Infinity');
       testAssertionMessage(-Infinity, '-Infinity');
-      testAssertionMessage('', "''");
+      testAssertionMessage2('', "''");
       testAssertionMessage('foo', "'foo'");
-      testAssertionMessage([], '[]');
-      testAssertionMessage([1, 2, 3], '[ 1, 2, 3 ]');
-      testAssertionMessage(/a/, '/a/');
-      testAssertionMessage(/abc/gim, '/abc/gim');
-      testAssertionMessage(function f() {}, '[Function: f]');
+      testAssertionMessage3([], '[]');
+      testAssertionMessage3([1, 2, 3], '[ 1, 2, 3 ]');
+      testAssertionMessage3(/a/, '/a/');
+      testAssertionMessage3(/abc/gim, '/abc/gim');
+      testAssertionMessage3(function f() {}, '[Function: f]');
       testAssertionMessage(function() {}, '[Function]');
-      testAssertionMessage({}, '{}');
-      testAssertionMessage(circular, '{ y: 1, x: [Circular] }');
-      testAssertionMessage(
+      testAssertionMessage3({}, '{}');
+      testAssertionMessage3(circular, '{ y: 1, x: [Circular] }');
+      testAssertionMessage3(
         {
           a: undefined,
           b: null,
         },
         '{ a: undefined, b: null }',
       );
-      testAssertionMessage(
+      testAssertionMessage3(
         {
           a: NaN,
           b: Infinity,
@@ -143,7 +173,37 @@ describe('error-x', function() {
         } catch (e) {
           expect(lib.isError(e)).toBe(true, 'isError');
           expect(e.toString()).toBe(
-            `MyAssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} === ''\n`,
+            `MyAssertionError [${e.code}]: Expected values to be strictly equal:\n\n${expected} !== ''\n`,
+          );
+          expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
+        }
+      };
+
+      const testAssertionMessage2 = function(actual /* , expected */) {
+        try {
+          throw new lib.AssertionErrorConstructor({
+            actual,
+            expected: '',
+            operator: 'strictEqual',
+          });
+        } catch (e) {
+          expect(lib.isError(e)).toBe(true, 'isError');
+          expect(e.toString()).toBe(`AssertionError [${e.code}]: Values identical but not reference-equal:\n\n''\n`);
+          expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
+        }
+      };
+
+      const testAssertionMessage3 = function(actual, expected) {
+        try {
+          throw new lib.AssertionErrorConstructor({
+            actual,
+            expected: '',
+            operator: 'strictEqual',
+          });
+        } catch (e) {
+          expect(lib.isError(e)).toBe(true, 'isError');
+          expect(e.toString()).toBe(
+            `AssertionError [${e.code}]: Expected values to be strictly equal:\n+ actual - expected\n\n+ ${expected}\n- ''`,
           );
           expect(e.generatedMessage).toBe(true, 'Message not marked as generated');
         }
@@ -158,24 +218,24 @@ describe('error-x', function() {
       testAssertionMessage(NaN, 'NaN');
       testAssertionMessage(Infinity, 'Infinity');
       testAssertionMessage(-Infinity, '-Infinity');
-      testAssertionMessage('', "''");
+      testAssertionMessage2('', "''");
       testAssertionMessage('foo', "'foo'");
-      testAssertionMessage([], '[]');
-      testAssertionMessage([1, 2, 3], '[ 1, 2, 3 ]');
-      testAssertionMessage(/a/, '/a/');
-      testAssertionMessage(/abc/gim, '/abc/gim');
-      testAssertionMessage(function f() {}, '[Function: f]');
+      testAssertionMessage3([], '[]');
+      testAssertionMessage3([1, 2, 3], '[ 1, 2, 3 ]');
+      testAssertionMessage3(/a/, '/a/');
+      testAssertionMessage3(/abc/gim, '/abc/gim');
+      testAssertionMessage3(function f() {}, '[Function: f]');
       testAssertionMessage(function() {}, '[Function]');
-      testAssertionMessage({}, '{}');
-      testAssertionMessage(circular, '{ y: 1, x: [Circular] }');
-      testAssertionMessage(
+      testAssertionMessage3({}, '{}');
+      testAssertionMessage3(circular, '{ y: 1, x: [Circular] }');
+      testAssertionMessage3(
         {
           a: undefined,
           b: null,
         },
         '{ a: undefined, b: null }',
       );
-      testAssertionMessage(
+      testAssertionMessage3(
         {
           a: NaN,
           b: Infinity,

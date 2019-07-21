@@ -20,19 +20,23 @@ import defineProperties from 'object-define-properties-x';
 import findIndex from 'find-index-x';
 import isFunction from 'is-function-x';
 import inspect from 'inspect-x';
-import truncate from 'truncate-x';
 import $isError from 'is-error-x';
 import isNil from 'is-nil-x';
-import toLength from 'to-length-x';
 import $create from 'object-create-x';
 import isObjectLike from 'is-object-like-x';
 import map from 'array-map-x';
 import numberIsNaN from 'is-nan-x';
 import numberIsFinite from 'is-finite-x';
 import isVarName from 'is-var-name';
+import toInteger from 'to-integer-x';
+import isRegExp from 'is-regexp-x';
+import clamp from 'math-clamp-x';
+
+/* Note to self: Missing repeat and endsWith */
 
 export const isError = $isError;
 
+const mathMax = Math.max;
 const {parse} = errorStackParser;
 
 /**
@@ -40,6 +44,8 @@ const {parse} = errorStackParser;
  */
 
 const EMPTY_STRING = '';
+const {split: stringSplit, indexOf: stringIndexOf, slice: stringSlice, charCodeAt} = EMPTY_STRING;
+const {pop, join, slice: arraySlice, toString: arrayToString} = [];
 /** @type {BooleanConstructor} */
 const castBoolean = true.constructor;
 /* eslint-disable-next-line compat/compat */
@@ -50,7 +56,89 @@ const $Error = Error;
 // Capture the function (if any).
 const {captureStackTrace, prepareStackTrace} = $Error;
 
-const readableOperator = {
+const repeat = function repeat(value, count) {
+  if (isNil(value)) {
+    throw new TypeError();
+  }
+
+  let string = safeToString(value);
+  let n = toInteger(count);
+
+  if (numberIsNaN(n)) {
+    n = 0;
+  }
+
+  // Account for out-of-bounds indices
+  if (n < 0 || !numberIsFinite(n)) {
+    throw new RangeError();
+  }
+
+  let result = EMPTY_STRING;
+  while (n) {
+    if (n % 2 === 1) {
+      result += string;
+    }
+
+    if (n > 1) {
+      string += string;
+    }
+
+    /* eslint-disable-next-line no-bitwise */
+    n >>= 1;
+  }
+
+  return result;
+};
+
+const endsWith = function endsWith(value, search) {
+  if (isNil(value)) {
+    throw new TypeError();
+  }
+
+  const string = safeToString(value);
+
+  if (isRegExp(search)) {
+    throw new TypeError();
+  }
+
+  const stringLength = string.length;
+  const searchString = safeToString(search);
+  const searchLength = searchString.length;
+  let pos = stringLength;
+
+  if (arguments.length > 2) {
+    /* eslint-disable-next-line prefer-rest-params */
+    const position = arguments[2];
+
+    if (typeof position !== 'undefined') {
+      pos = toInteger(position);
+
+      if (numberIsNaN(pos)) {
+        pos = 0;
+      }
+    }
+  }
+
+  const end = clamp(pos, 0, stringLength);
+  const start = end - searchLength;
+
+  if (start < 0) {
+    return false;
+  }
+
+  let index = 0;
+  while (index < searchLength) {
+    if (charCodeAt.call(string, start + index) !== charCodeAt.call(searchString, index)) {
+      return false;
+    }
+
+    index += 1;
+  }
+
+  return true;
+};
+
+const kReadableOperator = {
   deepStrictEqual: 'Expected values to be strictly deep-equal:',
   strictEqual: 'Expected values to be strictly equal:',
   strictEqualObject: 'Expected "actual" to be reference-equal to "expected":',
@@ -63,10 +151,297 @@ const readableOperator = {
   notDeepEqualUnequal: 'Expected values not to be loosely deep-equal:',
 };
 
-const shortOperator = {
-  strictEqual: '===',
-  notStrictEqual: '!==',
-};
+/* Comparing short primitives should just show === / !== instead of using the diff. */
+const kMaxShortLength = 12;
+
+function inspectValue(val) {
+  /*
+   *The util.inspect default values could be changed. This makes sure the
+   * error messages contain the necessary information nevertheless.
+   */
+  return inspect(val, {
+    compact: false,
+    customInspect: false,
+    depth: 1000,
+    maxArrayLength: Infinity,
+    /* Assert compares only enumerable properties (with a few exceptions). */
+    showHidden: false,
+    /* Assert does not detect proxies currently. */
+    showProxy: false,
+    sorted: true,
+    /* Inspect getters as we also check them when comparing entries. */
+    getters: true,
+  });
+}
+
+function createErrDiff(actual, expected, $operator) {
+  let operator = $operator;
+  let other = EMPTY_STRING;
+  let res = EMPTY_STRING;
+  let end = EMPTY_STRING;
+  let skipped = false;
+  const actualInspected = inspectValue(actual);
+  const actualLines = stringSplit.call(actualInspected, '\n');
+  const expectedLines = stringSplit.call(inspectValue(expected), '\n');
+
+  let i = 0;
+  let indicator = EMPTY_STRING;
+
+  /*
+   * In case both values are objects or functions explicitly mark them as not
+   * reference equal for the `strictEqual` operator.
+   */
+  if (
+    operator === 'strictEqual' &&
+    ((typeof actual === 'object' && actual !== null && typeof expected === 'object' && expected !== null) ||
+      (typeof actual === 'function' && typeof expected === 'function'))
+  ) {
+    operator = 'strictEqualObject';
+  }
+
+  /*
+   * If "actual" and "expected" fit on a single line and they are not strictly
+   * equal, check further special handling.
+   */
+  if (actualLines.length === 1 && expectedLines.length === 1 && actualLines[0] !== expectedLines[0]) {
+    const inputLength = actualLines[0].length + expectedLines[0].length;
+
+    /*
+     * If the character length of "actual" and "expected" together is less than
+     * kMaxShortLength and if neither is an object and at least one of them is
+     *not `zero`, use the strict equal comparison to visualize the output.
+     */
+    if (inputLength <= kMaxShortLength) {
+      if (
+        (typeof actual !== 'object' || actual === null) &&
+        (typeof expected !== 'object' || expected === null) &&
+        (actual !== 0 || expected !== 0)
+      ) {
+        /* -0 === +0 */
+        return `${kReadableOperator[operator]}\n\n${actualLines[0]} !== ${expectedLines[0]}\n`;
+      }
+    } else if (operator !== 'strictEqualObject') {
+      /*
+       * If the stderr is a tty and the input length is lower than the current
+       * columns per line, add a mismatch indicator below the output. If it is
+       * not a tty, use a default value of 80 characters.
+       */
+      const maxLength = process.stderr.isTTY ? process.stderr.columns : 80;
+
+      if (inputLength < maxLength) {
+        while (actualLines[0][i] === expectedLines[0][i]) {
+          i += 1;
+        }
+
+        /* Ignore the first characters. */
+        if (i > 2) {
+          /*
+           * Add position indicator for the first mismatch in case it is a
+           * single line and the input length is less than the column length.
+           */
+          indicator = `\n  ${repeat(' ', i)}^`;
+          i = 0;
+        }
+      }
+    }
+  }
+
+  /*
+   * Remove all ending lines that match (this optimizes the output for
+   * readability by reducing the number of total changed lines).
+   */
+  let a = actualLines[actualLines.length - 1];
+  let b = expectedLines[expectedLines.length - 1];
+  while (a === b) {
+    if (i < 3) {
+      end = `\n  ${a}${end}`;
+    } else {
+      other = a;
+    }
+
+    i += 1;
+
+    pop.call(actualLines);
+    pop.call(expectedLines);
+
+    if (actualLines.length === 0 || expectedLines.length === 0) {
+      break;
+    }
+
+    a = actualLines[actualLines.length - 1];
+    b = expectedLines[expectedLines.length - 1];
+  }
+
+  const maxLines = mathMax(actualLines.length, expectedLines.length);
+
+  /*
+   * Strict equal with identical objects that are not identical by reference.
+   * E.g., assert.deepStrictEqual({ a: Symbol() }, { a: Symbol() })
+   */
+  if (maxLines === 0) {
+    /* We have to get the result again. The lines were all removed before. */
+    const aLines = actualInspected.split('\n');
+
+    /* Only remove lines in case it makes sense to collapse those. */
+    /* TODO: Accept env to always show the full error. */
+    if (aLines.length > 50) {
+      aLines[46] = '...';
+      while (aLines.length > 47) {
+        pop.call(aLines);
+      }
+    }
+
+    return `${kReadableOperator.notIdentical}\n\n${join.call(aLines, '\n')}\n`;
+  }
+
+  /* There were at least five identical lines at the end. Mark a couple of skipped. */
+  if (i >= 5) {
+    end = `\n...${end}`;
+    skipped = true;
+  }
+
+  if (other !== EMPTY_STRING) {
+    end = `\n  ${other}${end}`;
+    other = EMPTY_STRING;
+  }
+
+  let printedLines = 0;
+  let identical = 0;
+  const msg = `${kReadableOperator[operator]}\n+ actual - expected`;
+  const skippedMsg = ' ... Lines skipped';
+
+  let lines = actualLines;
+  let plusMinus = '+';
+  let maxLength = expectedLines.length;
+
+  if (actualLines.length < maxLines) {
+    lines = expectedLines;
+    plusMinus = '-';
+    maxLength = actualLines.length;
+  }
+
+  for (i = 0; i < maxLines; i += 1) {
+    if (maxLength < i + 1) {
+      /*
+       * If more than two former lines are identical, print them. Collapse them
+       * in case more than five lines were identical.
+       */
+      if (identical > 2) {
+        if (identical > 3) {
+          if (identical > 4) {
+            if (identical === 5) {
+              res += `\n  ${lines[i - 3]}`;
+              printedLines += 1;
+            } else {
+              res += '\n...';
+              skipped = true;
+            }
+          }
+
+          res += `\n  ${lines[i - 2]}`;
+          printedLines += 1;
+        }
+
+        res += `\n  ${lines[i - 1]}`;
+        printedLines += 1;
+      }
+
+      /* No identical lines before. */
+      identical = 0;
+
+      /* Add the expected line to the cache. */
+      if (lines === actualLines) {
+        res += `\n${plusMinus} ${lines[i]}`;
+      } else {
+        other += `\n${plusMinus} ${lines[i]}`;
+      }
+
+      printedLines += 1;
+      /* Only extra actual lines exist */
+      /* Lines diverge */
+    } else {
+      const expectedLine = expectedLines[i];
+      let actualLine = actualLines[i];
+      /*
+       * If the lines diverge, specifically check for lines that only diverge by
+       * a trailing comma. In that case it is actually identical and we should
+       * mark it as such.
+       */
+      let divergingLines =
+        actualLine !== expectedLine && (!endsWith(actualLine, ',') || stringSlice.call(actualLine, 0, -1) !== expectedLine);
+
+      /*
+       * If the expected line has a trailing comma but is otherwise identical,
+       * add a comma at the end of the actual line. Otherwise the output could
+       * look weird as in:
+       *
+       * [
+       *   1         // No comma at the end!
+       * +   2
+       * ]
+       */
+      if (divergingLines && endsWith(expectedLine, ',') && stringSlice.call(expectedLine, 0, -1) === actualLine) {
+        divergingLines = false;
+        actualLine += ',';
+      }
+
+      if (divergingLines) {
+        /*
+         * If more than two former lines are identical, print them. Collapse
+         * them in case more than five lines were identical.
+         */
+        if (identical > 2) {
+          if (identical > 3) {
+            if (identical > 4) {
+              if (identical === 5) {
+                res += `\n  ${actualLines[i - 3]}`;
+                printedLines += 1;
+              } else {
+                res += '\n...';
+                skipped = true;
+              }
+            }
+
+            res += `\n  ${actualLines[i - 2]}`;
+            printedLines += 1;
+          }
+
+          res += `\n  ${actualLines[i - 1]}`;
+          printedLines += 1;
+        }
+
+        /* No identical lines before. */
+        identical = 0;
+        /*
+         * Add the actual line to the result and cache the expected diverging
+         * line so consecutive diverging lines show up as +++--- and not +-+-+-.
+         */
+        res += `\n+ ${actualLine}`;
+        other += `\n- ${expectedLine}`;
+        printedLines += 2;
+        /* Lines are identical */
+      } else {
+        /* Add all cached information to the result before adding other things and reset the cache. */
+        res += other;
+        other = EMPTY_STRING;
+        identical += 1;
+
+        /* The very first identical line since the last diverging line is be added to the result. */
+        if (identical <= 2) {
+          res += `\n  ${actualLine}`;
+          printedLines += 1;
+        }
+      }
+    }
+
+    /* Inspected object to big (Show ~50 rows max) */
+    if (printedLines > 50 && i < maxLines - 2) {
+      return `${msg}${skippedMsg}\n${res}\n...${other}\n...`;
+    }
+  }
+
+  return `${msg}${skipped ? skippedMsg : EMPTY_STRING}\n${res}${other}${end}${indicator}`;
+}
 
 /**
  * Tests for number as specified in StackTrace library.
@@ -121,7 +496,7 @@ const cV8 =
           isEval: frame.isEval(),
           isNative: frame.isNative(),
           isToplevel: frame.isToplevel(),
-          source: frame.toString(),
+          source: arrayToString.call(frame),
         };
 
         const getFileName = isFunction(frame.getFileName) && frame.getFileName();
@@ -178,9 +553,12 @@ const defContext = function defContext(context, frames, name) {
       value: frames,
     },
     stack: {
-      value: `${name}${STACK_NEWLINE}${map(frames, (frame) => {
-        return frame.toString();
-      }).join(STACK_NEWLINE)}`,
+      value: `${name}${STACK_NEWLINE}${join.call(
+        map(frames, (frame) => {
+          return arrayToString.call(frame);
+        }),
+        STACK_NEWLINE,
+      )}`,
     },
   });
 };
@@ -205,19 +583,19 @@ const errParse = function errParse(context, err, name) {
   const start = findIndex(frames, (frame) => {
     const fName = typeof frame.functionName === 'string' ? frame.functionName : EMPTY_STRING;
 
-    return fName.indexOf(name) > -1;
+    return stringIndexOf.call(fName, name) > -1;
   });
 
   if (start > -1) {
     const item = frames[start];
-    frames = frames.slice(start + 1);
+    frames = arraySlice.call(frames, start + 1);
 
     const end = findIndex(frames, (frame) => {
       return item.source === frame.source;
     });
 
     if (end > -1) {
-      frames = frames.slice(0, end);
+      frames = arraySlice.call(frames, 0, end);
     }
   }
 
@@ -332,8 +710,6 @@ const asAssertionError = function asAssertionError(name, ErrorCtr) {
   return false;
 };
 
-const MAX_MSG_LENGTH = 128;
-
 /**
  * Message generator for AssertionError.
  *
@@ -342,19 +718,77 @@ const MAX_MSG_LENGTH = 128;
  * @returns {string} The generated message.
  */
 const getMessage = function getMessage(message) {
-  const opts = {
-    length: message.length ? toLength(message.length) : MAX_MSG_LENGTH,
-    omission: message.omission ? safeToString(message.omission) : EMPTY_STRING,
-    separator: message.separator ? safeToString(message.separator) : EMPTY_STRING,
-  };
+  if (message.operator === 'deepStrictEqual' || message.operator === 'strictEqual') {
+    return createErrDiff(message.actual, message.expected, message.operator);
+  }
 
-  const readable = readableOperator[message.operator];
-  const op = shortOperator[message.operator] || message.operator;
+  if (message.operator === 'notDeepStrictEqual' || message.operator === 'notStrictEqual') {
+    // In case the objects are equal but the operator requires unequal, show
+    // the first object and say A equals B
+    let base = kReadableOperator[message.operator];
+    const res = inspectValue(message.actual).split('\n');
 
-  return `${readable ? `${readable}\n\n` : ''}${truncate(inspect(message.actual), opts)} ${op} ${truncate(
-    inspect(message.expected),
-    opts,
-  )}\n`;
+    // In case "actual" is an object or a function, it should not be
+    // reference equal.
+    if (
+      message.operator === 'notStrictEqual' &&
+      ((typeof message.actual === 'object' && message.actual !== null) || typeof actual === 'function')
+    ) {
+      base = kReadableOperator.notStrictEqualObject;
+    }
+
+    // Only remove lines in case it makes sense to collapse those.
+    // TODO: Accept env to always show the full error.
+    if (res.length > 50) {
+      res[46] = '...';
+      while (res.length > 47) {
+        pop.call(res);
+      }
+    }
+
+    // Only print a single input.
+    if (res.length === 1) {
+      return `${base}${res[0].length > 5 ? '\n\n' : ' '}${res[0]}`;
+    }
+
+    return `${base}\n\n${join.call(res, '\n')}\n`;
+  }
+
+  let res = inspectValue(message.actual);
+  let other = inspectValue(message.expected);
+  const knownOperator = kReadableOperator[message.operator];
+
+  if (message.operator === 'notDeepEqual' && res === other) {
+    res = `${knownOperator}\n\n${res}`;
+
+    if (res.length > 1024) {
+      res = `${stringSlice.call(res, 0, 1021)}...`;
+    }
+
+    return res;
+  }
+
+  if (res.length > 512) {
+    res = `${stringSlice.call(res, 0, 509)}...`;
+  }
+
+  if (other.length > 512) {
+    other = `${stringSlice.call(other, 0, 509)}...`;
+  }
+
+  if (message.operator === 'deepEqual') {
+    res = `${knownOperator}\n\n${res}\n\nshould loosely deep-equal\n\n`;
+  } else {
+    const newOp = kReadableOperator[`${message.operator}Unequal`];
+
+    if (newOp) {
+      res = `${newOp}\n\n${res}\n\nshould not loosely deep-equal\n\n`;
+    } else {
+      other = ` ${message.operator} ${other}`;
+    }
+  }
+
+  return `${res}${other}`;
 };
 
 /**
@@ -388,14 +822,12 @@ const init = function init(context, message, name, ErrorCtr) {
       throw new TypeError(`The "options" argument must be of type Object. Received type ${typeof message}`);
     }
 
-    const code = 'ERR_ASSERTION';
-
     defineProperties(context, {
       actual: {
         value: message.actual,
       },
       code: {
-        value: code,
+        value: 'ERR_ASSERTION',
       },
       expected: {
         value: message.expected,
@@ -405,11 +837,6 @@ const init = function init(context, message, name, ErrorCtr) {
       },
       message: {
         value: message.message || getMessage(message),
-      },
-      name: {
-        get() {
-          return `${this.constructor.name} [${code}]`;
-        },
       },
       operator: {
         value: message.operator,
@@ -432,6 +859,9 @@ const init = function init(context, message, name, ErrorCtr) {
 // `init` is used in `eval`, don't delete.
 init({}, 'message', 'name', $Error);
 
+/* eslint-disable-next-line no-void */
+let AssertionError = void 0;
+
 const CUSTOM_NAME = 'CustomError';
 
 /**
@@ -447,7 +877,7 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   const ECTR = allCtrs === false || isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
   const initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
   const customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
-
+  const nativeToString = ECTR.prototype.toString;
   /**
    * Create a new object, that prototypically inherits from the `Error`
    * constructor.
@@ -459,7 +889,7 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   let CstmCtr;
 
   // noinspection JSUnusedLocalSymbols
-  const f = /* eslint-disable-line no-unused-vars */ function _f(context, message) {
+  const f = /* eslint-disable-line no-unused-vars */ function f(context, message) {
     const isInstCtr = context instanceof CstmCtr;
 
     if (isInstCtr === false) {
@@ -505,6 +935,11 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
       toJSON: {
         value: toJSON,
       },
+      toString: {
+        value: function $toString() {
+          return this instanceof AssertionError ? `${this.name} [${this.code}]: ${this.message}` : nativeToString.call(this);
+        },
+      },
     },
   );
 
@@ -540,6 +975,8 @@ try {
  * @param {object} [message] - Need to document the properties.
  */
 export const AssertionErrorConstructor = createErrorCtr('AssertionError', Error);
+
+AssertionError = AssertionErrorConstructor;
 
 /**
  * The Error constructor creates an error object.
