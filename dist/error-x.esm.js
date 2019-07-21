@@ -363,7 +363,7 @@ var getMessage = function getMessage(message) {
   };
   var readable = readableOperator[message.operator];
   var op = shortOperator[message.operator] || message.operator;
-  return "".concat(readable ? "".concat(readable, "\n\n") : '').concat(truncate(inspect(message.actual), opts), " ").concat(op, " ").concat(truncate(inspect(message.expected), opts));
+  return "".concat(readable ? "".concat(readable, "\n\n") : '').concat(truncate(inspect(message.actual), opts), " ").concat(op, " ").concat(truncate(inspect(message.expected), opts), "\n");
 };
 /**
  * The toJSON method returns an object representation of the Error object.

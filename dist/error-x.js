@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-21T16:28:48.701Z",
+  "date": "2019-07-21T16:47:58.371Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "b3b0b560d5613848ef88",
+  "hash": "0f71e1f8fcc6cf3cfaa7",
   "license": "MIT",
-  "version": "3.0.9"
+  "version": "3.0.10"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -11789,7 +11789,7 @@ var getMessage = function getMessage(message) {
   };
   var readable = readableOperator[message.operator];
   var op = shortOperator[message.operator] || message.operator;
-  return "".concat(readable ? "".concat(readable, "\n\n") : '').concat(Object(truncate_x__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"])(Object(inspect_x__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"])(message.actual), opts), " ").concat(op, " ").concat(Object(truncate_x__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"])(Object(inspect_x__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"])(message.expected), opts));
+  return "".concat(readable ? "".concat(readable, "\n\n") : '').concat(Object(truncate_x__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"])(Object(inspect_x__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"])(message.actual), opts), " ").concat(op, " ").concat(Object(truncate_x__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"])(Object(inspect_x__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"])(message.expected), opts), "\n");
 };
 /**
  * The toJSON method returns an object representation of the Error object.

@@ -354,7 +354,7 @@ const getMessage = function getMessage(message) {
   return `${readable ? `${readable}\n\n` : ''}${truncate(inspect(message.actual), opts)} ${op} ${truncate(
     inspect(message.expected),
     opts,
-  )}`;
+  )}\n`;
 };
 
 /**
