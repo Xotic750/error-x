@@ -31,6 +31,7 @@ import isVarName from 'is-var-name';
 import toInteger from 'to-integer-x';
 import isRegExp from 'is-regexp-x';
 import clamp from 'math-clamp-x';
+import repeat from 'string-repeat-x';
 
 /* Note to self: Missing repeat and endsWith */
 
@@ -55,40 +56,6 @@ const $toStringTag = hasToStringTag && Symbol.toStringTag;
 const $Error = Error;
 // Capture the function (if any).
 const {captureStackTrace, prepareStackTrace} = $Error;
-
-const repeat = function repeat(value, count) {
-  if (isNil(value)) {
-    throw new TypeError();
-  }
-
-  let string = safeToString(value);
-  let n = toInteger(count);
-
-  if (numberIsNaN(n)) {
-    n = 0;
-  }
-
-  // Account for out-of-bounds indices
-  if (n < 0 || !numberIsFinite(n)) {
-    throw new RangeError();
-  }
-
-  let result = EMPTY_STRING;
-  while (n) {
-    if (n % 2 === 1) {
-      result += string;
-    }
-
-    if (n > 1) {
-      string += string;
-    }
-
-    /* eslint-disable-next-line no-bitwise */
-    n >>= 1;
-  }
-
-  return result;
-};
 
 const endsWith = function endsWith(value, search) {
   if (isNil(value)) {

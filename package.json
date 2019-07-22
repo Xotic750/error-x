@@ -1,6 +1,6 @@
 {
   "name": "error-x",
-  "version": "3.0.14",
+  "version": "3.0.15",
   "description": "Create custom Javascript Error objects.",
   "homepage": "http://xotic750.github.io/error-x/",
   "author": {
@@ -68,6 +68,7 @@
     "object-define-properties-x": "^5.0.7",
     "object-define-property-x": "^5.0.10",
     "stackframe": "^1.0.4",
+    "string-repeat-x": "^1.0.1",
     "to-integer-x": "^4.0.20",
     "to-string-symbols-supported-x": "^2.0.14",
     "trim-x": "^4.0.19"
