@@ -31,12 +31,8 @@ import map from 'array-map-x';
 import numberIsNaN from 'is-nan-x';
 import numberIsFinite from 'is-finite-x';
 import isVarName from 'is-var-name';
-import toInteger from 'to-integer-x';
-import isRegExp from 'is-regexp-x';
-import clamp from 'math-clamp-x';
 import repeat from 'string-repeat-x';
-/* Note to self: Missing repeat and endsWith */
-
+import endsWith from 'string-ends-with-x';
 export var isError = $isError;
 var mathMax = Math.max;
 var parse = errorStackParser.parse;
@@ -47,8 +43,7 @@ var parse = errorStackParser.parse;
 var EMPTY_STRING = '';
 var stringSplit = EMPTY_STRING.split,
     stringIndexOf = EMPTY_STRING.indexOf,
-    stringSlice = EMPTY_STRING.slice,
-    charCodeAt = EMPTY_STRING.charCodeAt;
+    stringSlice = EMPTY_STRING.slice;
 var _ref = [],
     pop = _ref.pop,
     join = _ref.join,
@@ -66,56 +61,6 @@ var $Error = Error; // Capture the function (if any).
 
 var captureStackTrace = $Error.captureStackTrace,
     prepareStackTrace = $Error.prepareStackTrace;
-
-var endsWith = function endsWith(value, search) {
-  if (isNil(value)) {
-    throw new TypeError();
-  }
-
-  var string = safeToString(value);
-
-  if (isRegExp(search)) {
-    throw new TypeError();
-  }
-
-  var stringLength = string.length;
-  var searchString = safeToString(search);
-  var searchLength = searchString.length;
-  var pos = stringLength;
-
-  if (arguments.length > 2) {
-    /* eslint-disable-next-line prefer-rest-params */
-    var position = arguments[2];
-
-    if (typeof position !== 'undefined') {
-      pos = toInteger(position);
-
-      if (numberIsNaN(pos)) {
-        pos = 0;
-      }
-    }
-  }
-
-  var end = clamp(pos, 0, stringLength);
-  var start = end - searchLength;
-
-  if (start < 0) {
-    return false;
-  }
-
-  var index = 0;
-
-  while (index < searchLength) {
-    if (charCodeAt.call(string, start + index) !== charCodeAt.call(searchString, index)) {
-      return false;
-    }
-
-    index += 1;
-  }
-
-  return true;
-};
-
 var kReadableOperator = {
   deepStrictEqual: 'Expected values to be strictly deep-equal:',
   strictEqual: 'Expected values to be strictly equal:',

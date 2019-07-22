@@ -28,12 +28,8 @@ import map from 'array-map-x';
 import numberIsNaN from 'is-nan-x';
 import numberIsFinite from 'is-finite-x';
 import isVarName from 'is-var-name';
-import toInteger from 'to-integer-x';
-import isRegExp from 'is-regexp-x';
-import clamp from 'math-clamp-x';
 import repeat from 'string-repeat-x';
-
-/* Note to self: Missing repeat and endsWith */
+import endsWith from 'string-ends-with-x';
 
 export const isError = $isError;
 
@@ -45,7 +41,7 @@ const {parse} = errorStackParser;
  */
 
 const EMPTY_STRING = '';
-const {split: stringSplit, indexOf: stringIndexOf, slice: stringSlice, charCodeAt} = EMPTY_STRING;
+const {split: stringSplit, indexOf: stringIndexOf, slice: stringSlice} = EMPTY_STRING;
 const {pop, join, slice: arraySlice, toString: arrayToString} = [];
 /** @type {BooleanConstructor} */
 const castBoolean = true.constructor;
@@ -56,54 +52,6 @@ const $toStringTag = hasToStringTag && Symbol.toStringTag;
 const $Error = Error;
 // Capture the function (if any).
 const {captureStackTrace, prepareStackTrace} = $Error;
-
-const endsWith = function endsWith(value, search) {
-  if (isNil(value)) {
-    throw new TypeError();
-  }
-
-  const string = safeToString(value);
-
-  if (isRegExp(search)) {
-    throw new TypeError();
-  }
-
-  const stringLength = string.length;
-  const searchString = safeToString(search);
-  const searchLength = searchString.length;
-  let pos = stringLength;
-
-  if (arguments.length > 2) {
-    /* eslint-disable-next-line prefer-rest-params */
-    const position = arguments[2];
-
-    if (typeof position !== 'undefined') {
-      pos = toInteger(position);
-
-      if (numberIsNaN(pos)) {
-        pos = 0;
-      }
-    }
-  }
-
-  const end = clamp(pos, 0, stringLength);
-  const start = end - searchLength;
-
-  if (start < 0) {
-    return false;
-  }
-
-  let index = 0;
-  while (index < searchLength) {
-    if (charCodeAt.call(string, start + index) !== charCodeAt.call(searchString, index)) {
-      return false;
-    }
-
-    index += 1;
-  }
-
-  return true;
-};
 
 const kReadableOperator = {
   deepStrictEqual: 'Expected values to be strictly deep-equal:',
