@@ -828,9 +828,7 @@ var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
 
   var CstmCtr; // noinspection JSUnusedLocalSymbols
 
-  var f =
-  /* eslint-disable-line no-unused-vars */
-  function f(context, message) {
+  var f = function f(context, message) {
     var isInstCtr = context instanceof CstmCtr;
 
     if (isInstCtr === false) {
@@ -840,10 +838,10 @@ var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
     init(context, message, customName, ErrorCtr);
     return context;
   };
-  /* eslint-disable-next-line no-eval */
+  /* eslint-disable-next-line no-new-func */
 
 
-  CstmCtr = eval("(0,function ".concat(customName, "(message){return f(this,message)})")); // Inherit the prototype methods from `ECTR`.
+  CstmCtr = Function('f', "return function ".concat(customName, "(message){return f(this,message)}"))(f); // Inherit the prototype methods from `ECTR`.
 
   CstmCtr.prototype = $create(ECTR.prototype); // noinspection JSValidateTypes
 
