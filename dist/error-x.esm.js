@@ -380,6 +380,19 @@ function createErrDiff(actual, expected, $operator) {
 var isNumber = function isNumber(n) {
   return numberIsNaN(parseFloat(n)) === false && numberIsFinite(n);
 };
+/**
+ * The stack preparation function for the V8 stack.
+ *
+ * @private
+ * @param {*} ignore - Unused argument.
+ * @param {!object} thisStack - The V8 stack.
+ * @returns {!object} The V8 stack.
+ */
+
+
+var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+  return thisStack;
+};
 
 var cV8 = castBoolean(captureStackTrace) && function getCV8() {
   // Test to see if the function works.
@@ -401,19 +414,8 @@ var cV8 = castBoolean(captureStackTrace) && function getCV8() {
   return function captureV8(context) {
     var _this = this;
 
-    /**
-     * The stack preparation function for the V8 stack.
-     *
-     * @private
-     * @param {*} ignore - Unused argument.
-     * @param {!object} thisStack - The V8 stack.
-     * @returns {!object} The V8 stack.
-     */
-    $Error.prepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
-      return thisStack;
-    };
+    $Error.prepareStackTrace = tempPrepareStackTrace;
     /** @type {object} */
-
 
     var error = new $Error();
     captureStackTrace(error, context.constructor);
@@ -512,7 +514,7 @@ var errParse = function errParse(context, err, name) {
   try {
     frames = parse(err);
   } catch (ignore) {
-    return false;
+    return [];
   }
 
   var start = findIndex(frames, function (frame) {

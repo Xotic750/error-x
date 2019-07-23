@@ -369,6 +369,18 @@ const isNumber = function isNumber(n) {
   return numberIsNaN(parseFloat(n)) === false && numberIsFinite(n);
 };
 
+/**
+ * The stack preparation function for the V8 stack.
+ *
+ * @private
+ * @param {*} ignore - Unused argument.
+ * @param {!object} thisStack - The V8 stack.
+ * @returns {!object} The V8 stack.
+ */
+const tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+  return thisStack;
+};
+
 const cV8 =
   castBoolean(captureStackTrace) &&
   (function getCV8() {
@@ -388,17 +400,7 @@ const cV8 =
      * @returns {!Array.<!object>} Array of StackFrames.
      */
     return function captureV8(context) {
-      /**
-       * The stack preparation function for the V8 stack.
-       *
-       * @private
-       * @param {*} ignore - Unused argument.
-       * @param {!object} thisStack - The V8 stack.
-       * @returns {!object} The V8 stack.
-       */
-      $Error.prepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
-        return thisStack;
-      };
+      $Error.prepareStackTrace = tempPrepareStackTrace;
 
       /** @type {object} */
       const error = new $Error();
@@ -452,8 +454,8 @@ const cV8 =
   })();
 
 let allCtrs = true;
-
 const STACK_NEWLINE = '\n    ';
+
 /**
  * Defines frames and stack on the Custom Error this object.
  *
@@ -492,7 +494,7 @@ const errParse = function errParse(context, err, name) {
   try {
     frames = parse(err);
   } catch (ignore) {
-    return false;
+    return [];
   }
 
   const start = findIndex(frames, (frame) => {

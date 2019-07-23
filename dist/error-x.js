@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-23T18:22:34.508Z",
+  "date": "2019-07-23T18:56:13.075Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "305c9d4dee3a4577b4fa",
+  "hash": "2a35387043fab1bc908a",
   "license": "MIT",
-  "version": "3.0.19"
+  "version": "3.0.20"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -11810,6 +11810,19 @@ function createErrDiff(actual, expected, $operator) {
 var isNumber = function isNumber(n) {
   return Object(is_nan_x__WEBPACK_IMPORTED_MODULE_15__[/* default */ "a"])(parseFloat(n)) === false && Object(is_finite_x__WEBPACK_IMPORTED_MODULE_16__[/* default */ "a"])(n);
 };
+/**
+ * The stack preparation function for the V8 stack.
+ *
+ * @private
+ * @param {*} ignore - Unused argument.
+ * @param {!object} thisStack - The V8 stack.
+ * @returns {!object} The V8 stack.
+ */
+
+
+var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+  return thisStack;
+};
 
 var cV8 = castBoolean(captureStackTrace) && function getCV8() {
   // Test to see if the function works.
@@ -11831,19 +11844,8 @@ var cV8 = castBoolean(captureStackTrace) && function getCV8() {
   return function captureV8(context) {
     var _this = this;
 
-    /**
-     * The stack preparation function for the V8 stack.
-     *
-     * @private
-     * @param {*} ignore - Unused argument.
-     * @param {!object} thisStack - The V8 stack.
-     * @returns {!object} The V8 stack.
-     */
-    $Error.prepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
-      return thisStack;
-    };
+    $Error.prepareStackTrace = tempPrepareStackTrace;
     /** @type {object} */
-
 
     var error = new $Error();
     captureStackTrace(error, context.constructor);
@@ -11942,7 +11944,7 @@ var errParse = function errParse(context, err, name) {
   try {
     frames = parse(err);
   } catch (ignore) {
-    return false;
+    return [];
   }
 
   var start = Object(find_index_x__WEBPACK_IMPORTED_MODULE_7__[/* default */ "a"])(frames, function (frame) {
