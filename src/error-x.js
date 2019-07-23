@@ -42,7 +42,7 @@ const {parse} = errorStackParser;
 
 const EMPTY_STRING = '';
 const {split: stringSplit, indexOf: stringIndexOf, slice: stringSlice} = EMPTY_STRING;
-const {pop, join, slice: arraySlice, toString: arrayToString} = [];
+const {pop, join, slice: arraySlice} = [];
 /** @type {BooleanConstructor} */
 const castBoolean = true.constructor;
 /* eslint-disable-next-line compat/compat */
@@ -411,7 +411,7 @@ const cV8 =
           isEval: frame.isEval(),
           isNative: frame.isNative(),
           isToplevel: frame.isToplevel(),
-          source: arrayToString.call(frame),
+          source: frame.toString(),
         };
 
         const getFileName = isFunction(frame.getFileName) && frame.getFileName();
@@ -470,7 +470,7 @@ const defContext = function defContext(context, frames, name) {
     stack: {
       value: `${name}${STACK_NEWLINE}${join.call(
         map(frames, (frame) => {
-          return arrayToString.call(frame);
+          return frame.toString();
         }),
         STACK_NEWLINE,
       )}`,

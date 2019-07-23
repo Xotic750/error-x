@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-23T00:01:41.839Z",
+  "date": "2019-07-23T18:22:34.508Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "607ea93e27b71c1bb5d3",
+  "hash": "305c9d4dee3a4577b4fa",
   "license": "MIT",
-  "version": "3.0.18"
+  "version": "3.0.19"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -11477,8 +11477,7 @@ var stringSplit = EMPTY_STRING.split,
 var _ref = [],
     pop = _ref.pop,
     join = _ref.join,
-    arraySlice = _ref.slice,
-    arrayToString = _ref.toString;
+    arraySlice = _ref.slice;
 /** @type {BooleanConstructor} */
 
 var castBoolean = true.constructor;
@@ -11858,7 +11857,7 @@ var cV8 = castBoolean(captureStackTrace) && function getCV8() {
         isEval: frame.isEval(),
         isNative: frame.isNative(),
         isToplevel: frame.isToplevel(),
-        source: arrayToString.call(frame)
+        source: frame.toString()
       };
       var getFileName = Object(is_function_x__WEBPACK_IMPORTED_MODULE_8__[/* default */ "a"])(frame.getFileName) && frame.getFileName();
 
@@ -11919,7 +11918,7 @@ var defContext = function defContext(context, frames, name) {
       value: "".concat(name).concat(STACK_NEWLINE).concat(join.call(Object(array_map_x__WEBPACK_IMPORTED_MODULE_14__[/* default */ "a"])(frames, function (frame) {
         _newArrowCheck(this, _this2);
 
-        return arrayToString.call(frame);
+        return frame.toString();
       }.bind(this)), STACK_NEWLINE))
     }
   });

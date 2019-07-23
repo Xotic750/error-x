@@ -47,8 +47,7 @@ var stringSplit = EMPTY_STRING.split,
 var _ref = [],
     pop = _ref.pop,
     join = _ref.join,
-    arraySlice = _ref.slice,
-    arrayToString = _ref.toString;
+    arraySlice = _ref.slice;
 /** @type {BooleanConstructor} */
 
 var castBoolean = true.constructor;
@@ -428,7 +427,7 @@ var cV8 = castBoolean(captureStackTrace) && function getCV8() {
         isEval: frame.isEval(),
         isNative: frame.isNative(),
         isToplevel: frame.isToplevel(),
-        source: arrayToString.call(frame)
+        source: frame.toString()
       };
       var getFileName = isFunction(frame.getFileName) && frame.getFileName();
 
@@ -489,7 +488,7 @@ var defContext = function defContext(context, frames, name) {
       value: "".concat(name).concat(STACK_NEWLINE).concat(join.call(map(frames, function (frame) {
         _newArrowCheck(this, _this2);
 
-        return arrayToString.call(frame);
+        return frame.toString();
       }.bind(this)), STACK_NEWLINE))
     }
   });
