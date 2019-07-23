@@ -34,7 +34,6 @@ import endsWith from 'string-ends-with-x';
 export const isError = $isError;
 
 const mathMax = Math.max;
-const {parse} = errorStackParser;
 
 /**
  * @typedef {ErrorConstructor|TypeErrorConstructor|SyntaxErrorConstructor|URIErrorConstructor|ReferenceErrorConstructor|EvalErrorConstructor|RangeErrorConstructor} OfErrorConstructor
@@ -492,9 +491,9 @@ const defContext = function defContext(context, frames, name) {
 const errParse = function errParse(context, err, name) {
   let frames;
   try {
-    frames = parse(err);
+    frames = errorStackParser.parse(err);
   } catch (ignore) {
-    return [];
+    return false;
   }
 
   const start = findIndex(frames, (frame) => {

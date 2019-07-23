@@ -35,7 +35,6 @@ import repeat from 'string-repeat-x';
 import endsWith from 'string-ends-with-x';
 export var isError = $isError;
 var mathMax = Math.max;
-var parse = errorStackParser.parse;
 /**
  * @typedef {ErrorConstructor|TypeErrorConstructor|SyntaxErrorConstructor|URIErrorConstructor|ReferenceErrorConstructor|EvalErrorConstructor|RangeErrorConstructor} OfErrorConstructor
  */
@@ -512,9 +511,9 @@ var errParse = function errParse(context, err, name) {
   var frames;
 
   try {
-    frames = parse(err);
+    frames = errorStackParser.parse(err);
   } catch (ignore) {
-    return [];
+    return false;
   }
 
   var start = findIndex(frames, function (frame) {

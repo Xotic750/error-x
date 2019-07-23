@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-23T18:56:13.075Z",
+  "date": "2019-07-23T19:30:23.276Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "2a35387043fab1bc908a",
+  "hash": "8a76543e5ac8b4415540",
   "license": "MIT",
-  "version": "3.0.20"
+  "version": "3.0.21"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -11465,7 +11465,6 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 var isError = is_error_x__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"];
 var mathMax = Math.max;
-var parse = error_stack_parser__WEBPACK_IMPORTED_MODULE_4___default.a.parse;
 /**
  * @typedef {ErrorConstructor|TypeErrorConstructor|SyntaxErrorConstructor|URIErrorConstructor|ReferenceErrorConstructor|EvalErrorConstructor|RangeErrorConstructor} OfErrorConstructor
  */
@@ -11942,9 +11941,9 @@ var errParse = function errParse(context, err, name) {
   var frames;
 
   try {
-    frames = parse(err);
+    frames = error_stack_parser__WEBPACK_IMPORTED_MODULE_4___default.a.parse(err);
   } catch (ignore) {
-    return [];
+    return false;
   }
 
   var start = Object(find_index_x__WEBPACK_IMPORTED_MODULE_7__[/* default */ "a"])(frames, function (frame) {
