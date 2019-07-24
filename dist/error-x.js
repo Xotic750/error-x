@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-24T01:30:30.177Z",
+  "date": "2019-07-24T17:54:44.379Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
   "hash": "732eb0efe2142523bbbb",
   "license": "MIT",
-  "version": "3.0.23"
+  "version": "3.0.24"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
