@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-27T15:30:34.291Z",
+  "date": "2019-07-27T19:15:42.701Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "fd374e79f0b28534b521",
+  "hash": "a3b4236ed37eb700ec38",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -10899,6 +10899,7 @@ function error_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Sy
 
 
 
+
 var error_x_esm_isError = is_error_x_esm;
 var mathMax = Math.max;
 /**
@@ -10906,16 +10907,13 @@ var mathMax = Math.max;
  */
 
 var error_x_esm_EMPTY_STRING = '';
-var stringSplit = error_x_esm_EMPTY_STRING.split,
+var split = error_x_esm_EMPTY_STRING.split,
     stringIndexOf = error_x_esm_EMPTY_STRING.indexOf,
     stringSlice = error_x_esm_EMPTY_STRING.slice;
 var error_x_esm_ref = [],
     pop = error_x_esm_ref.pop,
     error_x_esm_join = error_x_esm_ref.join,
     arraySlice = error_x_esm_ref.slice;
-/** @type {BooleanConstructor} */
-
-var error_x_esm_castBoolean = true.constructor;
 /* eslint-disable-next-line compat/compat */
 
 var $toStringTag = has_to_string_tag_x_esm && Symbol.toStringTag;
@@ -10971,8 +10969,8 @@ function createErrDiff(actual, expected, $operator) {
   var end = error_x_esm_EMPTY_STRING;
   var skipped = false;
   var actualInspected = inspectValue(actual);
-  var actualLines = stringSplit.call(actualInspected, '\n');
-  var expectedLines = stringSplit.call(inspectValue(expected), '\n');
+  var actualLines = split.call(actualInspected, '\n');
+  var expectedLines = split.call(inspectValue(expected), '\n');
   var i = 0;
   var indicator = error_x_esm_EMPTY_STRING;
   /*
@@ -11064,7 +11062,7 @@ function createErrDiff(actual, expected, $operator) {
 
   if (maxLines === 0) {
     /* We have to get the result again. The lines were all removed before. */
-    var aLines = actualInspected.split('\n');
+    var aLines = split.call(actualInspected, '\n');
     /* Only remove lines in case it makes sense to collapse those. */
 
     /* TODO: Accept env to always show the full error. */
@@ -11259,7 +11257,7 @@ var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
 
-var cV8 = error_x_esm_castBoolean(captureStackTrace) && function getCV8() {
+var cV8 = to_boolean_x_esm(captureStackTrace) && function getCV8() {
   // Test to see if the function works.
   try {
     captureStackTrace(new $Error(), captureStackTrace);
@@ -11532,7 +11530,7 @@ var getMessage = function getMessage(message) {
     // the first object and say A equals B
     var base = kReadableOperator[message.operator];
 
-    var _res = inspectValue(message.actual).split('\n'); // In case "actual" is an object or a function, it should not be
+    var _res = split.call(inspectValue(message.actual), '\n'); // In case "actual" is an object or a function, it should not be
     // reference equal.
 
 
@@ -11639,7 +11637,7 @@ var error_x_esm_init = function init(context, message, name, ErrorCtr) {
         value: message.expected
       },
       generatedMessage: {
-        value: error_x_esm_castBoolean(message.message) === false
+        value: to_boolean_x_esm(message.message) === false
       },
       message: {
         value: message.message || getMessage(message)

@@ -30,6 +30,7 @@ import numberIsFinite from 'is-finite-x';
 import isVarName from 'is-var-name';
 import repeat from 'string-repeat-x';
 import endsWith from 'string-ends-with-x';
+import toBoolean from 'to-boolean-x';
 
 export const isError = $isError;
 
@@ -40,10 +41,8 @@ const mathMax = Math.max;
  */
 
 const EMPTY_STRING = '';
-const {split: stringSplit, indexOf: stringIndexOf, slice: stringSlice} = EMPTY_STRING;
+const {split, indexOf: stringIndexOf, slice: stringSlice} = EMPTY_STRING;
 const {pop, join, slice: arraySlice} = [];
-/** @type {BooleanConstructor} */
-const castBoolean = true.constructor;
 /* eslint-disable-next-line compat/compat */
 const $toStringTag = hasToStringTag && Symbol.toStringTag;
 
@@ -95,8 +94,8 @@ function createErrDiff(actual, expected, $operator) {
   let end = EMPTY_STRING;
   let skipped = false;
   const actualInspected = inspectValue(actual);
-  const actualLines = stringSplit.call(actualInspected, '\n');
-  const expectedLines = stringSplit.call(inspectValue(expected), '\n');
+  const actualLines = split.call(actualInspected, '\n');
+  const expectedLines = split.call(inspectValue(expected), '\n');
 
   let i = 0;
   let indicator = EMPTY_STRING;
@@ -194,7 +193,7 @@ function createErrDiff(actual, expected, $operator) {
    */
   if (maxLines === 0) {
     /* We have to get the result again. The lines were all removed before. */
-    const aLines = actualInspected.split('\n');
+    const aLines = split.call(actualInspected, '\n');
 
     /* Only remove lines in case it makes sense to collapse those. */
     /* TODO: Accept env to always show the full error. */
@@ -381,7 +380,7 @@ const tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
 };
 
 const cV8 =
-  castBoolean(captureStackTrace) &&
+  toBoolean(captureStackTrace) &&
   (function getCV8() {
     // Test to see if the function works.
     try {
@@ -642,7 +641,7 @@ const getMessage = function getMessage(message) {
     // In case the objects are equal but the operator requires unequal, show
     // the first object and say A equals B
     let base = kReadableOperator[message.operator];
-    const res = inspectValue(message.actual).split('\n');
+    const res = split.call(inspectValue(message.actual), '\n');
 
     // In case "actual" is an object or a function, it should not be
     // reference equal.
@@ -749,7 +748,7 @@ const init = function init(context, message, name, ErrorCtr) {
         value: message.expected,
       },
       generatedMessage: {
-        value: castBoolean(message.message) === false,
+        value: toBoolean(message.message) === false,
       },
       message: {
         value: message.message || getMessage(message),

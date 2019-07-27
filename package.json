@@ -69,6 +69,7 @@
     "stackframe": "^1.0.4",
     "string-ends-with-x": "^1.0.7",
     "string-repeat-x": "^1.0.9",
+    "to-boolean-x": "^2.0.24",
     "to-string-symbols-supported-x": "^2.0.21",
     "trim-x": "^4.0.26"
   },

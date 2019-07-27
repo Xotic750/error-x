@@ -33,6 +33,7 @@ import numberIsFinite from 'is-finite-x';
 import isVarName from 'is-var-name';
 import repeat from 'string-repeat-x';
 import endsWith from 'string-ends-with-x';
+import toBoolean from 'to-boolean-x';
 export var isError = $isError;
 var mathMax = Math.max;
 /**
@@ -40,16 +41,13 @@ var mathMax = Math.max;
  */
 
 var EMPTY_STRING = '';
-var stringSplit = EMPTY_STRING.split,
+var split = EMPTY_STRING.split,
     stringIndexOf = EMPTY_STRING.indexOf,
     stringSlice = EMPTY_STRING.slice;
 var _ref = [],
     pop = _ref.pop,
     join = _ref.join,
     arraySlice = _ref.slice;
-/** @type {BooleanConstructor} */
-
-var castBoolean = true.constructor;
 /* eslint-disable-next-line compat/compat */
 
 var $toStringTag = hasToStringTag && Symbol.toStringTag;
@@ -105,8 +103,8 @@ function createErrDiff(actual, expected, $operator) {
   var end = EMPTY_STRING;
   var skipped = false;
   var actualInspected = inspectValue(actual);
-  var actualLines = stringSplit.call(actualInspected, '\n');
-  var expectedLines = stringSplit.call(inspectValue(expected), '\n');
+  var actualLines = split.call(actualInspected, '\n');
+  var expectedLines = split.call(inspectValue(expected), '\n');
   var i = 0;
   var indicator = EMPTY_STRING;
   /*
@@ -198,7 +196,7 @@ function createErrDiff(actual, expected, $operator) {
 
   if (maxLines === 0) {
     /* We have to get the result again. The lines were all removed before. */
-    var aLines = actualInspected.split('\n');
+    var aLines = split.call(actualInspected, '\n');
     /* Only remove lines in case it makes sense to collapse those. */
 
     /* TODO: Accept env to always show the full error. */
@@ -393,7 +391,7 @@ var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
 
-var cV8 = castBoolean(captureStackTrace) && function getCV8() {
+var cV8 = toBoolean(captureStackTrace) && function getCV8() {
   // Test to see if the function works.
   try {
     captureStackTrace(new $Error(), captureStackTrace);
@@ -666,7 +664,7 @@ var getMessage = function getMessage(message) {
     // the first object and say A equals B
     var base = kReadableOperator[message.operator];
 
-    var _res = inspectValue(message.actual).split('\n'); // In case "actual" is an object or a function, it should not be
+    var _res = split.call(inspectValue(message.actual), '\n'); // In case "actual" is an object or a function, it should not be
     // reference equal.
 
 
@@ -773,7 +771,7 @@ var init = function init(context, message, name, ErrorCtr) {
         value: message.expected
       },
       generatedMessage: {
-        value: castBoolean(message.message) === false
+        value: toBoolean(message.message) === false
       },
       message: {
         value: message.message || getMessage(message)
