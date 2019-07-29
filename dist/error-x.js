@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T11:51:26.815Z",
+  "date": "2019-07-29T12:10:43.799Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "14c368ad0b33a0934f1e",
+  "hash": "ee4785484b5fee2e4509",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -11242,6 +11242,67 @@ var error_x_esm_isNumber = function isNumber(n) {
 var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
+
+var getFrameIterateeOpts = function getFrameIterateeOpts(frame) {
+  return {
+    functionName: frame.getFunctionName(),
+    isConstructor: frame.isConstructor(),
+    isEval: frame.isEval(),
+    isNative: frame.isNative(),
+    isToplevel: frame.isToplevel(),
+    source: frame.toString()
+  };
+};
+
+var error_x_esm_setFileName = function setFileName(frame, opts) {
+  var getFileName = is_function_x_esm(frame.getFileName) && frame.getFileName();
+
+  if (getFileName) {
+    opts.getFileName = getFileName;
+  }
+
+  return opts;
+};
+
+var error_x_esm_setColumnNumber = function setColumnNumber(frame, opts) {
+  var columnNumber = is_function_x_esm(frame.getColumnNumber) && frame.getColumnNumber();
+
+  if (error_x_esm_isNumber(columnNumber)) {
+    opts.columnNumber = columnNumber;
+  }
+
+  return opts;
+};
+
+var error_x_esm_setLineNumber = function setLineNumber(frame, opts) {
+  var lineNumber = is_function_x_esm(frame.getLineNumber) && frame.getLineNumber();
+
+  if (error_x_esm_isNumber(lineNumber)) {
+    opts.lineNumber = lineNumber;
+  }
+
+  return opts;
+};
+
+var error_x_esm_setEvalOrigin = function setEvalOrigin(frame, opts) {
+  var evalOrigin = is_function_x_esm(frame.getEvalOrigin) && frame.getEvalOrigin();
+
+  if (is_object_like_x_esm(evalOrigin)) {
+    opts.evalOrigin = evalOrigin;
+  }
+
+  return opts;
+};
+
+var error_x_esm_v8FrameIteratee = function v8FrameIteratee(frame) {
+  var opts = getFrameIterateeOpts(frame);
+  error_x_esm_setFileName(frame, opts);
+  error_x_esm_setEvalOrigin(frame, opts);
+  error_x_esm_setColumnNumber(frame, opts);
+  error_x_esm_setLineNumber(frame, opts);
+  error_x_esm_setEvalOrigin(frame, opts);
+  return new stackframe_default.a(opts);
+};
 /**
  * Captures the V8 stack and converts it to an array of Stackframes.
  *
@@ -11258,41 +11319,7 @@ var error_x_esm_captureV8 = function captureV8(context) {
 
   var error = new $Error();
   captureStackTrace(error, context.constructor);
-  var frames = array_map_x_esm(error.stack, function iteratee(frame) {
-    var opts = {
-      functionName: frame.getFunctionName(),
-      isConstructor: frame.isConstructor(),
-      isEval: frame.isEval(),
-      isNative: frame.isNative(),
-      isToplevel: frame.isToplevel(),
-      source: frame.toString()
-    };
-    var getFileName = is_function_x_esm(frame.getFileName) && frame.getFileName();
-
-    if (getFileName) {
-      opts.getFileName = getFileName;
-    }
-
-    var columnNumber = is_function_x_esm(frame.getColumnNumber) && frame.getColumnNumber();
-
-    if (error_x_esm_isNumber(columnNumber)) {
-      opts.columnNumber = columnNumber;
-    }
-
-    var lineNumber = is_function_x_esm(frame.getLineNumber) && frame.getLineNumber();
-
-    if (error_x_esm_isNumber(lineNumber)) {
-      opts.lineNumber = lineNumber;
-    }
-
-    var evalOrigin = is_function_x_esm(frame.getEvalOrigin) && frame.getEvalOrigin();
-
-    if (is_object_like_x_esm(evalOrigin)) {
-      opts.evalOrigin = evalOrigin;
-    }
-
-    return new stackframe_default.a(opts);
-  });
+  var frames = array_map_x_esm(error.stack, error_x_esm_v8FrameIteratee);
 
   if (typeof prepareStackTrace === 'undefined') {
     delete $Error.prepareStackTrace;

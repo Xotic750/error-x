@@ -376,6 +376,67 @@ var isNumber = function isNumber(n) {
 var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
+
+var getFrameIterateeOpts = function getFrameIterateeOpts(frame) {
+  return {
+    functionName: frame.getFunctionName(),
+    isConstructor: frame.isConstructor(),
+    isEval: frame.isEval(),
+    isNative: frame.isNative(),
+    isToplevel: frame.isToplevel(),
+    source: frame.toString()
+  };
+};
+
+var setFileName = function setFileName(frame, opts) {
+  var getFileName = isFunction(frame.getFileName) && frame.getFileName();
+
+  if (getFileName) {
+    opts.getFileName = getFileName;
+  }
+
+  return opts;
+};
+
+var setColumnNumber = function setColumnNumber(frame, opts) {
+  var columnNumber = isFunction(frame.getColumnNumber) && frame.getColumnNumber();
+
+  if (isNumber(columnNumber)) {
+    opts.columnNumber = columnNumber;
+  }
+
+  return opts;
+};
+
+var setLineNumber = function setLineNumber(frame, opts) {
+  var lineNumber = isFunction(frame.getLineNumber) && frame.getLineNumber();
+
+  if (isNumber(lineNumber)) {
+    opts.lineNumber = lineNumber;
+  }
+
+  return opts;
+};
+
+var setEvalOrigin = function setEvalOrigin(frame, opts) {
+  var evalOrigin = isFunction(frame.getEvalOrigin) && frame.getEvalOrigin();
+
+  if (isObjectLike(evalOrigin)) {
+    opts.evalOrigin = evalOrigin;
+  }
+
+  return opts;
+};
+
+var v8FrameIteratee = function v8FrameIteratee(frame) {
+  var opts = getFrameIterateeOpts(frame);
+  setFileName(frame, opts);
+  setEvalOrigin(frame, opts);
+  setColumnNumber(frame, opts);
+  setLineNumber(frame, opts);
+  setEvalOrigin(frame, opts);
+  return new StackFrame(opts);
+};
 /**
  * Captures the V8 stack and converts it to an array of Stackframes.
  *
@@ -392,41 +453,7 @@ var captureV8 = function captureV8(context) {
 
   var error = new $Error();
   captureStackTrace(error, context.constructor);
-  var frames = map(error.stack, function iteratee(frame) {
-    var opts = {
-      functionName: frame.getFunctionName(),
-      isConstructor: frame.isConstructor(),
-      isEval: frame.isEval(),
-      isNative: frame.isNative(),
-      isToplevel: frame.isToplevel(),
-      source: frame.toString()
-    };
-    var getFileName = isFunction(frame.getFileName) && frame.getFileName();
-
-    if (getFileName) {
-      opts.getFileName = getFileName;
-    }
-
-    var columnNumber = isFunction(frame.getColumnNumber) && frame.getColumnNumber();
-
-    if (isNumber(columnNumber)) {
-      opts.columnNumber = columnNumber;
-    }
-
-    var lineNumber = isFunction(frame.getLineNumber) && frame.getLineNumber();
-
-    if (isNumber(lineNumber)) {
-      opts.lineNumber = lineNumber;
-    }
-
-    var evalOrigin = isFunction(frame.getEvalOrigin) && frame.getEvalOrigin();
-
-    if (isObjectLike(evalOrigin)) {
-      opts.evalOrigin = evalOrigin;
-    }
-
-    return new StackFrame(opts);
-  });
+  var frames = map(error.stack, v8FrameIteratee);
 
   if (typeof prepareStackTrace === 'undefined') {
     delete $Error.prepareStackTrace;
