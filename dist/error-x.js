@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T09:54:50.111Z",
+  "date": "2019-07-29T10:17:26.155Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "de96947342bf19ed5c6a",
+  "hash": "e4ed63402e73348fe81c",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -10864,8 +10864,6 @@ var sew = $endsWith;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SyntaxErrorConstructor", function() { return SyntaxErrorConstructor; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TypeErrorConstructor", function() { return TypeErrorConstructor; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "URIErrorConstructor", function() { return URIErrorConstructor; });
-function error_x_esm_newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
-
 function error_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { error_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { error_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return error_x_esm_typeof(obj); }
 
 /*
@@ -11278,16 +11276,12 @@ var cV8 = to_boolean_x_esm(captureStackTrace) && function getCV8() {
 
 
   return function captureV8(context) {
-    var _this = this;
-
     $Error.prepareStackTrace = tempPrepareStackTrace;
     /** @type {object} */
 
     var error = new $Error();
     captureStackTrace(error, context.constructor);
-    var frames = array_map_x_esm(error.stack, function (frame) {
-      error_x_esm_newArrowCheck(this, _this);
-
+    var frames = array_map_x_esm(error.stack, function iteratee(frame) {
       var opts = {
         // args: void 0,
         functionName: frame.getFunctionName(),
@@ -11322,7 +11316,7 @@ var cV8 = to_boolean_x_esm(captureStackTrace) && function getCV8() {
       }
 
       return new stackframe_default.a(opts);
-    }.bind(this));
+    });
 
     if (typeof prepareStackTrace === 'undefined') {
       delete $Error.prepareStackTrace;
@@ -11347,8 +11341,6 @@ var STACK_NEWLINE = '\n    ';
  */
 
 var error_x_esm_defContext = function defContext(obj) {
-  var _this2 = this;
-
   var context = obj.context,
       frames = obj.frames,
       name = obj.name;
@@ -11357,11 +11349,9 @@ var error_x_esm_defContext = function defContext(obj) {
       value: frames
     },
     stack: {
-      value: "".concat(name).concat(STACK_NEWLINE).concat(error_x_esm_join.call(array_map_x_esm(frames, function (frame) {
-        error_x_esm_newArrowCheck(this, _this2);
-
+      value: "".concat(name).concat(STACK_NEWLINE).concat(error_x_esm_join.call(array_map_x_esm(frames, function iteratee(frame) {
         return frame.toString();
-      }.bind(this)), STACK_NEWLINE))
+      }), STACK_NEWLINE))
     }
   });
 };
@@ -11378,8 +11368,6 @@ var error_x_esm_defContext = function defContext(obj) {
 
 
 var error_x_esm_errParse = function errParse(obj) {
-  var _this3 = this;
-
   var context = obj.context,
       err = obj.err,
       name = obj.name;
@@ -11391,21 +11379,17 @@ var error_x_esm_errParse = function errParse(obj) {
     return false;
   }
 
-  var start = find_index_x_esm(frames, function (frame) {
-    error_x_esm_newArrowCheck(this, _this3);
-
+  var start = find_index_x_esm(frames, function predicate(frame) {
     var fName = typeof frame.functionName === 'string' ? frame.functionName : error_x_esm_EMPTY_STRING;
     return stringIndexOf.call(fName, name) > -1;
-  }.bind(this));
+  });
 
   if (start > -1) {
     var item = frames[start];
     frames = arraySlice.call(frames, start + 1);
-    var end = find_index_x_esm(frames, function (frame) {
-      error_x_esm_newArrowCheck(this, _this3);
-
+    var end = find_index_x_esm(frames, function predicate(frame) {
       return item.source === frame.source;
-    }.bind(this));
+    });
 
     if (end > -1) {
       frames = arraySlice.call(frames, 0, end);
@@ -11648,6 +11632,7 @@ var toJSON = function toJSON() {
  * @property {object} obj.message - Human-readable description of the error.
  * @property {string} obj.name - The name for the custom Error.
  * @property {OfErrorConstructor} [obj.ErrorCtr=Error] - Error constructor to be used.
+ * @returns {!object} - The context;.
  */
 
 
@@ -11694,6 +11679,7 @@ var error_x_esm_init = function init(obj) {
 
 
   error_x_esm_parseStack(context, name);
+  return context;
 }; // `init` is used in `eval`, don't delete.
 
 
@@ -11707,53 +11693,11 @@ error_x_esm_init({
 
 var AssertionError = void 0;
 var CUSTOM_NAME = 'CustomError';
-/**
- * Creates a custom Error constructor. Will use `Error` if argument is not
- * a valid constructor.
- *
- * @function
- * @param {string} [name='Error'] - The name for the custom Error.
- * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
- * @returns {Function} The custom Error constructor.
- */
 
-var error_x_esm_createErrorCtr = function createErrorCtr(name, ErrorCtr) {
-  var ECTR = allCtrs === false || error_x_esm_isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
-  var initialName = is_nil_x_esm(name) ? CUSTOM_NAME : trim_x_esm(to_string_symbols_supported_x_esm(name));
-  var customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
-  var nativeToString = ECTR.prototype.toString;
-  /**
-   * Create a new object, that prototypically inherits from the `Error`
-   * constructor.
-   *
-   * @private
-   * @class CstmCtr
-   * @param {string} [message] - Human-readable description of the error.
-   */
-
-  var CstmCtr; // noinspection JSUnusedLocalSymbols
-
-  var f = function f(context, message) {
-    var isInstCtr = context instanceof CstmCtr;
-
-    if (isInstCtr === false) {
-      return new CstmCtr(message);
-    }
-
-    error_x_esm_init({
-      context: context,
-      message: message,
-      name: customName,
-      ErrorCtr: ErrorCtr
-    });
-    return context;
-  };
-  /* eslint-disable-next-line no-new-func */
-
-
-  CstmCtr = Function('f', "return function ".concat(customName, "(message){return f(this,message)}"))(f); // Inherit the prototype methods from `ECTR`.
-
-  CstmCtr.prototype = object_create_x_esm(ECTR.prototype); // noinspection JSValidateTypes
+var error_x_esm_assignCtrMethods = function assignCtrMethods(obj) {
+  var CstmCtr = obj.CstmCtr,
+      customName = obj.customName,
+      nativeToString = obj.nativeToString; // noinspection JSValidateTypes
 
   object_define_properties_x_esm(CstmCtr.prototype,
   /** @lends CstmCtr.prototype */
@@ -11805,6 +11749,58 @@ var error_x_esm_createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   }
 
   return CstmCtr;
+};
+/**
+ * Creates a custom Error constructor. Will use `Error` if argument is not
+ * a valid constructor.
+ *
+ * @function
+ * @param {string} [name='Error'] - The name for the custom Error.
+ * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
+ * @returns {Function} The custom Error constructor.
+ */
+
+
+var error_x_esm_createErrorCtr = function createErrorCtr(name, ErrorCtr) {
+  var ECTR = allCtrs === false || error_x_esm_isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
+  var initialName = is_nil_x_esm(name) ? CUSTOM_NAME : trim_x_esm(to_string_symbols_supported_x_esm(name));
+  var customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
+  /**
+   * Create a new object, that prototypically inherits from the `Error`
+   * constructor.
+   *
+   * @private
+   * @class CstmCtr
+   * @param {string} [message] - Human-readable description of the error.
+   */
+
+  var CstmCtr; // noinspection JSUnusedLocalSymbols
+
+  var f = function f(context, message) {
+    var isInstCtr = context instanceof CstmCtr;
+
+    if (isInstCtr === false) {
+      return new CstmCtr(message);
+    }
+
+    return error_x_esm_init({
+      context: context,
+      message: message,
+      name: customName,
+      ErrorCtr: ErrorCtr
+    });
+  };
+  /* eslint-disable-next-line no-new-func */
+
+
+  CstmCtr = Function('f', "return function ".concat(customName, "(message){return f(this,message)}"))(f); // Inherit the prototype methods from `ECTR`.
+
+  CstmCtr.prototype = object_create_x_esm(ECTR.prototype);
+  return error_x_esm_assignCtrMethods({
+    CstmCtr: CstmCtr,
+    customName: customName,
+    nativeToString: ECTR.prototype.toString
+  });
 };
 
 var error_x_esm_create = error_x_esm_createErrorCtr; // Test if we can use more than just the Error constructor.

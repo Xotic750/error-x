@@ -404,7 +404,7 @@ const cV8 =
       /** @type {object} */
       const error = new $Error();
       captureStackTrace(error, context.constructor);
-      const frames = map(error.stack, (frame) => {
+      const frames = map(error.stack, function iteratee(frame) {
         const opts = {
           // args: void 0,
           functionName: frame.getFunctionName(),
@@ -467,12 +467,10 @@ const STACK_NEWLINE = '\n    ';
 const defContext = function defContext(obj) {
   const {context, frames, name} = obj;
   defineProperties(context, {
-    frames: {
-      value: frames,
-    },
+    frames: {value: frames},
     stack: {
       value: `${name}${STACK_NEWLINE}${join.call(
-        map(frames, (frame) => {
+        map(frames, function iteratee(frame) {
           return frame.toString();
         }),
         STACK_NEWLINE,
@@ -500,7 +498,7 @@ const errParse = function errParse(obj) {
     return false;
   }
 
-  const start = findIndex(frames, (frame) => {
+  const start = findIndex(frames, function predicate(frame) {
     const fName = typeof frame.functionName === 'string' ? frame.functionName : EMPTY_STRING;
 
     return stringIndexOf.call(fName, name) > -1;
@@ -510,7 +508,7 @@ const errParse = function errParse(obj) {
     const item = frames[start];
     frames = arraySlice.call(frames, start + 1);
 
-    const end = findIndex(frames, (frame) => {
+    const end = findIndex(frames, function predicate(frame) {
       return item.source === frame.source;
     });
 
@@ -615,12 +613,7 @@ const asAssertionError = function asAssertionError(name, ErrorCtr) {
   }
 
   if (isErrorCtr(ErrorCtr)) {
-    const err = new ErrorCtr({
-      actual: 'b',
-      expected: 'c',
-      message: 'a',
-      operator: 'd',
-    });
+    const err = new ErrorCtr({actual: 'b', expected: 'c', message: 'a', operator: 'd'});
 
     return (
       typeof err.name === 'string' && err.message === 'a' && err.actual === 'b' && err.expected === 'c' && err.operator === 'd'
@@ -738,6 +731,7 @@ const toJSON = function toJSON() {
  * @property {object} obj.message - Human-readable description of the error.
  * @property {string} obj.name - The name for the custom Error.
  * @property {OfErrorConstructor} [obj.ErrorCtr=Error] - Error constructor to be used.
+ * @returns {!object} - The context;.
  */
 const init = function init(obj) {
   const {context, message, name, ErrorCtr} = obj;
@@ -779,6 +773,8 @@ const init = function init(obj) {
 
   // Parse and set the 'this' properties.
   parseStack(context, name);
+
+  return context;
 };
 
 // `init` is used in `eval`, don't delete.
@@ -789,48 +785,8 @@ let AssertionError = void 0;
 
 const CUSTOM_NAME = 'CustomError';
 
-/**
- * Creates a custom Error constructor. Will use `Error` if argument is not
- * a valid constructor.
- *
- * @function
- * @param {string} [name='Error'] - The name for the custom Error.
- * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
- * @returns {Function} The custom Error constructor.
- */
-const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
-  const ECTR = allCtrs === false || isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
-  const initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
-  const customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
-  const nativeToString = ECTR.prototype.toString;
-  /**
-   * Create a new object, that prototypically inherits from the `Error`
-   * constructor.
-   *
-   * @private
-   * @class CstmCtr
-   * @param {string} [message] - Human-readable description of the error.
-   */
-  let CstmCtr;
-
-  // noinspection JSUnusedLocalSymbols
-  const f = function f(context, message) {
-    const isInstCtr = context instanceof CstmCtr;
-
-    if (isInstCtr === false) {
-      return new CstmCtr(message);
-    }
-
-    init({context, message, name: customName, ErrorCtr});
-
-    return context;
-  };
-
-  /* eslint-disable-next-line no-new-func */
-  CstmCtr = Function('f', `return function ${customName}(message){return f(this,message)}`)(f);
-
-  // Inherit the prototype methods from `ECTR`.
-  CstmCtr.prototype = $create(ECTR.prototype);
+const assignCtrMethods = function assignCtrMethods(obj) {
+  const {CstmCtr, customName, nativeToString} = obj;
   // noinspection JSValidateTypes
   defineProperties(
     CstmCtr.prototype,
@@ -881,6 +837,48 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   }
 
   return CstmCtr;
+};
+
+/**
+ * Creates a custom Error constructor. Will use `Error` if argument is not
+ * a valid constructor.
+ *
+ * @function
+ * @param {string} [name='Error'] - The name for the custom Error.
+ * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
+ * @returns {Function} The custom Error constructor.
+ */
+const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
+  const ECTR = allCtrs === false || isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
+  const initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
+  const customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
+  /**
+   * Create a new object, that prototypically inherits from the `Error`
+   * constructor.
+   *
+   * @private
+   * @class CstmCtr
+   * @param {string} [message] - Human-readable description of the error.
+   */
+  let CstmCtr;
+
+  // noinspection JSUnusedLocalSymbols
+  const f = function f(context, message) {
+    const isInstCtr = context instanceof CstmCtr;
+
+    if (isInstCtr === false) {
+      return new CstmCtr(message);
+    }
+
+    return init({context, message, name: customName, ErrorCtr});
+  };
+
+  /* eslint-disable-next-line no-new-func */
+  CstmCtr = Function('f', `return function ${customName}(message){return f(this,message)}`)(f);
+  // Inherit the prototype methods from `ECTR`.
+  CstmCtr.prototype = $create(ECTR.prototype);
+
+  return assignCtrMethods({CstmCtr, customName, nativeToString: ECTR.prototype.toString});
 };
 
 export const create = createErrorCtr;

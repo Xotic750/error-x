@@ -1,5 +1,3 @@
-function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
-
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 /*
@@ -412,16 +410,12 @@ var cV8 = toBoolean(captureStackTrace) && function getCV8() {
 
 
   return function captureV8(context) {
-    var _this = this;
-
     $Error.prepareStackTrace = tempPrepareStackTrace;
     /** @type {object} */
 
     var error = new $Error();
     captureStackTrace(error, context.constructor);
-    var frames = map(error.stack, function (frame) {
-      _newArrowCheck(this, _this);
-
+    var frames = map(error.stack, function iteratee(frame) {
       var opts = {
         // args: void 0,
         functionName: frame.getFunctionName(),
@@ -456,7 +450,7 @@ var cV8 = toBoolean(captureStackTrace) && function getCV8() {
       }
 
       return new StackFrame(opts);
-    }.bind(this));
+    });
 
     if (typeof prepareStackTrace === 'undefined') {
       delete $Error.prepareStackTrace;
@@ -481,8 +475,6 @@ var STACK_NEWLINE = '\n    ';
  */
 
 var defContext = function defContext(obj) {
-  var _this2 = this;
-
   var context = obj.context,
       frames = obj.frames,
       name = obj.name;
@@ -491,11 +483,9 @@ var defContext = function defContext(obj) {
       value: frames
     },
     stack: {
-      value: "".concat(name).concat(STACK_NEWLINE).concat(join.call(map(frames, function (frame) {
-        _newArrowCheck(this, _this2);
-
+      value: "".concat(name).concat(STACK_NEWLINE).concat(join.call(map(frames, function iteratee(frame) {
         return frame.toString();
-      }.bind(this)), STACK_NEWLINE))
+      }), STACK_NEWLINE))
     }
   });
 };
@@ -512,8 +502,6 @@ var defContext = function defContext(obj) {
 
 
 var errParse = function errParse(obj) {
-  var _this3 = this;
-
   var context = obj.context,
       err = obj.err,
       name = obj.name;
@@ -525,21 +513,17 @@ var errParse = function errParse(obj) {
     return false;
   }
 
-  var start = findIndex(frames, function (frame) {
-    _newArrowCheck(this, _this3);
-
+  var start = findIndex(frames, function predicate(frame) {
     var fName = typeof frame.functionName === 'string' ? frame.functionName : EMPTY_STRING;
     return stringIndexOf.call(fName, name) > -1;
-  }.bind(this));
+  });
 
   if (start > -1) {
     var item = frames[start];
     frames = arraySlice.call(frames, start + 1);
-    var end = findIndex(frames, function (frame) {
-      _newArrowCheck(this, _this3);
-
+    var end = findIndex(frames, function predicate(frame) {
       return item.source === frame.source;
-    }.bind(this));
+    });
 
     if (end > -1) {
       frames = arraySlice.call(frames, 0, end);
@@ -782,6 +766,7 @@ var toJSON = function toJSON() {
  * @property {object} obj.message - Human-readable description of the error.
  * @property {string} obj.name - The name for the custom Error.
  * @property {OfErrorConstructor} [obj.ErrorCtr=Error] - Error constructor to be used.
+ * @returns {!object} - The context;.
  */
 
 
@@ -828,6 +813,7 @@ var init = function init(obj) {
 
 
   parseStack(context, name);
+  return context;
 }; // `init` is used in `eval`, don't delete.
 
 
@@ -841,53 +827,11 @@ init({
 
 var AssertionError = void 0;
 var CUSTOM_NAME = 'CustomError';
-/**
- * Creates a custom Error constructor. Will use `Error` if argument is not
- * a valid constructor.
- *
- * @function
- * @param {string} [name='Error'] - The name for the custom Error.
- * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
- * @returns {Function} The custom Error constructor.
- */
 
-var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
-  var ECTR = allCtrs === false || isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
-  var initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
-  var customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
-  var nativeToString = ECTR.prototype.toString;
-  /**
-   * Create a new object, that prototypically inherits from the `Error`
-   * constructor.
-   *
-   * @private
-   * @class CstmCtr
-   * @param {string} [message] - Human-readable description of the error.
-   */
-
-  var CstmCtr; // noinspection JSUnusedLocalSymbols
-
-  var f = function f(context, message) {
-    var isInstCtr = context instanceof CstmCtr;
-
-    if (isInstCtr === false) {
-      return new CstmCtr(message);
-    }
-
-    init({
-      context: context,
-      message: message,
-      name: customName,
-      ErrorCtr: ErrorCtr
-    });
-    return context;
-  };
-  /* eslint-disable-next-line no-new-func */
-
-
-  CstmCtr = Function('f', "return function ".concat(customName, "(message){return f(this,message)}"))(f); // Inherit the prototype methods from `ECTR`.
-
-  CstmCtr.prototype = $create(ECTR.prototype); // noinspection JSValidateTypes
+var assignCtrMethods = function assignCtrMethods(obj) {
+  var CstmCtr = obj.CstmCtr,
+      customName = obj.customName,
+      nativeToString = obj.nativeToString; // noinspection JSValidateTypes
 
   defineProperties(CstmCtr.prototype,
   /** @lends CstmCtr.prototype */
@@ -939,6 +883,58 @@ var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   }
 
   return CstmCtr;
+};
+/**
+ * Creates a custom Error constructor. Will use `Error` if argument is not
+ * a valid constructor.
+ *
+ * @function
+ * @param {string} [name='Error'] - The name for the custom Error.
+ * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
+ * @returns {Function} The custom Error constructor.
+ */
+
+
+var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
+  var ECTR = allCtrs === false || isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
+  var initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
+  var customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
+  /**
+   * Create a new object, that prototypically inherits from the `Error`
+   * constructor.
+   *
+   * @private
+   * @class CstmCtr
+   * @param {string} [message] - Human-readable description of the error.
+   */
+
+  var CstmCtr; // noinspection JSUnusedLocalSymbols
+
+  var f = function f(context, message) {
+    var isInstCtr = context instanceof CstmCtr;
+
+    if (isInstCtr === false) {
+      return new CstmCtr(message);
+    }
+
+    return init({
+      context: context,
+      message: message,
+      name: customName,
+      ErrorCtr: ErrorCtr
+    });
+  };
+  /* eslint-disable-next-line no-new-func */
+
+
+  CstmCtr = Function('f', "return function ".concat(customName, "(message){return f(this,message)}"))(f); // Inherit the prototype methods from `ECTR`.
+
+  CstmCtr.prototype = $create(ECTR.prototype);
+  return assignCtrMethods({
+    CstmCtr: CstmCtr,
+    customName: customName,
+    nativeToString: ECTR.prototype.toString
+  });
 };
 
 export var create = createErrorCtr; // Test if we can use more than just the Error constructor.
