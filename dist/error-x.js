@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T10:52:02.203Z",
+  "date": "2019-07-29T11:28:32.402Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "94fd1645a76a2be40a84",
+  "hash": "6791b9c8bc8f53984e60",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -10917,7 +10917,8 @@ var error_x_esm_ref = [],
 var $toStringTag = has_to_string_tag_x_esm && Symbol.toStringTag;
 /** @type {ErrorConstructor} */
 
-var $Error = Error; // Capture the function (if any).
+var $Error = Error;
+/* Capture the function (if any). */
 
 var captureStackTrace = $Error.captureStackTrace,
     prepareStackTrace = $Error.prepareStackTrace;
@@ -10974,26 +10975,19 @@ function createErrDiff(obj) {
   var expectedLines = split.call(inspectValue(expected), '\n');
   var i = 0;
   var indicator = error_x_esm_EMPTY_STRING;
-  /*
-   * In case both values are objects or functions explicitly mark them as not
-   * reference equal for the `strictEqual` operator.
-   */
+  /* In case both values are objects or functions explicitly mark them as not reference equal for the `strictEqual` operator. */
 
   if ($operator === 'strictEqual' && (error_x_esm_typeof(actual) === 'object' && actual !== null && error_x_esm_typeof(expected) === 'object' && expected !== null || typeof actual === 'function' && typeof expected === 'function')) {
     $operator = 'strictEqualObject';
   }
-  /*
-   * If "actual" and "expected" fit on a single line and they are not strictly
-   * equal, check further special handling.
-   */
+  /* If "actual" and "expected" fit on a single line and they are not strictly equal, check further special handling. */
 
 
   if (actualLines.length === 1 && expectedLines.length === 1 && actualLines[0] !== expectedLines[0]) {
     var inputLength = actualLines[0].length + expectedLines[0].length;
     /*
-     * If the character length of "actual" and "expected" together is less than
-     * kMaxShortLength and if neither is an object and at least one of them is
-     *not `zero`, use the strict equal comparison to visualize the output.
+     * If the character length of "actual" and "expected" together is less than kMaxShortLength and if neither is an object and at
+     * least one of them is not `zero`, use the strict equal comparison to visualize the output.
      */
 
     if (inputLength <= kMaxShortLength) {
@@ -11003,9 +10997,8 @@ function createErrDiff(obj) {
       }
     } else if ($operator !== 'strictEqualObject') {
       /*
-       * If the stderr is a tty and the input length is lower than the current
-       * columns per line, add a mismatch indicator below the output. If it is
-       * not a tty, use a default value of 80 characters.
+       * If the stderr is a tty and the input length is lower than the current columns per line,
+       * add a mismatch indicator below the output. If it is not a tty, use a default value of 80 characters.
        */
       var _maxLength = 80;
 
@@ -11107,10 +11100,7 @@ function createErrDiff(obj) {
 
   for (i = 0; i < maxLines; i += 1) {
     if (maxLength < i + 1) {
-      /*
-       * If more than two former lines are identical, print them. Collapse them
-       * in case more than five lines were identical.
-       */
+      /* If more than two former lines are identical, print them. Collapse them in case more than five lines were identical. */
       if (identical > 2) {
         if (identical > 3) {
           if (identical > 4) {
@@ -11143,23 +11133,19 @@ function createErrDiff(obj) {
       }
 
       printedLines += 1;
-      /* Only extra actual lines exist */
-
-      /* Lines diverge */
+      /* Only extra actual lines exist. Lines diverge */
     } else {
       var expectedLine = expectedLines[i];
       var actualLine = actualLines[i];
       /*
-       * If the lines diverge, specifically check for lines that only diverge by
-       * a trailing comma. In that case it is actually identical and we should
-       * mark it as such.
+       * If the lines diverge, specifically check for lines that only diverge by a trailing comma.
+       * In that case it is actually identical and we should mark it as such.
        */
 
       var divergingLines = actualLine !== expectedLine && (!string_ends_with_x_esm(actualLine, ',') || stringSlice.call(actualLine, 0, -1) !== expectedLine);
       /*
-       * If the expected line has a trailing comma but is otherwise identical,
-       * add a comma at the end of the actual line. Otherwise the output could
-       * look weird as in:
+       * If the expected line has a trailing comma but is otherwise identical, add a comma at the end of the actual line.
+       * Otherwise the output could look weird as in:
        *
        * [
        *   1         // No comma at the end!
@@ -11173,10 +11159,7 @@ function createErrDiff(obj) {
       }
 
       if (divergingLines) {
-        /*
-         * If more than two former lines are identical, print them. Collapse
-         * them in case more than five lines were identical.
-         */
+        /* If more than two former lines are identical, print them. Collapse them in case more than five lines were identical. */
         if (identical > 2) {
           if (identical > 3) {
             if (identical > 4) {
@@ -11257,77 +11240,79 @@ var error_x_esm_isNumber = function isNumber(n) {
 var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
+/**
+ * Captures the V8 stack and converts it to an array of Stackframes.
+ *
+ * @private
+ * @function captureV8
+ * @param {!object} context - The Custom Error this object.
+ * @returns {!Array.<!object>} Array of StackFrames.
+ */
 
-var cV8 = to_boolean_x_esm(captureStackTrace) && function getCV8() {
-  // Test to see if the function works.
+
+var error_x_esm_captureV8 = function captureV8(context) {
+  $Error.prepareStackTrace = tempPrepareStackTrace;
+  /** @type {object} */
+
+  var error = new $Error();
+  captureStackTrace(error, context.constructor);
+  var frames = array_map_x_esm(error.stack, function iteratee(frame) {
+    var opts = {
+      functionName: frame.getFunctionName(),
+      isConstructor: frame.isConstructor(),
+      isEval: frame.isEval(),
+      isNative: frame.isNative(),
+      isToplevel: frame.isToplevel(),
+      source: frame.toString()
+    };
+    var getFileName = is_function_x_esm(frame.getFileName) && frame.getFileName();
+
+    if (getFileName) {
+      opts.getFileName = getFileName;
+    }
+
+    var columnNumber = is_function_x_esm(frame.getColumnNumber) && frame.getColumnNumber();
+
+    if (error_x_esm_isNumber(columnNumber)) {
+      opts.columnNumber = columnNumber;
+    }
+
+    var lineNumber = is_function_x_esm(frame.getLineNumber) && frame.getLineNumber();
+
+    if (error_x_esm_isNumber(lineNumber)) {
+      opts.lineNumber = lineNumber;
+    }
+
+    var evalOrigin = is_function_x_esm(frame.getEvalOrigin) && frame.getEvalOrigin();
+
+    if (is_object_like_x_esm(evalOrigin)) {
+      opts.evalOrigin = evalOrigin;
+    }
+
+    return new stackframe_default.a(opts);
+  });
+
+  if (typeof prepareStackTrace === 'undefined') {
+    delete $Error.prepareStackTrace;
+  } else {
+    $Error.prepareStackTrace = prepareStackTrace;
+  }
+
+  return frames;
+};
+
+var getCV8 = function getCV8() {
+  /* Test to see if the function works. */
   try {
     captureStackTrace(new $Error(), captureStackTrace);
   } catch (ignore) {
     return false;
   }
-  /**
-   * Captures the V8 stack and converts it to an array of Stackframes.
-   *
-   * @private
-   * @function captureV8
-   * @param {!object} context - The Custom Error this object.
-   * @returns {!Array.<!object>} Array of StackFrames.
-   */
 
+  return error_x_esm_captureV8;
+};
 
-  return function captureV8(context) {
-    $Error.prepareStackTrace = tempPrepareStackTrace;
-    /** @type {object} */
-
-    var error = new $Error();
-    captureStackTrace(error, context.constructor);
-    var frames = array_map_x_esm(error.stack, function iteratee(frame) {
-      var opts = {
-        // args: void 0,
-        functionName: frame.getFunctionName(),
-        isConstructor: frame.isConstructor(),
-        isEval: frame.isEval(),
-        isNative: frame.isNative(),
-        isToplevel: frame.isToplevel(),
-        source: frame.toString()
-      };
-      var getFileName = is_function_x_esm(frame.getFileName) && frame.getFileName();
-
-      if (getFileName) {
-        opts.getFileName = getFileName;
-      }
-
-      var columnNumber = is_function_x_esm(frame.getColumnNumber) && frame.getColumnNumber();
-
-      if (error_x_esm_isNumber(columnNumber)) {
-        opts.columnNumber = columnNumber;
-      }
-
-      var lineNumber = is_function_x_esm(frame.getLineNumber) && frame.getLineNumber();
-
-      if (error_x_esm_isNumber(lineNumber)) {
-        opts.lineNumber = lineNumber;
-      }
-
-      var evalOrigin = is_function_x_esm(frame.getEvalOrigin) && frame.getEvalOrigin();
-
-      if (is_object_like_x_esm(evalOrigin)) {
-        opts.evalOrigin = evalOrigin;
-      }
-
-      return new stackframe_default.a(opts);
-    });
-
-    if (typeof prepareStackTrace === 'undefined') {
-      delete $Error.prepareStackTrace;
-    } else {
-      $Error.prepareStackTrace = prepareStackTrace;
-    }
-
-    return frames;
-  };
-}();
-
+var cV8 = to_boolean_x_esm(captureStackTrace) && getCV8();
 var allCtrs = true;
 var STACK_NEWLINE = '\n    ';
 /**
@@ -11462,6 +11447,7 @@ var getParseStackStack = function getParseStackStack(err) {
  * @private
  * @param {!object} context - The Custom Error this object.
  * @param {string} name - The name of the constructor.
+ * @returns {!object} - The context.
  */
 
 
@@ -11490,6 +11476,8 @@ var error_x_esm_parseStack = function parseStack(context, name) {
       });
     }
   }
+
+  return context;
 };
 /**
  * Test whether we have a valid Error constructor.
@@ -11559,18 +11547,19 @@ var getMessage = function getMessage(message) {
   }
 
   if (message.operator === 'notDeepStrictEqual' || message.operator === 'notStrictEqual') {
-    // In case the objects are equal but the operator requires unequal, show
-    // the first object and say A equals B
+    /* In case the objects are equal but the operator requires unequal, show the first object and say A equals B. */
     var base = kReadableOperator[message.operator];
 
-    var _res = split.call(inspectValue(message.actual), '\n'); // In case "actual" is an object or a function, it should not be
-    // reference equal.
+    var _res = split.call(inspectValue(message.actual), '\n');
+    /* In case "actual" is an object or a function, it should not be reference equal. */
 
 
     if (message.operator === 'notStrictEqual' && (error_x_esm_typeof(message.actual) === 'object' && message.actual !== null || typeof actual === 'function')) {
       base = kReadableOperator.notStrictEqualObject;
-    } // Only remove lines in case it makes sense to collapse those.
-    // TODO: Accept env to always show the full error.
+    }
+    /* Only remove lines in case it makes sense to collapse those. */
+
+    /* TODO: Accept env to always show the full error. */
 
 
     if (_res.length > 50) {
@@ -11579,7 +11568,8 @@ var getMessage = function getMessage(message) {
       while (_res.length > 47) {
         pop.call(_res);
       }
-    } // Only print a single input.
+    }
+    /* Only print a single input. */
 
 
     if (_res.length === 1) {
@@ -11642,6 +11632,34 @@ var toJSON = function toJSON() {
     stack: this.stack
   };
 };
+
+var error_x_esm_defineAssertionErrorProps = function defineAssertionErrorProps(context, message) {
+  if (error_x_esm_typeof(message) !== 'object' || message === null) {
+    throw new TypeError("The \"options\" argument must be of type Object. Received type ".concat(error_x_esm_typeof(message)));
+  }
+
+  object_define_properties_x_esm(context, {
+    actual: {
+      value: message.actual
+    },
+    code: {
+      value: 'ERR_ASSERTION'
+    },
+    expected: {
+      value: message.expected
+    },
+    generatedMessage: {
+      value: to_boolean_x_esm(message.message) === false
+    },
+    message: {
+      value: message.message || getMessage(message)
+    },
+    operator: {
+      value: message.operator
+    }
+  });
+  return context;
+};
 /**
  * Initialise a new instance of a custom error.
  *
@@ -11662,44 +11680,21 @@ var error_x_esm_init = function init(obj) {
       ErrorCtr = obj.ErrorCtr;
 
   if (asAssertionError(name, ErrorCtr)) {
-    if (error_x_esm_typeof(message) !== 'object' || message === null) {
-      throw new TypeError("The \"options\" argument must be of type Object. Received type ".concat(error_x_esm_typeof(message)));
-    }
-
-    object_define_properties_x_esm(context, {
-      actual: {
-        value: message.actual
-      },
-      code: {
-        value: 'ERR_ASSERTION'
-      },
-      expected: {
-        value: message.expected
-      },
-      generatedMessage: {
-        value: to_boolean_x_esm(message.message) === false
-      },
-      message: {
-        value: message.message || getMessage(message)
-      },
-      operator: {
-        value: message.operator
-      }
-    });
+    error_x_esm_defineAssertionErrorProps(context, message);
   } else if (typeof message !== 'undefined') {
-    // Standard Errors. Only set `this.message` if the argument `message`
-    // was not `undefined`.
+    /* Standard Errors. Only set `this.message` if the argument `message` was not `undefined`. */
     object_define_properties_x_esm(context, {
       message: {
         value: to_string_symbols_supported_x_esm(message)
       }
     });
-  } // Parse and set the 'this' properties.
+  }
+  /* Parse and set the 'this' properties. */
 
 
-  error_x_esm_parseStack(context, name);
-  return context;
-}; // `init` is used in `eval`, don't delete.
+  return error_x_esm_parseStack(context, name);
+};
+/* `init` is used in `eval`, don't delete. */
 
 
 error_x_esm_init({
@@ -11770,8 +11765,17 @@ var error_x_esm_assignCtrMethods = function assignCtrMethods(obj) {
   return CstmCtr;
 };
 /**
- * Creates a custom Error constructor. Will use `Error` if argument is not
- * a valid constructor.
+ * @param {*} name - The supplied name.
+ * @returns {string} - The custom name.
+ */
+
+
+var error_x_esm_getCustomName = function getCustomName(name) {
+  var initialName = is_nil_x_esm(name) ? CUSTOM_NAME : trim_x_esm(to_string_symbols_supported_x_esm(name));
+  return initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
+};
+/**
+ * Creates a custom Error constructor. Will use `Error` if argument is not a valid constructor.
  *
  * @function
  * @param {string} [name='Error'] - The name for the custom Error.
@@ -11782,8 +11786,7 @@ var error_x_esm_assignCtrMethods = function assignCtrMethods(obj) {
 
 var error_x_esm_createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   var ECTR = allCtrs === false || error_x_esm_isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
-  var initialName = is_nil_x_esm(name) ? CUSTOM_NAME : trim_x_esm(to_string_symbols_supported_x_esm(name));
-  var customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
+  var customName = error_x_esm_getCustomName(name);
   /**
    * Create a new object, that prototypically inherits from the `Error`
    * constructor.
@@ -11796,23 +11799,18 @@ var error_x_esm_createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   var CstmCtr; // noinspection JSUnusedLocalSymbols
 
   var f = function f(context, message) {
-    var isInstCtr = context instanceof CstmCtr;
-
-    if (isInstCtr === false) {
-      return new CstmCtr(message);
-    }
-
-    return error_x_esm_init({
+    return context instanceof CstmCtr ? error_x_esm_init({
       context: context,
       message: message,
       name: customName,
       ErrorCtr: ErrorCtr
-    });
+    }) : new CstmCtr(message);
   };
   /* eslint-disable-next-line no-new-func */
 
 
-  CstmCtr = Function('f', "return function ".concat(customName, "(message){return f(this,message)}"))(f); // Inherit the prototype methods from `ECTR`.
+  CstmCtr = Function('f', "return function ".concat(customName, "(message){return f(this,message)}"))(f);
+  /* Inherit the prototype methods from `ECTR`. */
 
   CstmCtr.prototype = object_create_x_esm(ECTR.prototype);
   return error_x_esm_assignCtrMethods({
@@ -11822,7 +11820,8 @@ var error_x_esm_createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   });
 };
 
-var error_x_esm_create = error_x_esm_createErrorCtr; // Test if we can use more than just the Error constructor.
+var error_x_esm_create = error_x_esm_createErrorCtr;
+/* Test if we can use more than just the Error constructor. */
 
 try {
   allCtrs = error_x_esm_createErrorCtr('X', SyntaxError)('x') instanceof SyntaxError;

@@ -48,7 +48,7 @@ const $toStringTag = hasToStringTag && Symbol.toStringTag;
 
 /** @type {ErrorConstructor} */
 const $Error = Error;
-// Capture the function (if any).
+/* Capture the function (if any). */
 const {captureStackTrace, prepareStackTrace} = $Error;
 
 const kReadableOperator = {
@@ -101,10 +101,7 @@ function createErrDiff(obj) {
   let i = 0;
   let indicator = EMPTY_STRING;
 
-  /*
-   * In case both values are objects or functions explicitly mark them as not
-   * reference equal for the `strictEqual` operator.
-   */
+  /* In case both values are objects or functions explicitly mark them as not reference equal for the `strictEqual` operator. */
   if (
     $operator === 'strictEqual' &&
     ((typeof actual === 'object' && actual !== null && typeof expected === 'object' && expected !== null) ||
@@ -113,17 +110,13 @@ function createErrDiff(obj) {
     $operator = 'strictEqualObject';
   }
 
-  /*
-   * If "actual" and "expected" fit on a single line and they are not strictly
-   * equal, check further special handling.
-   */
+  /* If "actual" and "expected" fit on a single line and they are not strictly equal, check further special handling. */
   if (actualLines.length === 1 && expectedLines.length === 1 && actualLines[0] !== expectedLines[0]) {
     const inputLength = actualLines[0].length + expectedLines[0].length;
 
     /*
-     * If the character length of "actual" and "expected" together is less than
-     * kMaxShortLength and if neither is an object and at least one of them is
-     *not `zero`, use the strict equal comparison to visualize the output.
+     * If the character length of "actual" and "expected" together is less than kMaxShortLength and if neither is an object and at
+     * least one of them is not `zero`, use the strict equal comparison to visualize the output.
      */
     if (inputLength <= kMaxShortLength) {
       if (
@@ -136,9 +129,8 @@ function createErrDiff(obj) {
       }
     } else if ($operator !== 'strictEqualObject') {
       /*
-       * If the stderr is a tty and the input length is lower than the current
-       * columns per line, add a mismatch indicator below the output. If it is
-       * not a tty, use a default value of 80 characters.
+       * If the stderr is a tty and the input length is lower than the current columns per line,
+       * add a mismatch indicator below the output. If it is not a tty, use a default value of 80 characters.
        */
       const maxLength = 80;
 
@@ -236,10 +228,7 @@ function createErrDiff(obj) {
 
   for (i = 0; i < maxLines; i += 1) {
     if (maxLength < i + 1) {
-      /*
-       * If more than two former lines are identical, print them. Collapse them
-       * in case more than five lines were identical.
-       */
+      /* If more than two former lines are identical, print them. Collapse them in case more than five lines were identical. */
       if (identical > 2) {
         if (identical > 3) {
           if (identical > 4) {
@@ -271,23 +260,20 @@ function createErrDiff(obj) {
       }
 
       printedLines += 1;
-      /* Only extra actual lines exist */
-      /* Lines diverge */
+      /* Only extra actual lines exist. Lines diverge */
     } else {
       const expectedLine = expectedLines[i];
       let actualLine = actualLines[i];
       /*
-       * If the lines diverge, specifically check for lines that only diverge by
-       * a trailing comma. In that case it is actually identical and we should
-       * mark it as such.
+       * If the lines diverge, specifically check for lines that only diverge by a trailing comma.
+       * In that case it is actually identical and we should mark it as such.
        */
       let divergingLines =
         actualLine !== expectedLine && (!endsWith(actualLine, ',') || stringSlice.call(actualLine, 0, -1) !== expectedLine);
 
       /*
-       * If the expected line has a trailing comma but is otherwise identical,
-       * add a comma at the end of the actual line. Otherwise the output could
-       * look weird as in:
+       * If the expected line has a trailing comma but is otherwise identical, add a comma at the end of the actual line.
+       * Otherwise the output could look weird as in:
        *
        * [
        *   1         // No comma at the end!
@@ -300,10 +286,7 @@ function createErrDiff(obj) {
       }
 
       if (divergingLines) {
-        /*
-         * If more than two former lines are identical, print them. Collapse
-         * them in case more than five lines were identical.
-         */
+        /* If more than two former lines are identical, print them. Collapse them in case more than five lines were identical. */
         if (identical > 2) {
           if (identical > 3) {
             if (identical > 4) {
@@ -380,78 +363,78 @@ const tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
 
-const cV8 =
-  toBoolean(captureStackTrace) &&
-  (function getCV8() {
-    // Test to see if the function works.
-    try {
-      captureStackTrace(new $Error(), captureStackTrace);
-    } catch (ignore) {
-      return false;
+/**
+ * Captures the V8 stack and converts it to an array of Stackframes.
+ *
+ * @private
+ * @function captureV8
+ * @param {!object} context - The Custom Error this object.
+ * @returns {!Array.<!object>} Array of StackFrames.
+ */
+const captureV8 = function captureV8(context) {
+  $Error.prepareStackTrace = tempPrepareStackTrace;
+
+  /** @type {object} */
+  const error = new $Error();
+  captureStackTrace(error, context.constructor);
+  const frames = map(error.stack, function iteratee(frame) {
+    const opts = {
+      functionName: frame.getFunctionName(),
+      isConstructor: frame.isConstructor(),
+      isEval: frame.isEval(),
+      isNative: frame.isNative(),
+      isToplevel: frame.isToplevel(),
+      source: frame.toString(),
+    };
+
+    const getFileName = isFunction(frame.getFileName) && frame.getFileName();
+
+    if (getFileName) {
+      opts.getFileName = getFileName;
     }
 
-    /**
-     * Captures the V8 stack and converts it to an array of Stackframes.
-     *
-     * @private
-     * @function captureV8
-     * @param {!object} context - The Custom Error this object.
-     * @returns {!Array.<!object>} Array of StackFrames.
-     */
-    return function captureV8(context) {
-      $Error.prepareStackTrace = tempPrepareStackTrace;
+    const columnNumber = isFunction(frame.getColumnNumber) && frame.getColumnNumber();
 
-      /** @type {object} */
-      const error = new $Error();
-      captureStackTrace(error, context.constructor);
-      const frames = map(error.stack, function iteratee(frame) {
-        const opts = {
-          // args: void 0,
-          functionName: frame.getFunctionName(),
-          isConstructor: frame.isConstructor(),
-          isEval: frame.isEval(),
-          isNative: frame.isNative(),
-          isToplevel: frame.isToplevel(),
-          source: frame.toString(),
-        };
+    if (isNumber(columnNumber)) {
+      opts.columnNumber = columnNumber;
+    }
 
-        const getFileName = isFunction(frame.getFileName) && frame.getFileName();
+    const lineNumber = isFunction(frame.getLineNumber) && frame.getLineNumber();
 
-        if (getFileName) {
-          opts.getFileName = getFileName;
-        }
+    if (isNumber(lineNumber)) {
+      opts.lineNumber = lineNumber;
+    }
 
-        const columnNumber = isFunction(frame.getColumnNumber) && frame.getColumnNumber();
+    const evalOrigin = isFunction(frame.getEvalOrigin) && frame.getEvalOrigin();
 
-        if (isNumber(columnNumber)) {
-          opts.columnNumber = columnNumber;
-        }
+    if (isObjectLike(evalOrigin)) {
+      opts.evalOrigin = evalOrigin;
+    }
 
-        const lineNumber = isFunction(frame.getLineNumber) && frame.getLineNumber();
+    return new StackFrame(opts);
+  });
 
-        if (isNumber(lineNumber)) {
-          opts.lineNumber = lineNumber;
-        }
+  if (typeof prepareStackTrace === 'undefined') {
+    delete $Error.prepareStackTrace;
+  } else {
+    $Error.prepareStackTrace = prepareStackTrace;
+  }
 
-        const evalOrigin = isFunction(frame.getEvalOrigin) && frame.getEvalOrigin();
+  return frames;
+};
 
-        if (isObjectLike(evalOrigin)) {
-          opts.evalOrigin = evalOrigin;
-        }
+const getCV8 = function getCV8() {
+  /* Test to see if the function works. */
+  try {
+    captureStackTrace(new $Error(), captureStackTrace);
+  } catch (ignore) {
+    return false;
+  }
 
-        return new StackFrame(opts);
-      });
+  return captureV8;
+};
 
-      if (typeof prepareStackTrace === 'undefined') {
-        delete $Error.prepareStackTrace;
-      } else {
-        $Error.prepareStackTrace = prepareStackTrace;
-      }
-
-      return frames;
-    };
-  })();
-
+const cV8 = toBoolean(captureStackTrace) && getCV8();
 let allCtrs = true;
 const STACK_NEWLINE = '\n    ';
 
@@ -581,6 +564,7 @@ const getParseStackStack = function getParseStackStack(err) {
  * @private
  * @param {!object} context - The Custom Error this object.
  * @param {string} name - The name of the constructor.
+ * @returns {!object} - The context.
  */
 const parseStack = function parseStack(context, name) {
   if (cV8) {
@@ -595,6 +579,8 @@ const parseStack = function parseStack(context, name) {
       });
     }
   }
+
+  return context;
 };
 
 /**
@@ -655,13 +641,11 @@ const getMessage = function getMessage(message) {
   }
 
   if (message.operator === 'notDeepStrictEqual' || message.operator === 'notStrictEqual') {
-    // In case the objects are equal but the operator requires unequal, show
-    // the first object and say A equals B
+    /* In case the objects are equal but the operator requires unequal, show the first object and say A equals B. */
     let base = kReadableOperator[message.operator];
     const res = split.call(inspectValue(message.actual), '\n');
 
-    // In case "actual" is an object or a function, it should not be
-    // reference equal.
+    /* In case "actual" is an object or a function, it should not be reference equal. */
     if (
       message.operator === 'notStrictEqual' &&
       ((typeof message.actual === 'object' && message.actual !== null) || typeof actual === 'function')
@@ -669,8 +653,8 @@ const getMessage = function getMessage(message) {
       base = kReadableOperator.notStrictEqualObject;
     }
 
-    // Only remove lines in case it makes sense to collapse those.
-    // TODO: Accept env to always show the full error.
+    /* Only remove lines in case it makes sense to collapse those. */
+    /* TODO: Accept env to always show the full error. */
     if (res.length > 50) {
       res[46] = '...';
       while (res.length > 47) {
@@ -678,7 +662,7 @@ const getMessage = function getMessage(message) {
       }
     }
 
-    // Only print a single input.
+    /* Only print a single input. */
     if (res.length === 1) {
       return `${base}${res[0].length > 5 ? '\n\n' : ' '}${res[0]}`;
     }
@@ -739,6 +723,23 @@ const toJSON = function toJSON() {
   };
 };
 
+const defineAssertionErrorProps = function defineAssertionErrorProps(context, message) {
+  if (typeof message !== 'object' || message === null) {
+    throw new TypeError(`The "options" argument must be of type Object. Received type ${typeof message}`);
+  }
+
+  defineProperties(context, {
+    actual: {value: message.actual},
+    code: {value: 'ERR_ASSERTION'},
+    expected: {value: message.expected},
+    generatedMessage: {value: toBoolean(message.message) === false},
+    message: {value: message.message || getMessage(message)},
+    operator: {value: message.operator},
+  });
+
+  return context;
+};
+
 /**
  * Initialise a new instance of a custom error.
  *
@@ -754,33 +755,9 @@ const init = function init(obj) {
   const {context, message, name, ErrorCtr} = obj;
 
   if (asAssertionError(name, ErrorCtr)) {
-    if (typeof message !== 'object' || message === null) {
-      throw new TypeError(`The "options" argument must be of type Object. Received type ${typeof message}`);
-    }
-
-    defineProperties(context, {
-      actual: {
-        value: message.actual,
-      },
-      code: {
-        value: 'ERR_ASSERTION',
-      },
-      expected: {
-        value: message.expected,
-      },
-      generatedMessage: {
-        value: toBoolean(message.message) === false,
-      },
-      message: {
-        value: message.message || getMessage(message),
-      },
-      operator: {
-        value: message.operator,
-      },
-    });
+    defineAssertionErrorProps(context, message);
   } else if (typeof message !== 'undefined') {
-    // Standard Errors. Only set `this.message` if the argument `message`
-    // was not `undefined`.
+    /* Standard Errors. Only set `this.message` if the argument `message` was not `undefined`. */
     defineProperties(context, {
       message: {
         value: safeToString(message),
@@ -788,13 +765,11 @@ const init = function init(obj) {
     });
   }
 
-  // Parse and set the 'this' properties.
-  parseStack(context, name);
-
-  return context;
+  /* Parse and set the 'this' properties. */
+  return parseStack(context, name);
 };
 
-// `init` is used in `eval`, don't delete.
+/* `init` is used in `eval`, don't delete. */
 init({context: {}, message: 'message', name: 'name', ErrorCtr: $Error});
 
 /* eslint-disable-next-line no-void */
@@ -857,8 +832,17 @@ const assignCtrMethods = function assignCtrMethods(obj) {
 };
 
 /**
- * Creates a custom Error constructor. Will use `Error` if argument is not
- * a valid constructor.
+ * @param {*} name - The supplied name.
+ * @returns {string} - The custom name.
+ */
+const getCustomName = function getCustomName(name) {
+  const initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
+
+  return initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
+};
+
+/**
+ * Creates a custom Error constructor. Will use `Error` if argument is not a valid constructor.
  *
  * @function
  * @param {string} [name='Error'] - The name for the custom Error.
@@ -867,8 +851,8 @@ const assignCtrMethods = function assignCtrMethods(obj) {
  */
 const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   const ECTR = allCtrs === false || isErrorCtr(ErrorCtr) === false ? $Error : ErrorCtr;
-  const initialName = isNil(name) ? CUSTOM_NAME : trim(safeToString(name));
-  const customName = initialName === CUSTOM_NAME || isVarName(initialName) ? initialName : CUSTOM_NAME;
+  const customName = getCustomName(name);
+
   /**
    * Create a new object, that prototypically inherits from the `Error`
    * constructor.
@@ -881,18 +865,12 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
 
   // noinspection JSUnusedLocalSymbols
   const f = function f(context, message) {
-    const isInstCtr = context instanceof CstmCtr;
-
-    if (isInstCtr === false) {
-      return new CstmCtr(message);
-    }
-
-    return init({context, message, name: customName, ErrorCtr});
+    return context instanceof CstmCtr ? init({context, message, name: customName, ErrorCtr}) : new CstmCtr(message);
   };
 
   /* eslint-disable-next-line no-new-func */
   CstmCtr = Function('f', `return function ${customName}(message){return f(this,message)}`)(f);
-  // Inherit the prototype methods from `ECTR`.
+  /* Inherit the prototype methods from `ECTR`. */
   CstmCtr.prototype = $create(ECTR.prototype);
 
   return assignCtrMethods({CstmCtr, customName, nativeToString: ECTR.prototype.toString});
@@ -900,7 +878,7 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
 
 export const create = createErrorCtr;
 
-// Test if we can use more than just the Error constructor.
+/* Test if we can use more than just the Error constructor. */
 try {
   allCtrs = createErrorCtr('X', SyntaxError)('x') instanceof SyntaxError;
 } catch (ignore) {
