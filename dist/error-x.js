@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T12:25:10.301Z",
+  "date": "2019-07-29T20:22:58.151Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "0b03bdca5dd211fba400",
+  "hash": "4f637054a998dcfd8e40",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -10940,7 +10940,7 @@ var kReadableOperator = {
 
 var kMaxShortLength = 12;
 
-function inspectValue(val) {
+var error_x_esm_inspectValue = function inspectValue(val) {
   /*
    *The util.inspect default values could be changed. This makes sure the
    * error messages contain the necessary information nevertheless.
@@ -10961,9 +10961,9 @@ function inspectValue(val) {
     /* Inspect getters as we also check them when comparing entries. */
     getters: true
   });
-}
+};
 
-function createErrDiff(obj) {
+var error_x_esm_createErrDiff = function createErrDiff(obj) {
   var actual = obj.actual,
       expected = obj.expected,
       operator = obj.operator;
@@ -10972,9 +10972,9 @@ function createErrDiff(obj) {
   var res = error_x_esm_EMPTY_STRING;
   var end = error_x_esm_EMPTY_STRING;
   var skipped = false;
-  var actualInspected = inspectValue(actual);
+  var actualInspected = error_x_esm_inspectValue(actual);
   var actualLines = split.call(actualInspected, '\n');
-  var expectedLines = split.call(inspectValue(expected), '\n');
+  var expectedLines = split.call(error_x_esm_inspectValue(expected), '\n');
   var i = 0;
   var indicator = error_x_esm_EMPTY_STRING;
   /* In case both values are objects or functions explicitly mark them as not reference equal for the `strictEqual` operator. */
@@ -11216,7 +11216,7 @@ function createErrDiff(obj) {
   }
 
   return "".concat(msg).concat(skipped ? skippedMsg : error_x_esm_EMPTY_STRING, "\n").concat(res).concat(other).concat(end).concat(indicator);
-}
+};
 /**
  * Tests for number as specified in StackTrace library.
  *
@@ -11239,7 +11239,7 @@ var error_x_esm_isNumber = function isNumber(n) {
  */
 
 
-var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+var tempPrepareStackTrace = function $prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
 
@@ -11584,7 +11584,7 @@ var getMessage = function getMessage(message) {
     var _actual = message.actual,
         expected = message.expected,
         operator = message.operator;
-    return createErrDiff({
+    return error_x_esm_createErrDiff({
       actual: _actual,
       expected: expected,
       operator: operator
@@ -11595,7 +11595,7 @@ var getMessage = function getMessage(message) {
     /* In case the objects are equal but the operator requires unequal, show the first object and say A equals B. */
     var base = kReadableOperator[message.operator];
 
-    var _res = split.call(inspectValue(message.actual), '\n');
+    var _res = split.call(error_x_esm_inspectValue(message.actual), '\n');
     /* In case "actual" is an object or a function, it should not be reference equal. */
 
 
@@ -11624,8 +11624,8 @@ var getMessage = function getMessage(message) {
     return "".concat(base, "\n\n").concat(error_x_esm_join.call(_res, '\n'), "\n");
   }
 
-  var res = inspectValue(message.actual);
-  var other = inspectValue(message.expected);
+  var res = error_x_esm_inspectValue(message.actual);
+  var other = error_x_esm_inspectValue(message.expected);
   var knownOperator = kReadableOperator[message.operator];
 
   if (message.operator === 'notDeepEqual' && res === other) {

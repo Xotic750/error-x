@@ -74,7 +74,7 @@ var kReadableOperator = {
 
 var kMaxShortLength = 12;
 
-function inspectValue(val) {
+var inspectValue = function inspectValue(val) {
   /*
    *The util.inspect default values could be changed. This makes sure the
    * error messages contain the necessary information nevertheless.
@@ -95,9 +95,9 @@ function inspectValue(val) {
     /* Inspect getters as we also check them when comparing entries. */
     getters: true
   });
-}
+};
 
-function createErrDiff(obj) {
+var createErrDiff = function createErrDiff(obj) {
   var actual = obj.actual,
       expected = obj.expected,
       operator = obj.operator;
@@ -350,7 +350,7 @@ function createErrDiff(obj) {
   }
 
   return "".concat(msg).concat(skipped ? skippedMsg : EMPTY_STRING, "\n").concat(res).concat(other).concat(end).concat(indicator);
-}
+};
 /**
  * Tests for number as specified in StackTrace library.
  *
@@ -373,7 +373,7 @@ var isNumber = function isNumber(n) {
  */
 
 
-var tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+var tempPrepareStackTrace = function $prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
 
