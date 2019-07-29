@@ -69,7 +69,7 @@ const kReadableOperator = {
 /* Comparing short primitives should just show === / !== instead of using the diff. */
 const kMaxShortLength = 12;
 
-function inspectValue(val) {
+const inspectValue = function inspectValue(val) {
   /*
    *The util.inspect default values could be changed. This makes sure the
    * error messages contain the necessary information nevertheless.
@@ -87,9 +87,9 @@ function inspectValue(val) {
     /* Inspect getters as we also check them when comparing entries. */
     getters: true,
   });
-}
+};
 
-function createErrDiff(obj) {
+const createErrDiff = function createErrDiff(obj) {
   const {actual, expected, operator} = obj;
   let $operator = operator;
   let other = EMPTY_STRING;
@@ -340,7 +340,7 @@ function createErrDiff(obj) {
   }
 
   return `${msg}${skipped ? skippedMsg : EMPTY_STRING}\n${res}${other}${end}${indicator}`;
-}
+};
 
 /**
  * Tests for number as specified in StackTrace library.
@@ -361,7 +361,7 @@ const isNumber = function isNumber(n) {
  * @param {!object} thisStack - The V8 stack.
  * @returns {!object} The V8 stack.
  */
-const tempPrepareStackTrace = function _prepareStackTrace(ignore, thisStack) {
+const tempPrepareStackTrace = function $prepareStackTrace(ignore, thisStack) {
   return thisStack;
 };
 
