@@ -32,6 +32,8 @@ import isVarName from 'is-var-name';
 import repeat from 'string-repeat-x';
 import endsWith from 'string-ends-with-x';
 import toBoolean from 'to-boolean-x';
+import objectKeys from 'object-keys-x';
+import every from 'array-every-x';
 export var isError = $isError;
 var mathMax = Math.max;
 /**
@@ -474,6 +476,13 @@ var defContext = function defContext(obj) {
     }
   });
 };
+/**
+ * @private
+ * @param {Array} frames - The frames array.
+ * @param {number} start - Start from.
+ * @returns {Array} - The filtered frames array.
+ */
+
 
 var filterFramesErrParse = function filterFramesErrParse(frames, start) {
   var item = frames[start];
@@ -483,6 +492,12 @@ var filterFramesErrParse = function filterFramesErrParse(frames, start) {
   });
   return end > -1 ? arraySlice.call($frames, 0, end) : $frames;
 };
+/**
+ * @private
+ * @param {Error} err - The error object.
+ * @returns {Array|boolean} - The frames array or false.
+ */
+
 
 var getErrParseFrames = function getErrParseFrames(err) {
   try {
@@ -648,13 +663,16 @@ var asAssertionError = function asAssertionError(name, ErrorCtr) {
   }
 
   if (isErrorCtr(ErrorCtr)) {
-    var err = new ErrorCtr({
+    var testObject = {
       actual: 'b',
       expected: 'c',
       message: 'a',
       operator: 'd'
+    };
+    var err = new ErrorCtr(testObject);
+    return every(objectKeys(testObject), function predicate(key) {
+      return err[key] === testObject[key];
     });
-    return typeof err.name === 'string' && err.message === 'a' && err.actual === 'b' && err.expected === 'c' && err.operator === 'd';
   }
 
   return false;

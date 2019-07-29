@@ -49,6 +49,7 @@
     "url": "https://github.com/Xotic750/error-x/issues"
   },
   "dependencies": {
+    "array-every-x": "^3.0.19",
     "array-map-x": "^3.0.20",
     "define-properties-x": "^4.0.9",
     "error-stack-parser": "^2.0.2",
@@ -66,6 +67,7 @@
     "object-create-x": "^3.0.12",
     "object-define-properties-x": "^5.0.13",
     "object-define-property-x": "^5.0.16",
+    "object-keys-x": "^3.0.17",
     "stackframe": "^1.0.4",
     "string-ends-with-x": "^1.0.7",
     "string-repeat-x": "^1.0.9",

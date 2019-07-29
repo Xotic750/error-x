@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T11:28:32.402Z",
+  "date": "2019-07-29T11:51:26.815Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "6791b9c8bc8f53984e60",
+  "hash": "14c368ad0b33a0934f1e",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -9702,7 +9702,7 @@ var supportsGetSet;
 try {
   /* eslint-disable-next-line no-void */
   var testVar = void 0;
-  var testObject = object_define_property_x_esm({}, 'defaultOptions', {
+  var inspect_x_esm_testObject = object_define_property_x_esm({}, 'defaultOptions', {
     get: function get() {
       return testVar;
     },
@@ -9711,8 +9711,8 @@ try {
       return testVar;
     }
   });
-  testObject.defaultOptions = 'test';
-  supportsGetSet = testVar === 'test' && testObject.defaultOptions === 'test';
+  inspect_x_esm_testObject.defaultOptions = 'test';
+  supportsGetSet = testVar === 'test' && inspect_x_esm_testObject.defaultOptions === 'test';
 } catch (ignore) {// empty
 }
 
@@ -10898,6 +10898,8 @@ function error_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Sy
 
 
 
+
+
 var error_x_esm_isError = is_error_x_esm;
 var mathMax = Math.max;
 /**
@@ -11340,6 +11342,13 @@ var error_x_esm_defContext = function defContext(obj) {
     }
   });
 };
+/**
+ * @private
+ * @param {Array} frames - The frames array.
+ * @param {number} start - Start from.
+ * @returns {Array} - The filtered frames array.
+ */
+
 
 var error_x_esm_filterFramesErrParse = function filterFramesErrParse(frames, start) {
   var item = frames[start];
@@ -11349,6 +11358,12 @@ var error_x_esm_filterFramesErrParse = function filterFramesErrParse(frames, sta
   });
   return end > -1 ? arraySlice.call($frames, 0, end) : $frames;
 };
+/**
+ * @private
+ * @param {Error} err - The error object.
+ * @returns {Array|boolean} - The frames array or false.
+ */
+
 
 var error_x_esm_getErrParseFrames = function getErrParseFrames(err) {
   try {
@@ -11508,19 +11523,22 @@ var error_x_esm_isErrorCtr = function isErrorCtr(ErrorCtr) {
  */
 
 
-var asAssertionError = function asAssertionError(name, ErrorCtr) {
+var error_x_esm_asAssertionError = function asAssertionError(name, ErrorCtr) {
   if (name === 'AssertionError') {
     return true;
   }
 
   if (error_x_esm_isErrorCtr(ErrorCtr)) {
-    var err = new ErrorCtr({
+    var testObject = {
       actual: 'b',
       expected: 'c',
       message: 'a',
       operator: 'd'
+    };
+    var err = new ErrorCtr(testObject);
+    return array_every_x_esm(object_keys_x_esm(testObject), function predicate(key) {
+      return err[key] === testObject[key];
     });
-    return typeof err.name === 'string' && err.message === 'a' && err.actual === 'b' && err.expected === 'c' && err.operator === 'd';
   }
 
   return false;
@@ -11679,7 +11697,7 @@ var error_x_esm_init = function init(obj) {
       name = obj.name,
       ErrorCtr = obj.ErrorCtr;
 
-  if (asAssertionError(name, ErrorCtr)) {
+  if (error_x_esm_asAssertionError(name, ErrorCtr)) {
     error_x_esm_defineAssertionErrorProps(context, message);
   } else if (typeof message !== 'undefined') {
     /* Standard Errors. Only set `this.message` if the argument `message` was not `undefined`. */

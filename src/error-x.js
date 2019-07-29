@@ -31,6 +31,8 @@ import isVarName from 'is-var-name';
 import repeat from 'string-repeat-x';
 import endsWith from 'string-ends-with-x';
 import toBoolean from 'to-boolean-x';
+import objectKeys from 'object-keys-x';
+import every from 'array-every-x';
 
 export const isError = $isError;
 
@@ -462,6 +464,12 @@ const defContext = function defContext(obj) {
   });
 };
 
+/**
+ * @private
+ * @param {Array} frames - The frames array.
+ * @param {number} start - Start from.
+ * @returns {Array} - The filtered frames array.
+ */
 const filterFramesErrParse = function filterFramesErrParse(frames, start) {
   const item = frames[start];
   const $frames = arraySlice.call(frames, start + 1);
@@ -473,6 +481,11 @@ const filterFramesErrParse = function filterFramesErrParse(frames, start) {
   return end > -1 ? arraySlice.call($frames, 0, end) : $frames;
 };
 
+/**
+ * @private
+ * @param {Error} err - The error object.
+ * @returns {Array|boolean} - The frames array or false.
+ */
 const getErrParseFrames = function getErrParseFrames(err) {
   try {
     return errorStackParser.parse(err);
@@ -616,11 +629,12 @@ const asAssertionError = function asAssertionError(name, ErrorCtr) {
   }
 
   if (isErrorCtr(ErrorCtr)) {
-    const err = new ErrorCtr({actual: 'b', expected: 'c', message: 'a', operator: 'd'});
+    const testObject = {actual: 'b', expected: 'c', message: 'a', operator: 'd'};
+    const err = new ErrorCtr(testObject);
 
-    return (
-      typeof err.name === 'string' && err.message === 'a' && err.actual === 'b' && err.expected === 'c' && err.operator === 'd'
-    );
+    return every(objectKeys(testObject), function predicate(key) {
+      return err[key] === testObject[key];
+    });
   }
 
   return false;
