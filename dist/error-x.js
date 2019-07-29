@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-27T22:20:20.818Z",
+  "date": "2019-07-29T09:54:50.111Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "a3b4236ed37eb700ec38",
+  "hash": "de96947342bf19ed5c6a",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -10962,8 +10962,11 @@ function inspectValue(val) {
   });
 }
 
-function createErrDiff(actual, expected, $operator) {
-  var operator = $operator;
+function createErrDiff(obj) {
+  var actual = obj.actual,
+      expected = obj.expected,
+      operator = obj.operator;
+  var $operator = operator;
   var other = error_x_esm_EMPTY_STRING;
   var res = error_x_esm_EMPTY_STRING;
   var end = error_x_esm_EMPTY_STRING;
@@ -10978,8 +10981,8 @@ function createErrDiff(actual, expected, $operator) {
    * reference equal for the `strictEqual` operator.
    */
 
-  if (operator === 'strictEqual' && (error_x_esm_typeof(actual) === 'object' && actual !== null && error_x_esm_typeof(expected) === 'object' && expected !== null || typeof actual === 'function' && typeof expected === 'function')) {
-    operator = 'strictEqualObject';
+  if ($operator === 'strictEqual' && (error_x_esm_typeof(actual) === 'object' && actual !== null && error_x_esm_typeof(expected) === 'object' && expected !== null || typeof actual === 'function' && typeof expected === 'function')) {
+    $operator = 'strictEqualObject';
   }
   /*
    * If "actual" and "expected" fit on a single line and they are not strictly
@@ -10998,9 +11001,9 @@ function createErrDiff(actual, expected, $operator) {
     if (inputLength <= kMaxShortLength) {
       if ((error_x_esm_typeof(actual) !== 'object' || actual === null) && (error_x_esm_typeof(expected) !== 'object' || expected === null) && (actual !== 0 || expected !== 0)) {
         /* -0 === +0 */
-        return "".concat(kReadableOperator[operator], "\n\n").concat(actualLines[0], " !== ").concat(expectedLines[0], "\n");
+        return "".concat(kReadableOperator[$operator], "\n\n").concat(actualLines[0], " !== ").concat(expectedLines[0], "\n");
       }
-    } else if (operator !== 'strictEqualObject') {
+    } else if ($operator !== 'strictEqualObject') {
       /*
        * If the stderr is a tty and the input length is lower than the current
        * columns per line, add a mismatch indicator below the output. If it is
@@ -11092,7 +11095,7 @@ function createErrDiff(actual, expected, $operator) {
 
   var printedLines = 0;
   var identical = 0;
-  var msg = "".concat(kReadableOperator[operator], "\n+ actual - expected");
+  var msg = "".concat(kReadableOperator[$operator], "\n+ actual - expected");
   var skippedMsg = ' ... Lines skipped';
   var lines = actualLines;
   var plusMinus = '+';
@@ -11337,14 +11340,18 @@ var STACK_NEWLINE = '\n    ';
  * Defines frames and stack on the Custom Error this object.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {!Array.<!object>} frames - Array of StackFrames.
- * @param {string} name - The name of the constructor.
+ * @param {!object} obj - The parameters.
+ * @property {!object} objcontext - The Custom Error this object.
+ * @property {!Array.<!object>} objframes - Array of StackFrames.
+ * @property {string} objname - The name of the constructor.
  */
 
-var error_x_esm_defContext = function defContext(context, frames, name) {
+var error_x_esm_defContext = function defContext(obj) {
   var _this2 = this;
 
+  var context = obj.context,
+      frames = obj.frames,
+      name = obj.name;
   object_define_properties_x_esm(context, {
     frames: {
       value: frames
@@ -11362,16 +11369,20 @@ var error_x_esm_defContext = function defContext(context, frames, name) {
  * Captures the other stacks and converts them to an array of Stackframes.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {!Error} err - The Error object to be parsed.
- * @param {string} name - The name of the constructor.
+ * @param {!object} obj - The parameters.
+ * @property {!object} obj.context - The Custom Error this object.
+ * @property {!Error} obj.err - The Error object to be parsed.
+ * @property {string} obj.name - The name of the constructor.
  * @returns {boolean} True if the Error object was parsed, otherwise false.
  */
 
 
-var error_x_esm_errParse = function errParse(context, err, name) {
+var error_x_esm_errParse = function errParse(obj) {
   var _this3 = this;
 
+  var context = obj.context,
+      err = obj.err,
+      name = obj.name;
   var frames;
 
   try {
@@ -11401,7 +11412,11 @@ var error_x_esm_errParse = function errParse(context, err, name) {
     }
   }
 
-  error_x_esm_defContext(context, frames, name);
+  error_x_esm_defContext({
+    context: context,
+    frames: frames,
+    name: name
+  });
   return true;
 };
 /**
@@ -11416,7 +11431,11 @@ var error_x_esm_errParse = function errParse(context, err, name) {
 
 var error_x_esm_parseStack = function parseStack(context, name) {
   if (cV8) {
-    error_x_esm_defContext(context, cV8(context), name);
+    error_x_esm_defContext({
+      context: context,
+      frames: cV8(context),
+      name: name
+    });
   } else {
     /** @type {Error} */
     var err;
@@ -11429,7 +11448,11 @@ var error_x_esm_parseStack = function parseStack(context, name) {
       err = e;
     }
 
-    if (error_x_esm_errParse(context, err, name) === false) {
+    if (error_x_esm_errParse({
+      context: context,
+      err: err,
+      name: name
+    }) === false) {
       var stack = error_x_esm_EMPTY_STRING; // If `Error` has a non-standard `stack`, `stacktrace` or
       // `opera#sourceloc` property that offers a trace of which functions
       // were called, in what order, from which line and  file, and with what
@@ -11522,7 +11545,14 @@ var asAssertionError = function asAssertionError(name, ErrorCtr) {
 
 var getMessage = function getMessage(message) {
   if (message.operator === 'deepStrictEqual' || message.operator === 'strictEqual') {
-    return createErrDiff(message.actual, message.expected, message.operator);
+    var _actual = message.actual,
+        expected = message.expected,
+        operator = message.operator;
+    return createErrDiff({
+      actual: _actual,
+      expected: expected,
+      operator: operator
+    });
   }
 
   if (message.operator === 'notDeepStrictEqual' || message.operator === 'notStrictEqual') {
@@ -11613,14 +11643,20 @@ var toJSON = function toJSON() {
  * Initialise a new instance of a custom error.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {object} message - Human-readable description of the error.
- * @param {string} name - The name for the custom Error.
- * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
+ * @param {!object} obj - The parameters.
+ * @property {!object} obj.context - The Custom Error this object.
+ * @property {object} obj.message - Human-readable description of the error.
+ * @property {string} obj.name - The name for the custom Error.
+ * @property {OfErrorConstructor} [obj.ErrorCtr=Error] - Error constructor to be used.
  */
 
 
-var error_x_esm_init = function init(context, message, name, ErrorCtr) {
+var error_x_esm_init = function init(obj) {
+  var context = obj.context,
+      message = obj.message,
+      name = obj.name,
+      ErrorCtr = obj.ErrorCtr;
+
   if (asAssertionError(name, ErrorCtr)) {
     if (error_x_esm_typeof(message) !== 'object' || message === null) {
       throw new TypeError("The \"options\" argument must be of type Object. Received type ".concat(error_x_esm_typeof(message)));
@@ -11661,7 +11697,12 @@ var error_x_esm_init = function init(context, message, name, ErrorCtr) {
 }; // `init` is used in `eval`, don't delete.
 
 
-error_x_esm_init({}, 'message', 'name', $Error);
+error_x_esm_init({
+  context: {},
+  message: 'message',
+  name: 'name',
+  ErrorCtr: $Error
+});
 /* eslint-disable-next-line no-void */
 
 var AssertionError = void 0;
@@ -11699,7 +11740,12 @@ var error_x_esm_createErrorCtr = function createErrorCtr(name, ErrorCtr) {
       return new CstmCtr(message);
     }
 
-    error_x_esm_init(context, message, customName, ErrorCtr);
+    error_x_esm_init({
+      context: context,
+      message: message,
+      name: customName,
+      ErrorCtr: ErrorCtr
+    });
     return context;
   };
   /* eslint-disable-next-line no-new-func */

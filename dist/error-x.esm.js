@@ -96,8 +96,11 @@ function inspectValue(val) {
   });
 }
 
-function createErrDiff(actual, expected, $operator) {
-  var operator = $operator;
+function createErrDiff(obj) {
+  var actual = obj.actual,
+      expected = obj.expected,
+      operator = obj.operator;
+  var $operator = operator;
   var other = EMPTY_STRING;
   var res = EMPTY_STRING;
   var end = EMPTY_STRING;
@@ -112,8 +115,8 @@ function createErrDiff(actual, expected, $operator) {
    * reference equal for the `strictEqual` operator.
    */
 
-  if (operator === 'strictEqual' && (_typeof(actual) === 'object' && actual !== null && _typeof(expected) === 'object' && expected !== null || typeof actual === 'function' && typeof expected === 'function')) {
-    operator = 'strictEqualObject';
+  if ($operator === 'strictEqual' && (_typeof(actual) === 'object' && actual !== null && _typeof(expected) === 'object' && expected !== null || typeof actual === 'function' && typeof expected === 'function')) {
+    $operator = 'strictEqualObject';
   }
   /*
    * If "actual" and "expected" fit on a single line and they are not strictly
@@ -132,9 +135,9 @@ function createErrDiff(actual, expected, $operator) {
     if (inputLength <= kMaxShortLength) {
       if ((_typeof(actual) !== 'object' || actual === null) && (_typeof(expected) !== 'object' || expected === null) && (actual !== 0 || expected !== 0)) {
         /* -0 === +0 */
-        return "".concat(kReadableOperator[operator], "\n\n").concat(actualLines[0], " !== ").concat(expectedLines[0], "\n");
+        return "".concat(kReadableOperator[$operator], "\n\n").concat(actualLines[0], " !== ").concat(expectedLines[0], "\n");
       }
-    } else if (operator !== 'strictEqualObject') {
+    } else if ($operator !== 'strictEqualObject') {
       /*
        * If the stderr is a tty and the input length is lower than the current
        * columns per line, add a mismatch indicator below the output. If it is
@@ -226,7 +229,7 @@ function createErrDiff(actual, expected, $operator) {
 
   var printedLines = 0;
   var identical = 0;
-  var msg = "".concat(kReadableOperator[operator], "\n+ actual - expected");
+  var msg = "".concat(kReadableOperator[$operator], "\n+ actual - expected");
   var skippedMsg = ' ... Lines skipped';
   var lines = actualLines;
   var plusMinus = '+';
@@ -471,14 +474,18 @@ var STACK_NEWLINE = '\n    ';
  * Defines frames and stack on the Custom Error this object.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {!Array.<!object>} frames - Array of StackFrames.
- * @param {string} name - The name of the constructor.
+ * @param {!object} obj - The parameters.
+ * @property {!object} objcontext - The Custom Error this object.
+ * @property {!Array.<!object>} objframes - Array of StackFrames.
+ * @property {string} objname - The name of the constructor.
  */
 
-var defContext = function defContext(context, frames, name) {
+var defContext = function defContext(obj) {
   var _this2 = this;
 
+  var context = obj.context,
+      frames = obj.frames,
+      name = obj.name;
   defineProperties(context, {
     frames: {
       value: frames
@@ -496,16 +503,20 @@ var defContext = function defContext(context, frames, name) {
  * Captures the other stacks and converts them to an array of Stackframes.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {!Error} err - The Error object to be parsed.
- * @param {string} name - The name of the constructor.
+ * @param {!object} obj - The parameters.
+ * @property {!object} obj.context - The Custom Error this object.
+ * @property {!Error} obj.err - The Error object to be parsed.
+ * @property {string} obj.name - The name of the constructor.
  * @returns {boolean} True if the Error object was parsed, otherwise false.
  */
 
 
-var errParse = function errParse(context, err, name) {
+var errParse = function errParse(obj) {
   var _this3 = this;
 
+  var context = obj.context,
+      err = obj.err,
+      name = obj.name;
   var frames;
 
   try {
@@ -535,7 +546,11 @@ var errParse = function errParse(context, err, name) {
     }
   }
 
-  defContext(context, frames, name);
+  defContext({
+    context: context,
+    frames: frames,
+    name: name
+  });
   return true;
 };
 /**
@@ -550,7 +565,11 @@ var errParse = function errParse(context, err, name) {
 
 var parseStack = function parseStack(context, name) {
   if (cV8) {
-    defContext(context, cV8(context), name);
+    defContext({
+      context: context,
+      frames: cV8(context),
+      name: name
+    });
   } else {
     /** @type {Error} */
     var err;
@@ -563,7 +582,11 @@ var parseStack = function parseStack(context, name) {
       err = e;
     }
 
-    if (errParse(context, err, name) === false) {
+    if (errParse({
+      context: context,
+      err: err,
+      name: name
+    }) === false) {
       var stack = EMPTY_STRING; // If `Error` has a non-standard `stack`, `stacktrace` or
       // `opera#sourceloc` property that offers a trace of which functions
       // were called, in what order, from which line and  file, and with what
@@ -656,7 +679,14 @@ var asAssertionError = function asAssertionError(name, ErrorCtr) {
 
 var getMessage = function getMessage(message) {
   if (message.operator === 'deepStrictEqual' || message.operator === 'strictEqual') {
-    return createErrDiff(message.actual, message.expected, message.operator);
+    var _actual = message.actual,
+        expected = message.expected,
+        operator = message.operator;
+    return createErrDiff({
+      actual: _actual,
+      expected: expected,
+      operator: operator
+    });
   }
 
   if (message.operator === 'notDeepStrictEqual' || message.operator === 'notStrictEqual') {
@@ -747,14 +777,20 @@ var toJSON = function toJSON() {
  * Initialise a new instance of a custom error.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {object} message - Human-readable description of the error.
- * @param {string} name - The name for the custom Error.
- * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
+ * @param {!object} obj - The parameters.
+ * @property {!object} obj.context - The Custom Error this object.
+ * @property {object} obj.message - Human-readable description of the error.
+ * @property {string} obj.name - The name for the custom Error.
+ * @property {OfErrorConstructor} [obj.ErrorCtr=Error] - Error constructor to be used.
  */
 
 
-var init = function init(context, message, name, ErrorCtr) {
+var init = function init(obj) {
+  var context = obj.context,
+      message = obj.message,
+      name = obj.name,
+      ErrorCtr = obj.ErrorCtr;
+
   if (asAssertionError(name, ErrorCtr)) {
     if (_typeof(message) !== 'object' || message === null) {
       throw new TypeError("The \"options\" argument must be of type Object. Received type ".concat(_typeof(message)));
@@ -795,7 +831,12 @@ var init = function init(context, message, name, ErrorCtr) {
 }; // `init` is used in `eval`, don't delete.
 
 
-init({}, 'message', 'name', $Error);
+init({
+  context: {},
+  message: 'message',
+  name: 'name',
+  ErrorCtr: $Error
+});
 /* eslint-disable-next-line no-void */
 
 var AssertionError = void 0;
@@ -833,7 +874,12 @@ var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
       return new CstmCtr(message);
     }
 
-    init(context, message, customName, ErrorCtr);
+    init({
+      context: context,
+      message: message,
+      name: customName,
+      ErrorCtr: ErrorCtr
+    });
     return context;
   };
   /* eslint-disable-next-line no-new-func */

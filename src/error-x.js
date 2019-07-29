@@ -87,8 +87,9 @@ function inspectValue(val) {
   });
 }
 
-function createErrDiff(actual, expected, $operator) {
-  let operator = $operator;
+function createErrDiff(obj) {
+  const {actual, expected, operator} = obj;
+  let $operator = operator;
   let other = EMPTY_STRING;
   let res = EMPTY_STRING;
   let end = EMPTY_STRING;
@@ -105,11 +106,11 @@ function createErrDiff(actual, expected, $operator) {
    * reference equal for the `strictEqual` operator.
    */
   if (
-    operator === 'strictEqual' &&
+    $operator === 'strictEqual' &&
     ((typeof actual === 'object' && actual !== null && typeof expected === 'object' && expected !== null) ||
       (typeof actual === 'function' && typeof expected === 'function'))
   ) {
-    operator = 'strictEqualObject';
+    $operator = 'strictEqualObject';
   }
 
   /*
@@ -131,9 +132,9 @@ function createErrDiff(actual, expected, $operator) {
         (actual !== 0 || expected !== 0)
       ) {
         /* -0 === +0 */
-        return `${kReadableOperator[operator]}\n\n${actualLines[0]} !== ${expectedLines[0]}\n`;
+        return `${kReadableOperator[$operator]}\n\n${actualLines[0]} !== ${expectedLines[0]}\n`;
       }
-    } else if (operator !== 'strictEqualObject') {
+    } else if ($operator !== 'strictEqualObject') {
       /*
        * If the stderr is a tty and the input length is lower than the current
        * columns per line, add a mismatch indicator below the output. If it is
@@ -220,7 +221,7 @@ function createErrDiff(actual, expected, $operator) {
 
   let printedLines = 0;
   let identical = 0;
-  const msg = `${kReadableOperator[operator]}\n+ actual - expected`;
+  const msg = `${kReadableOperator[$operator]}\n+ actual - expected`;
   const skippedMsg = ' ... Lines skipped';
 
   let lines = actualLines;
@@ -458,11 +459,13 @@ const STACK_NEWLINE = '\n    ';
  * Defines frames and stack on the Custom Error this object.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {!Array.<!object>} frames - Array of StackFrames.
- * @param {string} name - The name of the constructor.
+ * @param {!object} obj - The parameters.
+ * @property {!object} objcontext - The Custom Error this object.
+ * @property {!Array.<!object>} objframes - Array of StackFrames.
+ * @property {string} objname - The name of the constructor.
  */
-const defContext = function defContext(context, frames, name) {
+const defContext = function defContext(obj) {
+  const {context, frames, name} = obj;
   defineProperties(context, {
     frames: {
       value: frames,
@@ -482,12 +485,14 @@ const defContext = function defContext(context, frames, name) {
  * Captures the other stacks and converts them to an array of Stackframes.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {!Error} err - The Error object to be parsed.
- * @param {string} name - The name of the constructor.
+ * @param {!object} obj - The parameters.
+ * @property {!object} obj.context - The Custom Error this object.
+ * @property {!Error} obj.err - The Error object to be parsed.
+ * @property {string} obj.name - The name of the constructor.
  * @returns {boolean} True if the Error object was parsed, otherwise false.
  */
-const errParse = function errParse(context, err, name) {
+const errParse = function errParse(obj) {
+  const {context, err, name} = obj;
   let frames;
   try {
     frames = errorStackParser.parse(err);
@@ -514,7 +519,7 @@ const errParse = function errParse(context, err, name) {
     }
   }
 
-  defContext(context, frames, name);
+  defContext({context, frames, name});
 
   return true;
 };
@@ -529,7 +534,7 @@ const errParse = function errParse(context, err, name) {
  */
 const parseStack = function parseStack(context, name) {
   if (cV8) {
-    defContext(context, cV8(context), name);
+    defContext({context, frames: cV8(context), name});
   } else {
     /** @type {Error} */
     let err;
@@ -541,7 +546,7 @@ const parseStack = function parseStack(context, name) {
       err = e;
     }
 
-    if (errParse(context, err, name) === false) {
+    if (errParse({context, err, name}) === false) {
       let stack = EMPTY_STRING;
 
       // If `Error` has a non-standard `stack`, `stacktrace` or
@@ -634,7 +639,9 @@ const asAssertionError = function asAssertionError(name, ErrorCtr) {
  */
 const getMessage = function getMessage(message) {
   if (message.operator === 'deepStrictEqual' || message.operator === 'strictEqual') {
-    return createErrDiff(message.actual, message.expected, message.operator);
+    const {actual, expected, operator} = message;
+
+    return createErrDiff({actual, expected, operator});
   }
 
   if (message.operator === 'notDeepStrictEqual' || message.operator === 'notStrictEqual') {
@@ -726,12 +733,15 @@ const toJSON = function toJSON() {
  * Initialise a new instance of a custom error.
  *
  * @private
- * @param {!object} context - The Custom Error this object.
- * @param {object} message - Human-readable description of the error.
- * @param {string} name - The name for the custom Error.
- * @param {OfErrorConstructor} [ErrorCtr=Error] - Error constructor to be used.
+ * @param {!object} obj - The parameters.
+ * @property {!object} obj.context - The Custom Error this object.
+ * @property {object} obj.message - Human-readable description of the error.
+ * @property {string} obj.name - The name for the custom Error.
+ * @property {OfErrorConstructor} [obj.ErrorCtr=Error] - Error constructor to be used.
  */
-const init = function init(context, message, name, ErrorCtr) {
+const init = function init(obj) {
+  const {context, message, name, ErrorCtr} = obj;
+
   if (asAssertionError(name, ErrorCtr)) {
     if (typeof message !== 'object' || message === null) {
       throw new TypeError(`The "options" argument must be of type Object. Received type ${typeof message}`);
@@ -772,7 +782,7 @@ const init = function init(context, message, name, ErrorCtr) {
 };
 
 // `init` is used in `eval`, don't delete.
-init({}, 'message', 'name', $Error);
+init({context: {}, message: 'message', name: 'name', ErrorCtr: $Error});
 
 /* eslint-disable-next-line no-void */
 let AssertionError = void 0;
@@ -811,7 +821,7 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
       return new CstmCtr(message);
     }
 
-    init(context, message, customName, ErrorCtr);
+    init({context, message, name: customName, ErrorCtr});
 
     return context;
   };
