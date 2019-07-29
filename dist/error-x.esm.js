@@ -489,6 +489,23 @@ var defContext = function defContext(obj) {
     }
   });
 };
+
+var filterFramesErrParse = function filterFramesErrParse(frames, start) {
+  var item = frames[start];
+  var $frames = arraySlice.call(frames, start + 1);
+  var end = findIndex($frames, function predicate(frame) {
+    return item.source === frame.source;
+  });
+  return end > -1 ? arraySlice.call($frames, 0, end) : $frames;
+};
+
+var getErrParseFrames = function getErrParseFrames(err) {
+  try {
+    return errorStackParser.parse(err);
+  } catch (ignore) {
+    return false;
+  }
+};
 /**
  * Captures the other stacks and converts them to an array of Stackframes.
  *
@@ -505,11 +522,9 @@ var errParse = function errParse(obj) {
   var context = obj.context,
       err = obj.err,
       name = obj.name;
-  var frames;
+  var frames = getErrParseFrames(err);
 
-  try {
-    frames = errorStackParser.parse(err);
-  } catch (ignore) {
+  if (frames === false) {
     return false;
   }
 
@@ -519,15 +534,7 @@ var errParse = function errParse(obj) {
   });
 
   if (start > -1) {
-    var item = frames[start];
-    frames = arraySlice.call(frames, start + 1);
-    var end = findIndex(frames, function predicate(frame) {
-      return item.source === frame.source;
-    });
-
-    if (end > -1) {
-      frames = arraySlice.call(frames, 0, end);
-    }
+    frames = filterFramesErrParse(frames, start);
   }
 
   defContext({
@@ -536,6 +543,51 @@ var errParse = function errParse(obj) {
     name: name
   });
   return true;
+};
+/**
+ * Error must be thrown to get stack in IE.
+ *
+ * @private
+ * @returns {Error} - The thrown error.
+ */
+
+
+var getParseStackError = function getParseStackError() {
+  try {
+    // noinspection ExceptionCaughtLocallyJS,JSValidateTypes
+    throw $Error();
+  } catch (e) {
+    return e;
+  }
+};
+/**
+ * If `Error` has a non-standard `stack`, `stacktrace` or `opera#sourceloc` property that offers a trace of which functions
+ * were called, in what order, from which line and  file, and with what argument, then we will set it.
+ *
+ * @private
+ * @param {Error} err - - The error object.
+ * @returns {string} - The stack string.
+ */
+
+
+var getParseStackStack = function getParseStackStack(err) {
+  if (typeof err.stack !== 'undefined') {
+    return err.stack;
+  } // noinspection JSUnresolvedVariable
+
+
+  if (typeof err.stacktrace !== 'undefined') {
+    // noinspection JSUnresolvedVariable
+    return err.stacktrace;
+  }
+
+  var sourceloc = err['opera#sourceloc'];
+
+  if (typeof sourceloc !== 'undefined') {
+    return sourceloc;
+  }
+
+  return EMPTY_STRING;
 };
 /**
  * The main function for capturing and parsing stacks and setting properties
@@ -555,52 +607,19 @@ var parseStack = function parseStack(context, name) {
       name: name
     });
   } else {
-    /** @type {Error} */
-    var err;
-
-    try {
-      // Error must be thrown to get stack in IE
-      // noinspection ExceptionCaughtLocallyJS,JSValidateTypes
-      throw $Error();
-    } catch (e) {
-      err = e;
-    }
+    var err = getParseStackError();
 
     if (errParse({
       context: context,
       err: err,
       name: name
     }) === false) {
-      var stack = EMPTY_STRING; // If `Error` has a non-standard `stack`, `stacktrace` or
-      // `opera#sourceloc` property that offers a trace of which functions
-      // were called, in what order, from which line and  file, and with what
-      // argument, then we will set it.
-
-      if (typeof err.stack !== 'undefined') {
-        /* eslint-disable-next-line prefer-destructuring */
-        stack = err.stack;
-      } else {
-        // noinspection JSUnresolvedVariable
-        if (
-        /* eslint-disable-line no-lonely-if */
-        typeof err.stacktrace !== 'undefined') {
-          // noinspection JSUnresolvedVariable
-          stack = err.stacktrace;
-        } else {
-          var sourceloc = err['opera#sourceloc'];
-
-          if (typeof sourceloc !== 'undefined') {
-            stack = sourceloc;
-          }
-        }
-      }
-
       defineProperties(context, {
         frames: {
           value: []
         },
         stack: {
-          value: stack
+          value: getParseStackStack(err)
         }
       });
     }

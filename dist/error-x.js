@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T10:17:26.155Z",
+  "date": "2019-07-29T10:52:02.203Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "e4ed63402e73348fe81c",
+  "hash": "94fd1645a76a2be40a84",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -11355,6 +11355,23 @@ var error_x_esm_defContext = function defContext(obj) {
     }
   });
 };
+
+var error_x_esm_filterFramesErrParse = function filterFramesErrParse(frames, start) {
+  var item = frames[start];
+  var $frames = arraySlice.call(frames, start + 1);
+  var end = find_index_x_esm($frames, function predicate(frame) {
+    return item.source === frame.source;
+  });
+  return end > -1 ? arraySlice.call($frames, 0, end) : $frames;
+};
+
+var error_x_esm_getErrParseFrames = function getErrParseFrames(err) {
+  try {
+    return error_stack_parser_default.a.parse(err);
+  } catch (ignore) {
+    return false;
+  }
+};
 /**
  * Captures the other stacks and converts them to an array of Stackframes.
  *
@@ -11371,11 +11388,9 @@ var error_x_esm_errParse = function errParse(obj) {
   var context = obj.context,
       err = obj.err,
       name = obj.name;
-  var frames;
+  var frames = error_x_esm_getErrParseFrames(err);
 
-  try {
-    frames = error_stack_parser_default.a.parse(err);
-  } catch (ignore) {
+  if (frames === false) {
     return false;
   }
 
@@ -11385,15 +11400,7 @@ var error_x_esm_errParse = function errParse(obj) {
   });
 
   if (start > -1) {
-    var item = frames[start];
-    frames = arraySlice.call(frames, start + 1);
-    var end = find_index_x_esm(frames, function predicate(frame) {
-      return item.source === frame.source;
-    });
-
-    if (end > -1) {
-      frames = arraySlice.call(frames, 0, end);
-    }
+    frames = error_x_esm_filterFramesErrParse(frames, start);
   }
 
   error_x_esm_defContext({
@@ -11402,6 +11409,51 @@ var error_x_esm_errParse = function errParse(obj) {
     name: name
   });
   return true;
+};
+/**
+ * Error must be thrown to get stack in IE.
+ *
+ * @private
+ * @returns {Error} - The thrown error.
+ */
+
+
+var getParseStackError = function getParseStackError() {
+  try {
+    // noinspection ExceptionCaughtLocallyJS,JSValidateTypes
+    throw $Error();
+  } catch (e) {
+    return e;
+  }
+};
+/**
+ * If `Error` has a non-standard `stack`, `stacktrace` or `opera#sourceloc` property that offers a trace of which functions
+ * were called, in what order, from which line and  file, and with what argument, then we will set it.
+ *
+ * @private
+ * @param {Error} err - - The error object.
+ * @returns {string} - The stack string.
+ */
+
+
+var getParseStackStack = function getParseStackStack(err) {
+  if (typeof err.stack !== 'undefined') {
+    return err.stack;
+  } // noinspection JSUnresolvedVariable
+
+
+  if (typeof err.stacktrace !== 'undefined') {
+    // noinspection JSUnresolvedVariable
+    return err.stacktrace;
+  }
+
+  var sourceloc = err['opera#sourceloc'];
+
+  if (typeof sourceloc !== 'undefined') {
+    return sourceloc;
+  }
+
+  return error_x_esm_EMPTY_STRING;
 };
 /**
  * The main function for capturing and parsing stacks and setting properties
@@ -11421,52 +11473,19 @@ var error_x_esm_parseStack = function parseStack(context, name) {
       name: name
     });
   } else {
-    /** @type {Error} */
-    var err;
-
-    try {
-      // Error must be thrown to get stack in IE
-      // noinspection ExceptionCaughtLocallyJS,JSValidateTypes
-      throw $Error();
-    } catch (e) {
-      err = e;
-    }
+    var err = getParseStackError();
 
     if (error_x_esm_errParse({
       context: context,
       err: err,
       name: name
     }) === false) {
-      var stack = error_x_esm_EMPTY_STRING; // If `Error` has a non-standard `stack`, `stacktrace` or
-      // `opera#sourceloc` property that offers a trace of which functions
-      // were called, in what order, from which line and  file, and with what
-      // argument, then we will set it.
-
-      if (typeof err.stack !== 'undefined') {
-        /* eslint-disable-next-line prefer-destructuring */
-        stack = err.stack;
-      } else {
-        // noinspection JSUnresolvedVariable
-        if (
-        /* eslint-disable-line no-lonely-if */
-        typeof err.stacktrace !== 'undefined') {
-          // noinspection JSUnresolvedVariable
-          stack = err.stacktrace;
-        } else {
-          var sourceloc = err['opera#sourceloc'];
-
-          if (typeof sourceloc !== 'undefined') {
-            stack = sourceloc;
-          }
-        }
-      }
-
       object_define_properties_x_esm(context, {
         frames: {
           value: []
         },
         stack: {
-          value: stack
+          value: getParseStackStack(err)
         }
       });
     }
