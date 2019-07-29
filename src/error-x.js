@@ -813,50 +813,10 @@ const init = function init(obj) {
 /* `init` is used in `eval`, don't delete. */
 init({context: {}, message: 'message', name: 'name', ErrorCtr: $Error});
 
-/* eslint-disable-next-line no-void */
-let AssertionError = void 0;
-
+let AssertionError = null;
 const CUSTOM_NAME = 'CustomError';
 
-const assignCtrMethods = function assignCtrMethods(obj) {
-  const {CstmCtr, customName, nativeToString} = obj;
-  // noinspection JSValidateTypes
-  defineProperties(
-    CstmCtr.prototype,
-    /** @lends CstmCtr.prototype */ {
-      /**
-       * Specifies the function that created an instance's prototype.
-       *
-       * @class
-       */
-      constructor: {
-        value: CstmCtr,
-      },
-      /**
-       * The name property represents a name for the type of error.
-       *
-       * @default 'Error'
-       * @type {string}
-       */
-      name: {
-        value: customName,
-      },
-      /**
-       * The toJSON method returns a string representation of the Error object.
-       *
-       * @returns {string} A JSON stringified representation.
-       */
-      toJSON: {
-        value: toJSON,
-      },
-      toString: {
-        value: function $toString() {
-          return this instanceof AssertionError ? `${this.name} [${this.code}]: ${this.message}` : nativeToString.call(this);
-        },
-      },
-    },
-  );
-
+const assignToStringTag = function assignToStringTag(CstmCtr) {
   if ($toStringTag) {
     /**
      * Name Symbol.toStringTag.
@@ -872,7 +832,47 @@ const assignCtrMethods = function assignCtrMethods(obj) {
   return CstmCtr;
 };
 
+const getToStringFn = function getToStringFn(nativeToString) {
+  return function $toString() {
+    /* eslint-disable-next-line babel/no-invalid-this */
+    return this instanceof AssertionError ? `${this.name} [${this.code}]: ${this.message}` : nativeToString.call(this);
+  };
+};
+
+const assignCtrMethods = function assignCtrMethods(obj) {
+  const {CstmCtr, customName, nativeToString} = obj;
+  // noinspection JSValidateTypes
+  defineProperties(
+    CstmCtr.prototype,
+    /** @lends CstmCtr.prototype */ {
+      /**
+       * Specifies the function that created an instance's prototype.
+       *
+       * @class
+       */
+      constructor: {value: CstmCtr},
+      /**
+       * The name property represents a name for the type of error.
+       *
+       * @default 'Error'
+       * @type {string}
+       */
+      name: {value: customName},
+      /**
+       * The toJSON method returns a string representation of the Error object.
+       *
+       * @returns {string} A JSON stringified representation.
+       */
+      toJSON: {value: toJSON},
+      toString: {value: getToStringFn(nativeToString)},
+    },
+  );
+
+  return assignToStringTag(CstmCtr);
+};
+
 /**
+ * @private
  * @param {*} name - The supplied name.
  * @returns {string} - The custom name.
  */

@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T12:10:43.799Z",
+  "date": "2019-07-29T12:25:10.301Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "ee4785484b5fee2e4509",
+  "hash": "0b03bdca5dd211fba400",
   "license": "MIT",
   "version": "3.0.27"
 }
@@ -11748,10 +11748,31 @@ error_x_esm_init({
   name: 'name',
   ErrorCtr: $Error
 });
-/* eslint-disable-next-line no-void */
-
-var AssertionError = void 0;
+var AssertionError = null;
 var CUSTOM_NAME = 'CustomError';
+
+var error_x_esm_assignToStringTag = function assignToStringTag(CstmCtr) {
+  if ($toStringTag) {
+    /**
+     * Name Symbol.toStringTag.
+     *
+     * @memberof CstmCtr.prototype
+     * @type {string}
+     */
+    object_define_property_x_esm(CstmCtr.prototype, $toStringTag, {
+      value: '[object Error]'
+    });
+  }
+
+  return CstmCtr;
+};
+
+var getToStringFn = function getToStringFn(nativeToString) {
+  return function $toString() {
+    /* eslint-disable-next-line babel/no-invalid-this */
+    return this instanceof AssertionError ? "".concat(this.name, " [").concat(this.code, "]: ").concat(this.message) : nativeToString.call(this);
+  };
+};
 
 var error_x_esm_assignCtrMethods = function assignCtrMethods(obj) {
   var CstmCtr = obj.CstmCtr,
@@ -11789,27 +11810,13 @@ var error_x_esm_assignCtrMethods = function assignCtrMethods(obj) {
       value: toJSON
     },
     toString: {
-      value: function $toString() {
-        return this instanceof AssertionError ? "".concat(this.name, " [").concat(this.code, "]: ").concat(this.message) : nativeToString.call(this);
-      }
+      value: getToStringFn(nativeToString)
     }
   });
-
-  if ($toStringTag) {
-    /**
-     * Name Symbol.toStringTag.
-     *
-     * @memberof CstmCtr.prototype
-     * @type {string}
-     */
-    object_define_property_x_esm(CstmCtr.prototype, $toStringTag, {
-      value: '[object Error]'
-    });
-  }
-
-  return CstmCtr;
+  return error_x_esm_assignToStringTag(CstmCtr);
 };
 /**
+ * @private
  * @param {*} name - The supplied name.
  * @returns {string} - The custom name.
  */

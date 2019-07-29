@@ -882,10 +882,31 @@ init({
   name: 'name',
   ErrorCtr: $Error
 });
-/* eslint-disable-next-line no-void */
-
-var AssertionError = void 0;
+var AssertionError = null;
 var CUSTOM_NAME = 'CustomError';
+
+var assignToStringTag = function assignToStringTag(CstmCtr) {
+  if ($toStringTag) {
+    /**
+     * Name Symbol.toStringTag.
+     *
+     * @memberof CstmCtr.prototype
+     * @type {string}
+     */
+    defineProperty(CstmCtr.prototype, $toStringTag, {
+      value: '[object Error]'
+    });
+  }
+
+  return CstmCtr;
+};
+
+var getToStringFn = function getToStringFn(nativeToString) {
+  return function $toString() {
+    /* eslint-disable-next-line babel/no-invalid-this */
+    return this instanceof AssertionError ? "".concat(this.name, " [").concat(this.code, "]: ").concat(this.message) : nativeToString.call(this);
+  };
+};
 
 var assignCtrMethods = function assignCtrMethods(obj) {
   var CstmCtr = obj.CstmCtr,
@@ -923,27 +944,13 @@ var assignCtrMethods = function assignCtrMethods(obj) {
       value: toJSON
     },
     toString: {
-      value: function $toString() {
-        return this instanceof AssertionError ? "".concat(this.name, " [").concat(this.code, "]: ").concat(this.message) : nativeToString.call(this);
-      }
+      value: getToStringFn(nativeToString)
     }
   });
-
-  if ($toStringTag) {
-    /**
-     * Name Symbol.toStringTag.
-     *
-     * @memberof CstmCtr.prototype
-     * @type {string}
-     */
-    defineProperty(CstmCtr.prototype, $toStringTag, {
-      value: '[object Error]'
-    });
-  }
-
-  return CstmCtr;
+  return assignToStringTag(CstmCtr);
 };
 /**
+ * @private
  * @param {*} name - The supplied name.
  * @returns {string} - The custom name.
  */
