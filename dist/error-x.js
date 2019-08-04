@@ -2,7 +2,7 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-04T15:56:44.020Z",
+  "date": "2019-08-04T23:48:18.860Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
