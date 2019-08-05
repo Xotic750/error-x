@@ -2,13 +2,13 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-05T20:47:42.624Z",
+  "date": "2019-08-05T21:54:30.635Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "1e47383733feddbaa05b",
+  "hash": "6fac269b8fdf72954e22",
   "license": "MIT",
-  "version": "3.0.30"
+  "version": "3.0.31"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -4041,7 +4041,7 @@ var array_for_each_x_esm_test2 = function test2() {
   var _this2 = this;
 
   var spy = '';
-  var res = attempt_x_esm.call(to_boolean_x_esm('abc'), nativeForEach, function (item) {
+  var res = attempt_x_esm.call(to_object_x_esm('abc'), nativeForEach, function (item) {
     array_for_each_x_esm_newArrowCheck(this, _this2);
 
     spy += item;
@@ -4174,41 +4174,28 @@ var $forEach = isWorking ? patchedNative : implementation;
 
 
 // CONCATENATED MODULE: ./node_modules/is-array-x/dist/is-array-x.esm.js
-var is_array_x_esm_this = undefined;
-
-function is_array_x_esm_newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 
-
-var nativeIsArray = [].isArray;
-var isArrayNative = typeof nativeIsArray === 'function' && nativeIsArray;
-var testRes = isArrayNative && attempt_x_esm(function () {
-  is_array_x_esm_newArrowCheck(this, is_array_x_esm_this);
-
-  return isArrayNative([]) === true && isArrayNative({
+var nia = [].isArray;
+var nativeIsArray = typeof nia === 'function' && nia;
+var is_array_x_esm_testResult = attempt_x_esm(function attemptee() {
+  return nativeIsArray([]) === true && nativeIsArray({
     length: 0
   }) === false;
-}.bind(undefined));
+});
+var is_array_x_esm_isWorking = is_array_x_esm_testResult.threw === false && is_array_x_esm_testResult.value === true;
+var is_array_x_esm_implementation = function isArray(value) {
+  return to_string_tag_x_esm(value) === '[object Array]';
+};
+/**
+ * Determines whether the passed value is an Array.
+ *
+ * @param {*} value - The value to test.
+ * @returns {boolean} - True if an array; otherwise false.
+ */
 
-var isArrayFn = function iife() {
-  if (testRes && testRes.threw === false && testRes.value === true) {
-    return isArrayNative;
-  }
-  /**
-   * The isArray() function determines whether the passed value is an Array.
-   *
-   * @function isArray
-   * @param {*} [value] - The object to be checked..
-   * @returns {boolean} `true` if the object is an Array; otherwise, `false`.
-   */
-
-
-  return function isArray(value) {
-    return to_string_tag_x_esm(value) === '[object Array]';
-  };
-}();
-
-/* harmony default export */ var is_array_x_esm = (isArrayFn);
+var is_array_x_esm_isArray = is_array_x_esm_isWorking ? nativeIsArray : is_array_x_esm_implementation;
+/* harmony default export */ var is_array_x_esm = (is_array_x_esm_isArray);
 
 
 // EXTERNAL MODULE: ./node_modules/is-arguments/index.js
@@ -5342,6 +5329,78 @@ if (nativeBind) {
     }
   }
 }
+/* eslint-disable-next-line no-unused-vars */
+
+
+var patchedBind = function bind(target, thisArg) {
+  /* eslint-disable-next-line prefer-rest-params */
+  return nativeBind.apply(assert_is_function_x_esm(target), array_slice_x_esm(arguments, 1));
+};
+
+var bind_x_esm_concat = function concat(a, b) {
+  var aLength = a.length;
+  var bLength = b.length;
+  var result = array_slice_x_esm(a);
+  result.length += bLength;
+
+  for (var index = 0; index < bLength; index += 1) {
+    result[aLength + index] = b[index];
+  }
+
+  return result;
+};
+/* eslint-disable-next-line lodash/prefer-noop */
+
+
+var Empty = function Empty() {};
+
+var bind_x_esm_implementation = function bind(target, thisArg) {
+  assert_is_function_x_esm(target);
+  /* eslint-disable-next-line prefer-rest-params */
+
+  var args = array_slice_x_esm(arguments, 2);
+  var bound;
+
+  var binder = function _binder() {
+    /* eslint-disable-next-line babel/no-invalid-this */
+    if (this instanceof bound) {
+      /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+      var result = target.apply(this, bind_x_esm_concat(args, arguments));
+      /* eslint-disable-next-line babel/no-invalid-this */
+
+      return is_primitive_default()(result) ? this : result;
+    }
+    /* eslint-disable-next-line prefer-rest-params */
+
+
+    return target.apply(thisArg, bind_x_esm_concat(args, arguments));
+  };
+
+  var boundLength = target.length - args.length;
+
+  if (boundLength < 0) {
+    boundLength = 0;
+  }
+
+  var lastIndex = boundLength - 1;
+  var boundArgs = '';
+
+  for (var index = 0; index < boundLength; index += 1) {
+    boundArgs += "$_".concat(index, "_$").concat(index < lastIndex ? ',' : '');
+  }
+  /* eslint-disable-next-line no-new-func */
+
+
+  bound = Function('binder', 'slice', "return function (".concat(boundArgs, "){ return binder.apply(this,slice(arguments)); }"))(binder, array_slice_x_esm);
+
+  if (target.prototype) {
+    Empty.prototype = target.prototype;
+    bound.prototype = new Empty();
+    Empty.prototype = null;
+  }
+
+  return bound;
+};
 /**
  * The bind() method creates a new function that, when called, has its this
  * keyword set to the provided value, with a given sequence of arguments
@@ -5357,84 +5416,8 @@ if (nativeBind) {
  * @returns {Function} The bound function.
  */
 
-
-var $bind;
-
-if (bind_x_esm_isWorking) {
-  /* eslint-disable-next-line no-unused-vars */
-  $bind = function bind(target, thisArg) {
-    /* eslint-disable-next-line prefer-rest-params */
-    return nativeBind.apply(assert_is_function_x_esm(target), array_slice_x_esm(arguments, 1));
-  };
-} else {
-  var bind_x_esm_concat = function concat(a, b) {
-    var aLength = a.length;
-    var bLength = b.length;
-    var result = array_slice_x_esm(a);
-    result.length += bLength;
-
-    for (var index = 0; index < bLength; index += 1) {
-      result[aLength + index] = b[index];
-    }
-
-    return result;
-  };
-  /* eslint-disable-next-line lodash/prefer-noop */
-
-
-  var Empty = function Empty() {};
-
-  $bind = function bind(target, thisArg) {
-    assert_is_function_x_esm(target);
-    /* eslint-disable-next-line prefer-rest-params */
-
-    var args = array_slice_x_esm(arguments, 2);
-    var bound;
-
-    var binder = function _binder() {
-      /* eslint-disable-next-line babel/no-invalid-this */
-      if (this instanceof bound) {
-        /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
-        var result = target.apply(this, bind_x_esm_concat(args, arguments));
-        /* eslint-disable-next-line babel/no-invalid-this */
-
-        return is_primitive_default()(result) ? this : result;
-      }
-      /* eslint-disable-next-line prefer-rest-params */
-
-
-      return target.apply(thisArg, bind_x_esm_concat(args, arguments));
-    };
-
-    var boundLength = target.length - args.length;
-
-    if (boundLength < 0) {
-      boundLength = 0;
-    }
-
-    var lastIndex = boundLength - 1;
-    var boundArgs = '';
-
-    for (var index = 0; index < boundLength; index += 1) {
-      boundArgs += "$_".concat(index, "_$").concat(index < lastIndex ? ',' : '');
-    }
-    /* eslint-disable-next-line no-new-func */
-
-
-    bound = Function('binder', 'slice', "return function (".concat(boundArgs, "){ return binder.apply(this,slice(arguments)); }"))(binder, array_slice_x_esm);
-
-    if (target.prototype) {
-      Empty.prototype = target.prototype;
-      bound.prototype = new Empty();
-      Empty.prototype = null;
-    }
-
-    return bound;
-  };
-}
-
-var libBind = $bind;
-/* harmony default export */ var bind_x_esm = (libBind);
+var $bind = bind_x_esm_isWorking ? patchedBind : bind_x_esm_implementation;
+/* harmony default export */ var bind_x_esm = ($bind);
 
 
 // EXTERNAL MODULE: ./node_modules/is-generator-function/index.js
@@ -5514,11 +5497,11 @@ var isFnRegex = /^async function/;
 var is_async_function_x_esm_test = isFnRegex.test;
 var functionCtr = attempt_x_esm.constructor;
 var is_async_function_x_esm_fToString = functionCtr.toString;
-var is_async_function_x_esm_testRes = attempt_x_esm(function attemptee() {
+var testRes = attempt_x_esm(function attemptee() {
   return get_prototype_of_x_esm(functionCtr('return async function() {}')());
 });
-var supportsAsync = is_async_function_x_esm_testRes.threw === false;
-var asyncProto = is_async_function_x_esm_testRes.value;
+var supportsAsync = testRes.threw === false;
+var asyncProto = testRes.value;
 
 var is_async_function_x_esm_attemptToString = function attemptToString(fn) {
   return attempt_x_esm(function attemptee() {
