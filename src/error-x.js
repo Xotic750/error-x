@@ -33,6 +33,7 @@ import endsWith from 'string-ends-with-x';
 import toBoolean from 'to-boolean-x';
 import objectKeys from 'object-keys-x';
 import every from 'array-every-x';
+import methodize from 'simple-methodize-x';
 
 export const isError = $isError;
 
@@ -43,8 +44,13 @@ const mathMax = Math.max;
  */
 
 const EMPTY_STRING = '';
-const {split, indexOf: stringIndexOf, slice: stringSlice} = EMPTY_STRING;
-const {pop, join, slice: arraySlice} = [];
+const split = methodize(EMPTY_STRING.split);
+const stringIndexOf = methodize(EMPTY_STRING.indexOf);
+const stringSlice = methodize(EMPTY_STRING.slice);
+const tempArray = [];
+const pop = methodize(tempArray.pop);
+const join = methodize(tempArray.join);
+const arraySlice = methodize(tempArray.slice);
 /* eslint-disable-next-line compat/compat */
 const $toStringTag = hasToStringTag && Symbol.toStringTag;
 
@@ -97,8 +103,8 @@ const createErrDiff = function createErrDiff(obj) {
   let end = EMPTY_STRING;
   let skipped = false;
   const actualInspected = inspectValue(actual);
-  const actualLines = split.call(actualInspected, '\n');
-  const expectedLines = split.call(inspectValue(expected), '\n');
+  const actualLines = split(actualInspected, '\n');
+  const expectedLines = split(inspectValue(expected), '\n');
 
   let i = 0;
   let indicator = EMPTY_STRING;
@@ -169,8 +175,8 @@ const createErrDiff = function createErrDiff(obj) {
 
     i += 1;
 
-    pop.call(actualLines);
-    pop.call(expectedLines);
+    pop(actualLines);
+    pop(expectedLines);
 
     if (actualLines.length === 0 || expectedLines.length === 0) {
       break;
@@ -188,18 +194,18 @@ const createErrDiff = function createErrDiff(obj) {
    */
   if (maxLines === 0) {
     /* We have to get the result again. The lines were all removed before. */
-    const aLines = split.call(actualInspected, '\n');
+    const aLines = split(actualInspected, '\n');
 
     /* Only remove lines in case it makes sense to collapse those. */
     /* TODO: Accept env to always show the full error. */
     if (aLines.length > 50) {
       aLines[46] = '...';
       while (aLines.length > 47) {
-        pop.call(aLines);
+        pop(aLines);
       }
     }
 
-    return `${kReadableOperator.notIdentical}\n\n${join.call(aLines, '\n')}\n`;
+    return `${kReadableOperator.notIdentical}\n\n${join(aLines, '\n')}\n`;
   }
 
   /* There were at least five identical lines at the end. Mark a couple of skipped. */
@@ -271,7 +277,7 @@ const createErrDiff = function createErrDiff(obj) {
        * In that case it is actually identical and we should mark it as such.
        */
       let divergingLines =
-        actualLine !== expectedLine && (!endsWith(actualLine, ',') || stringSlice.call(actualLine, 0, -1) !== expectedLine);
+        actualLine !== expectedLine && (endsWith(actualLine, ',') === false || stringSlice(actualLine, 0, -1) !== expectedLine);
 
       /*
        * If the expected line has a trailing comma but is otherwise identical, add a comma at the end of the actual line.
@@ -282,7 +288,7 @@ const createErrDiff = function createErrDiff(obj) {
        * +   2
        * ]
        */
-      if (divergingLines && endsWith(expectedLine, ',') && stringSlice.call(expectedLine, 0, -1) === actualLine) {
+      if (divergingLines && endsWith(expectedLine, ',') && stringSlice(expectedLine, 0, -1) === actualLine) {
         divergingLines = false;
         actualLine += ',';
       }
@@ -481,7 +487,7 @@ const defContext = function defContext(obj) {
   defineProperties(context, {
     frames: {value: frames},
     stack: {
-      value: `${name}${STACK_NEWLINE}${join.call(
+      value: `${name}${STACK_NEWLINE}${join(
         map(frames, function iteratee(frame) {
           return frame.toString();
         }),
@@ -499,13 +505,13 @@ const defContext = function defContext(obj) {
  */
 const filterFramesErrParse = function filterFramesErrParse(frames, start) {
   const item = frames[start];
-  const $frames = arraySlice.call(frames, start + 1);
+  const $frames = arraySlice(frames, start + 1);
 
   const end = findIndex($frames, function predicate(frame) {
     return item.source === frame.source;
   });
 
-  return end > -1 ? arraySlice.call($frames, 0, end) : $frames;
+  return end > -1 ? arraySlice($frames, 0, end) : $frames;
 };
 
 /**
@@ -542,7 +548,7 @@ const errParse = function errParse(obj) {
   const start = findIndex(frames, function predicate(frame) {
     const fName = typeof frame.functionName === 'string' ? frame.functionName : EMPTY_STRING;
 
-    return stringIndexOf.call(fName, name) > -1;
+    return stringIndexOf(fName, name) > -1;
   });
 
   if (start > -1) {
@@ -684,7 +690,7 @@ const getMessage = function getMessage(message) {
   if (message.operator === 'notDeepStrictEqual' || message.operator === 'notStrictEqual') {
     /* In case the objects are equal but the operator requires unequal, show the first object and say A equals B. */
     let base = kReadableOperator[message.operator];
-    const res = split.call(inspectValue(message.actual), '\n');
+    const res = split(inspectValue(message.actual), '\n');
 
     /* In case "actual" is an object or a function, it should not be reference equal. */
     if (
@@ -699,7 +705,7 @@ const getMessage = function getMessage(message) {
     if (res.length > 50) {
       res[46] = '...';
       while (res.length > 47) {
-        pop.call(res);
+        pop(res);
       }
     }
 
@@ -708,7 +714,7 @@ const getMessage = function getMessage(message) {
       return `${base}${res[0].length > 5 ? '\n\n' : ' '}${res[0]}`;
     }
 
-    return `${base}\n\n${join.call(res, '\n')}\n`;
+    return `${base}\n\n${join(res, '\n')}\n`;
   }
 
   let res = inspectValue(message.actual);
@@ -719,18 +725,18 @@ const getMessage = function getMessage(message) {
     res = `${knownOperator}\n\n${res}`;
 
     if (res.length > 1024) {
-      res = `${stringSlice.call(res, 0, 1021)}...`;
+      res = `${stringSlice(res, 0, 1021)}...`;
     }
 
     return res;
   }
 
   if (res.length > 512) {
-    res = `${stringSlice.call(res, 0, 509)}...`;
+    res = `${stringSlice(res, 0, 509)}...`;
   }
 
   if (other.length > 512) {
-    other = `${stringSlice.call(other, 0, 509)}...`;
+    other = `${stringSlice(other, 0, 509)}...`;
   }
 
   if (message.operator === 'deepEqual') {
@@ -835,7 +841,7 @@ const assignToStringTag = function assignToStringTag(CstmCtr) {
 const getToStringFn = function getToStringFn(nativeToString) {
   return function $toString() {
     /* eslint-disable-next-line babel/no-invalid-this */
-    return this instanceof AssertionError ? `${this.name} [${this.code}]: ${this.message}` : nativeToString.call(this);
+    return this instanceof AssertionError ? `${this.name} [${this.code}]: ${this.message}` : nativeToString(this);
   };
 };
 
@@ -914,7 +920,7 @@ const createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   /* Inherit the prototype methods from `ECTR`. */
   CstmCtr.prototype = $create(ECTR.prototype);
 
-  return assignCtrMethods({CstmCtr, customName, nativeToString: ECTR.prototype.toString});
+  return assignCtrMethods({CstmCtr, customName, nativeToString: methodize(ECTR.prototype.toString)});
 };
 
 export const create = createErrorCtr;

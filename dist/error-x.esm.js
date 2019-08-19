@@ -34,6 +34,7 @@ import endsWith from 'string-ends-with-x';
 import toBoolean from 'to-boolean-x';
 import objectKeys from 'object-keys-x';
 import every from 'array-every-x';
+import methodize from 'simple-methodize-x';
 export var isError = $isError;
 var mathMax = Math.max;
 /**
@@ -41,13 +42,13 @@ var mathMax = Math.max;
  */
 
 var EMPTY_STRING = '';
-var split = EMPTY_STRING.split,
-    stringIndexOf = EMPTY_STRING.indexOf,
-    stringSlice = EMPTY_STRING.slice;
-var _ref = [],
-    pop = _ref.pop,
-    join = _ref.join,
-    arraySlice = _ref.slice;
+var split = methodize(EMPTY_STRING.split);
+var stringIndexOf = methodize(EMPTY_STRING.indexOf);
+var stringSlice = methodize(EMPTY_STRING.slice);
+var tempArray = [];
+var pop = methodize(tempArray.pop);
+var join = methodize(tempArray.join);
+var arraySlice = methodize(tempArray.slice);
 /* eslint-disable-next-line compat/compat */
 
 var $toStringTag = hasToStringTag && Symbol.toStringTag;
@@ -107,8 +108,8 @@ var createErrDiff = function createErrDiff(obj) {
   var end = EMPTY_STRING;
   var skipped = false;
   var actualInspected = inspectValue(actual);
-  var actualLines = split.call(actualInspected, '\n');
-  var expectedLines = split.call(inspectValue(expected), '\n');
+  var actualLines = split(actualInspected, '\n');
+  var expectedLines = split(inspectValue(expected), '\n');
   var i = 0;
   var indicator = EMPTY_STRING;
   /* In case both values are objects or functions explicitly mark them as not reference equal for the `strictEqual` operator. */
@@ -173,8 +174,8 @@ var createErrDiff = function createErrDiff(obj) {
     }
 
     i += 1;
-    pop.call(actualLines);
-    pop.call(expectedLines);
+    pop(actualLines);
+    pop(expectedLines);
 
     if (actualLines.length === 0 || expectedLines.length === 0) {
       break;
@@ -192,7 +193,7 @@ var createErrDiff = function createErrDiff(obj) {
 
   if (maxLines === 0) {
     /* We have to get the result again. The lines were all removed before. */
-    var aLines = split.call(actualInspected, '\n');
+    var aLines = split(actualInspected, '\n');
     /* Only remove lines in case it makes sense to collapse those. */
 
     /* TODO: Accept env to always show the full error. */
@@ -201,11 +202,11 @@ var createErrDiff = function createErrDiff(obj) {
       aLines[46] = '...';
 
       while (aLines.length > 47) {
-        pop.call(aLines);
+        pop(aLines);
       }
     }
 
-    return "".concat(kReadableOperator.notIdentical, "\n\n").concat(join.call(aLines, '\n'), "\n");
+    return "".concat(kReadableOperator.notIdentical, "\n\n").concat(join(aLines, '\n'), "\n");
   }
   /* There were at least five identical lines at the end. Mark a couple of skipped. */
 
@@ -278,7 +279,7 @@ var createErrDiff = function createErrDiff(obj) {
        * In that case it is actually identical and we should mark it as such.
        */
 
-      var divergingLines = actualLine !== expectedLine && (!endsWith(actualLine, ',') || stringSlice.call(actualLine, 0, -1) !== expectedLine);
+      var divergingLines = actualLine !== expectedLine && (endsWith(actualLine, ',') === false || stringSlice(actualLine, 0, -1) !== expectedLine);
       /*
        * If the expected line has a trailing comma but is otherwise identical, add a comma at the end of the actual line.
        * Otherwise the output could look weird as in:
@@ -289,7 +290,7 @@ var createErrDiff = function createErrDiff(obj) {
        * ]
        */
 
-      if (divergingLines && endsWith(expectedLine, ',') && stringSlice.call(expectedLine, 0, -1) === actualLine) {
+      if (divergingLines && endsWith(expectedLine, ',') && stringSlice(expectedLine, 0, -1) === actualLine) {
         divergingLines = false;
         actualLine += ',';
       }
@@ -497,7 +498,7 @@ var defContext = function defContext(obj) {
       value: frames
     },
     stack: {
-      value: "".concat(name).concat(STACK_NEWLINE).concat(join.call(map(frames, function iteratee(frame) {
+      value: "".concat(name).concat(STACK_NEWLINE).concat(join(map(frames, function iteratee(frame) {
         return frame.toString();
       }), STACK_NEWLINE))
     }
@@ -513,11 +514,11 @@ var defContext = function defContext(obj) {
 
 var filterFramesErrParse = function filterFramesErrParse(frames, start) {
   var item = frames[start];
-  var $frames = arraySlice.call(frames, start + 1);
+  var $frames = arraySlice(frames, start + 1);
   var end = findIndex($frames, function predicate(frame) {
     return item.source === frame.source;
   });
-  return end > -1 ? arraySlice.call($frames, 0, end) : $frames;
+  return end > -1 ? arraySlice($frames, 0, end) : $frames;
 };
 /**
  * @private
@@ -557,7 +558,7 @@ var errParse = function errParse(obj) {
 
   var start = findIndex(frames, function predicate(frame) {
     var fName = typeof frame.functionName === 'string' ? frame.functionName : EMPTY_STRING;
-    return stringIndexOf.call(fName, name) > -1;
+    return stringIndexOf(fName, name) > -1;
   });
 
   if (start > -1) {
@@ -729,7 +730,7 @@ var getMessage = function getMessage(message) {
     /* In case the objects are equal but the operator requires unequal, show the first object and say A equals B. */
     var base = kReadableOperator[message.operator];
 
-    var _res = split.call(inspectValue(message.actual), '\n');
+    var _res = split(inspectValue(message.actual), '\n');
     /* In case "actual" is an object or a function, it should not be reference equal. */
 
 
@@ -745,7 +746,7 @@ var getMessage = function getMessage(message) {
       _res[46] = '...';
 
       while (_res.length > 47) {
-        pop.call(_res);
+        pop(_res);
       }
     }
     /* Only print a single input. */
@@ -755,7 +756,7 @@ var getMessage = function getMessage(message) {
       return "".concat(base).concat(_res[0].length > 5 ? '\n\n' : ' ').concat(_res[0]);
     }
 
-    return "".concat(base, "\n\n").concat(join.call(_res, '\n'), "\n");
+    return "".concat(base, "\n\n").concat(join(_res, '\n'), "\n");
   }
 
   var res = inspectValue(message.actual);
@@ -766,18 +767,18 @@ var getMessage = function getMessage(message) {
     res = "".concat(knownOperator, "\n\n").concat(res);
 
     if (res.length > 1024) {
-      res = "".concat(stringSlice.call(res, 0, 1021), "...");
+      res = "".concat(stringSlice(res, 0, 1021), "...");
     }
 
     return res;
   }
 
   if (res.length > 512) {
-    res = "".concat(stringSlice.call(res, 0, 509), "...");
+    res = "".concat(stringSlice(res, 0, 509), "...");
   }
 
   if (other.length > 512) {
-    other = "".concat(stringSlice.call(other, 0, 509), "...");
+    other = "".concat(stringSlice(other, 0, 509), "...");
   }
 
   if (message.operator === 'deepEqual') {
@@ -904,7 +905,7 @@ var assignToStringTag = function assignToStringTag(CstmCtr) {
 var getToStringFn = function getToStringFn(nativeToString) {
   return function $toString() {
     /* eslint-disable-next-line babel/no-invalid-this */
-    return this instanceof AssertionError ? "".concat(this.name, " [").concat(this.code, "]: ").concat(this.message) : nativeToString.call(this);
+    return this instanceof AssertionError ? "".concat(this.name, " [").concat(this.code, "]: ").concat(this.message) : nativeToString(this);
   };
 };
 
@@ -1002,7 +1003,7 @@ var createErrorCtr = function createErrorCtr(name, ErrorCtr) {
   return assignCtrMethods({
     CstmCtr: CstmCtr,
     customName: customName,
-    nativeToString: ECTR.prototype.toString
+    nativeToString: methodize(ECTR.prototype.toString)
   });
 };
 
