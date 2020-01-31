@@ -2,11 +2,11 @@
 {
   "author": "Xotic750",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-09-05T20:47:14.010Z",
+  "date": "2020-01-31T11:46:57.775Z",
   "describe": "",
   "description": "Create custom Javascript Error objects.",
   "file": "error-x.js",
-  "hash": "5fb380965ecd843ffd14",
+  "hash": "8665b25f63782ffd5560",
   "license": "MIT",
   "version": "3.1.2"
 }
@@ -11350,7 +11350,7 @@ var $endsWith = string_ends_with_x_esm_isWorking ? patchedEndsWith : string_ends
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SyntaxErrorConstructor", function() { return SyntaxErrorConstructor; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TypeErrorConstructor", function() { return TypeErrorConstructor; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "URIErrorConstructor", function() { return URIErrorConstructor; });
-function error_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { error_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { error_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return error_x_esm_typeof(obj); }
+function error_x_esm_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { error_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { error_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return error_x_esm_typeof(obj); }
 
 /*
  * Want to create your own Error objects, this module will allow you to do
